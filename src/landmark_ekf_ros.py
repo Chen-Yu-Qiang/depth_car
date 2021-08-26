@@ -15,7 +15,6 @@ from geometry_msgs.msg import Vector3Stamped
 import depth2map
 import EKF_localization 
 import TREEDATA
-from mapping_explorer.srv import InitOffset, InitOffsetResponse
 
 print("[landmark_ekf_ros.py] Python version: "+str(sys.version))
 rospy.init_node("landmark_ekf", anonymous=True)
@@ -25,7 +24,11 @@ print("[landmark_ekf_ros.py] Get GPS init x = {} ,y = {}".format(gps_init.linear
 
 
 print("[landmark_ekf_ros.py] wait for service get_init_offset_in_map ")
+
+
 if sys.version[0]=='3':
+
+    from mapping_explorer.srv import InitOffset, InitOffsetResponse
     rospy.wait_for_service('get_init_offset_in_map')
     try:
         get_init_offset_in_map = rospy.ServiceProxy('get_init_offset_in_map',InitOffset)
@@ -33,6 +36,10 @@ if sys.version[0]=='3':
     except rospy.ServiceException as e:
         print("[landmark_ekf_ros.py] Service call failed: %s" % e)
 else:
+    class InitOffset:
+        def __init__(self):
+            self.offset_x=0
+            self.offset_y=0
     resp=InitOffset()
     resp.offset_x=0
     resp.offset_y=0
@@ -211,7 +218,7 @@ def cb_x0y0(data):
     y0=data.linear.y
 
 
-USING_GAZEBO=int(rospy.get_param("Using_Gazebo"))
+USING_GAZEBO=int(rospy.get_param("Using_Gazebo",0))
 
 if __name__=="__main__":
     rospy.Subscriber("/tree/data/together", Float64MultiArray,cb_array, buff_size=2**20,queue_size=1)
@@ -238,8 +245,8 @@ if __name__=="__main__":
     ekf_out_sigma=rospy.Publisher("/lm_ekf/sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("/lm_ekf/z",Float64MultiArray,queue_size=1)
     ekf_out_landmark_error=rospy.Publisher("/lm_ekf/error",Float64MultiArray,queue_size=1)
-    rate=rospy.Rate(10)
-    EKF_localization.DELTA_T=0.1
+    rate=rospy.Rate(20)
+    EKF_localization.DELTA_T=0.05
 
     
     while not rospy.is_shutdown():

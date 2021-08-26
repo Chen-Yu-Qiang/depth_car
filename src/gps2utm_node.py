@@ -14,7 +14,7 @@ import tf
 x0=0
 y0=0
 
-USING_GAZEBO=int(rospy.get_param("Using_Gazebo"))
+USING_GAZEBO=int(rospy.get_param("Using_Gazebo",0))
 def cb_gps(data):
     global x0,y0,x0_loc,y0_loc
     # t0=time.time()
