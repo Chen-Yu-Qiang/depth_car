@@ -33,8 +33,39 @@ rosbag record -a -x "/camera(.*)"
 ```
 
 
-'2022-01-12-12-44-58.bag map1 no div in con
-2022-01-12-12-58-12.bag map1 no div in con
-2022-01-12-13-15-22.bag map1
+## 關於numpy inv 造成大量CpU佔用問題
+可以加入此行
+```bash
+ export OPENBLAS_NUM_THREADS=1
+```
 
-2022-01-12-14-22-51.bag my con  no div
+## Gazebo
+
+- 開啟 
+```bash
+roslaunch depth_car gazebo_tree.launch
+```
+- 紀錄檔
+bag檔會自動存在~/.ros
+如果空間不夠裡面的.bag都可以刪
+
+
+- 生成地圖
+執行直接用python TREEDATA.py 到68行之前
+在61行開始設定樹的xy與半徑
+之後會產生一個output.npy把它放到
+/home/yuqiang/GA_MAP/shapefiles/neg
+
+裡面存成檔名`center_all.npy`
+
+- 控制器
+若要使用控制器可以使用launch檔裡面的34 35行
+發送目標點到話題`"/ctrl/path/g`
+或是一次發送一堆目標點（PoseArray）到`/plan/wps`
+
+
+若不使用則直接發送速度命令到`cmd_vel`
+
+- 機器人狀態
+在話題`/sim/robot`
+

@@ -95,7 +95,7 @@ if __name__ == '__main__':
     rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix,cb_gps,queue_size=1)
     rospy.Subscriber("/lm_ekf/gps/utm", Twist,cb_gps_utm,queue_size=1)
     rospy.Subscriber("/gps/qual", UInt8,cb_gps_qual,queue_size=1)
-    rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd,queue_size=1)
+    rospy.Subscriber("/cmd_vel", Twist,cb_cmd,queue_size=1)
     # rospy.Subscriber("/ctrl/achieve_error", Twist,cb_error,queue_size=1)
     rospy.Subscriber("/ctrl/error", Twist,cb_error,queue_size=1)
     rospy.Subscriber("/lm_ekf/sigma",Twist,cb_sigma,queue_size=1)
