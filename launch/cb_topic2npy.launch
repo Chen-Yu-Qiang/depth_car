@@ -1,0 +1,4 @@
+<launch>
+<node pkg="image_transport" type="republish" name="republish" args="compressed in:=/camera/color/image_raw raw out:=/camera/color/image_raw"/>
+<node pkg="depth_car" type="cb_topic2npy.py" name="cb_topic2npy" output="screen"/>
+</launch>
