@@ -247,6 +247,15 @@ def draw_arrowed(x,y,theta,img,color=(0,255,0)):
     img=cv2.arrowedLine(img, arrowed_start, arrowed_end, color,5,8,0,0.3)
     return img
 
+'''
+circle c
+c["x"] x  in camera frame
+c["y"] y  in camera frame
+c["r"] Radius
+c["res"] Residual
+
+'''
+
 def topView_to_circle(tv):
     t1=time.time()
     hieght_or = np.zeros((LOCAL_MAP_X_SIZE,LOCAL_MAP_Y_SIZE), dtype=np.uint8)
@@ -429,7 +438,7 @@ if __name__=="__main__":
         cv2.imshow("map",map_rgb)
         # cv2.imshow("grid",g*255)
         cv2.imshow("grid2",g2*255)
-        cv2.imwrite("each/"+str(AA)+".png",g2*255)
+        # cv2.imwrite("each/"+str(AA)+".png",g2*255)
         print(t7-t1,t2-t1,t3-t2,t4-t3,t5-t4,t6-t5,t7-t6)
 
 
