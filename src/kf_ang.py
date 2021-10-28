@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import rospy
+import tf
 import numpy as np
 from sensor_msgs.msg import MagneticField,Imu
 
@@ -9,33 +10,33 @@ import kf_lib
 
 def F(x,u):
     dt=0.02
-    f=np.eye(6)
-    f[4][5]=dt
+    f=np.eye(4)
+    f[2][3]=dt
     return np.dot(f,x)
 def F_d(x,u):
     dt=0.02
-    f=np.eye(6)
-    f[4][5]=dt
+    f=np.eye(4)
+    f[2][3]=dt
     return f
 
 def H1(x):
     # y=np.array([[x[0][0]+x[2][0]*np.cos(x[4][0])],[x[1][0]+x[3][0]*np.sin(x[4][0])]])
 
-    y=np.array([[x[0][0]+(6.25*10**(-5))*np.cos(x[4][0])],[x[1][0]+(6.25*10**(-5))*np.sin(x[4][0])]])
+    y=np.array([[x[0][0]+(6.25*10**(-5))*np.cos(x[2][0])*(-1.0)],[x[1][0]+(6.25*10**(-5))*np.sin(x[2][0])]])
     return y
 
 def H1_d(x):
     # y1=np.array([1,0,np.cos(x[4][0]),0,np.sin(x[4][0])*(-1.0)*x[2][0],0])
     # y2=np.array([0,1,0,np.sin(x[4][0]),np.cos(x[4][0])*x[3][0],0])
-    y1=np.array([1,0,np.cos(x[4][0]),0,np.sin(x[4][0])*(-1.0)*(6.25*10**(-5)),0])
-    y2=np.array([0,1,0,np.sin(x[4][0]),np.cos(x[4][0])*(6.25*10**(-5)),0])
+    y1=np.array([1,0,np.sin(x[2][0])*(6.25*10**(-5)),0])
+    y2=np.array([0,1,np.cos(x[2][0])*(6.25*10**(-5)),0])
     return np.array([y1,y2])
 
 def H2(x):
-    return x[5][0]
+    return x[3][0]
 
 def H2_d(x):
-    return np.array([[0,0,0,0,0,1]])
+    return np.array([[0,0,0,1]])
 
 
 def cb_mag(data):
@@ -46,10 +47,10 @@ def cb_mag(data):
 
 def cb_imu(data):
     global imu_omg
-    z=data.angular_velocity.z*3.0
+    z=data.angular_velocity.z*10.0
     imu_omg.update(np.array([[z]]))
 
-mag_ekf=kf_lib.ExtendedKalmanFilter(6)
+mag_ekf=kf_lib.ExtendedKalmanFilter(4)
 mag_ekf.F=F
 mag_ekf.F_d=F_d
 
@@ -62,17 +63,17 @@ mag_ekf.F_d=F_d
 # x[5] omega
 mag_ekf.X[0]=-5.75*10**(-5)
 mag_ekf.X[1]=-8.75*10**(-5)
-mag_ekf.X[2]=6.25*10**(-5)
-mag_ekf.X[3]=6.25*10**(-5)
-mag_ekf.X[4]=0
-mag_ekf.X[5]=0.0
-mag_ekf.Q=np.eye(6)
+mag_ekf.X[2]=0.0
+mag_ekf.X[3]=0.0
+mag_ekf.Q=np.eye(4)
 mag_ekf.Q[0][0]=10**(-7)
 mag_ekf.Q[1][1]=10**(-7)
-mag_ekf.Q[2][2]=10**(-10)
-mag_ekf.Q[3][3]=10**(-10)
-mag_ekf.Q[4][4]=10**(-8)
-mag_ekf.Q[5][5]=10**(-5)
+mag_ekf.Q[2][2]=10**(-8)
+mag_ekf.Q[3][3]=10**(-2)
+
+mag_ekf.P[0][0]=10**(-2)
+mag_ekf.P[1][1]=10**(-2)
+mag_ekf.P[2][2]=10**(-3)
 
 
 
@@ -110,15 +111,14 @@ while not rospy.is_shutdown():
     mag_org_msg.magnetic_field.y=mag_ekf.X[1]
     mag_org_pub.publish(mag_org_msg)
 
-    mag_rad_msg=MagneticField()
-    mag_rad_msg.magnetic_field.x=mag_ekf.X[2]
-    mag_rad_msg.magnetic_field.y=mag_ekf.X[3]
-    mag_rad_pub.publish(mag_rad_msg)
+
 
     mag_ang_msg=Imu()
-    mag_ang_msg.angular_velocity.z=mag_ekf.X[5]
-    mag_ang_msg.orientation.z=np.sin(mag_ekf.X[4]*0.5)
-    mag_ang_msg.orientation.w=np.cos(mag_ekf.X[4]*0.5)
+    mag_ang_msg.angular_velocity.z=mag_ekf.X[3]
+    ang_0_2pi=mag_ekf.X[2] % (2.0*np.pi)
+    ang_q=tf.transformations.quaternion_from_euler(0,0,ang_0_2pi)
+    mag_ang_msg.orientation.z=ang_q[2]
+    mag_ang_msg.orientation.w=ang_q[3]
     mag_ang_pub.publish(mag_ang_msg)
 
     
