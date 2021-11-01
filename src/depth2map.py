@@ -56,8 +56,8 @@ def depth_to_3DPoint(npDepth):
     npPointY = npPointY*np.cos(theta) + npDepth * np.sin(theta) + 410
     npPointY = npPointY.astype('float64')
     npHeight = np.copy(npPointY)
-    npHeight[npHeight<=300]=300
-    npHeight[npHeight>=2000]=2000
+    # npHeight[npHeight<=300]=300
+    # npHeight[npHeight>=2000]=2000
 
     # plt.figure()
     # plt.contourf(range(640),479-np.asarray(range(480)),npPointX,100)
@@ -141,23 +141,24 @@ def img_mask(depthimg,mask):
     return y
 
 
-def depth_filter(npPointX,npHeight,npDepth,mask=np.ones((480,640))):
-    height_range_low=700
-    height_range_high=900
+def depth_filter(npPointX,npHeight,npDepth,mask=np.ones((480,640)),height_range_low=500,height_range_high=900):
+    
+    
 
     t1=time.time()
     x_depth=np.reshape(npPointX,(307200,))
     y_depth=np.reshape(npHeight,(307200,))
     z_depth=np.reshape(npDepth,(307200,))
-    mask=np.reshape(mask,(307200,))
+    mask2=mask.copy()
+    mask2=np.reshape(mask2,(307200,))
 
-    mask[z_depth>=LOCAL_MAP_X_SIZE*MAP_RESOLUTION]=0
-    mask[x_depth>=(LOCAL_MAP_X_SIZE*MAP_RESOLUTION)*0.5]=0
-    mask[x_depth<=(LOCAL_MAP_X_SIZE*MAP_RESOLUTION)*(-0.5)]=0
-    # mask[y_depth>height_range_high]=0
-    # mask[y_depth<height_range_low]=0
-    z_depth=z_depth[~(mask==0)]
-    x_depth=x_depth[~(mask==0)]    
+    mask2[z_depth>=LOCAL_MAP_X_SIZE*MAP_RESOLUTION]=0
+    mask2[x_depth>=(LOCAL_MAP_X_SIZE*MAP_RESOLUTION)*0.5]=0
+    mask2[x_depth<=(LOCAL_MAP_X_SIZE*MAP_RESOLUTION)*(-0.5)]=0
+    mask2[y_depth>height_range_high]=0
+    mask2[y_depth<height_range_low]=0
+    z_depth=z_depth[~(mask2==0)]
+    x_depth=x_depth[~(mask2==0)]    
     return z_depth, x_depth
 
 def depth_to_topView(z_depth, x_depth):
@@ -165,7 +166,7 @@ def depth_to_topView(z_depth, x_depth):
     for i in range(len(z_depth)):
         mygrid[int(z_depth[i]/MAP_RESOLUTION),int(x_depth[i]/MAP_RESOLUTION)+250]+=1
     
-    mygrid=mygrid>5
+    mygrid=mygrid>3
 
     return mygrid.astype('uint8')
 
@@ -196,7 +197,7 @@ def into_world_map(map,z_depth, x_depth,x,y,theta):
     map_temp=np.zeros((MAP_X_SIZE,MAP_X_SIZE))
     for i in range(len(x_list)):
         map_temp[x_list[i],y_list[i]]+=1
-    map_temp=map_temp>5
+    map_temp=map_temp>3
     map=map+map_temp
     return map.astype('uint8')
 
@@ -230,6 +231,7 @@ def circle_to_world(map,centre_x_list,centre_z_list,radius_r_list,x,y,theta):
         # else:
         #     r=r_list[i]
          map=cv2.circle(map,(z_list[i], x_list[i]), r_list[i], 50, 2)
+        #  map=cv2.circle(map,(z_list[i], x_list[i]), 1, 50, 2)
     return map
 
 def draw_arrowed(x,y,theta,img,color=(0,255,0)):
@@ -261,14 +263,23 @@ def topView_to_circle(tv):
     hieght_or = np.zeros((LOCAL_MAP_X_SIZE,LOCAL_MAP_Y_SIZE), dtype=np.uint8)
     hieght_or[tv>0]=255
     hieght_or = hieght_or.astype('uint8')
-    kernel = np.ones((2,2), np.uint8)
-    hieght_or = cv2.dilate(hieght_or,kernel,iterations = 1)
-    kernel = np.ones((2,2), np.uint8)
-    hieght_or = cv2.erode(hieght_or, kernel, iterations = 1)
+    kernel = np.ones((1,1), np.uint8)
+    # hieght_or = cv2.erode(hieght_or, kernel, iterations = 1)
+    kernel = np.ones((3,3), np.uint8)
+    # hieght_or = cv2.dilate(hieght_or,kernel,iterations = 1)
     cv2.imshow("hieght_or",hieght_or)
     t2=time.time()
     ''' find connected component and push into point array A '''
-    num_objects, labels = cv2.connectedComponents(hieght_or)
+    num_objects, labels = cv2.connectedComponents(hieght_or,connectivity=4)
+
+    # label_mask=labels>0
+    # label_mask=label_mask.astype('uint8')
+    # kernel = np.ones((3,3), np.uint8)
+    # label_mask = cv2.erode(label_mask, kernel, iterations = 1)
+    
+    # labels[label_mask==0]=0
+
+
     labels_spr=coo_matrix(labels)
     labels_spr=np.asarray([labels_spr.row,labels_spr.col,labels_spr.data])
     labels_spr=labels_spr.T
@@ -292,13 +303,13 @@ def topView_to_circle(tv):
     for i in range(1,num_objects):
         A = []
         t31=time.time()
-        while(labels_spr[i_index_end,2]==i):
+        while (labels_spr[i_index_end,2]==i):
             if i_index_end<i_max-1:
                 i_index_end=i_index_end+1
             else:
                 break
         
-        print(i_index_end-i_index_start)
+        # print(i_index_end-i_index_start)
         if i_index_end-i_index_start<20:
             i_index_start=i_index_end
             continue

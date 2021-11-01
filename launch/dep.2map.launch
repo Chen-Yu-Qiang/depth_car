@@ -1,0 +1,7 @@
+<launch>
+<node pkg="depth_car" type="ls_ang.py" name="ls_ang" output="screen"/>
+<node pkg="depth_car" type="kf_ang.py" name="kf_ang" output="screen"/>
+<node pkg="depth_car" type="gps2ang.py" name="gps2ang" output="screen"/>
+<node pkg="depth_car" type="add2filtered_map.py" name="add2filtered_map" output="screen"/>
+<node pkg="depth_car" type="depth2map_ros.py" name="depth2map_ros" output="screen"/>
+</launch>

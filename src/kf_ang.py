@@ -61,7 +61,7 @@ def cb_mag(data):
 
 def cb_imu(data):
     global imu_omg
-    z=data.angular_velocity.z*10.0
+    z=data.angular_velocity.z
     imu_omg.update(np.array([[z]]))
 n2pi=0
 def cb_gps(data):
@@ -75,7 +75,7 @@ def cb_ls(data):
     z_x=data.magnetic_field.x
     z_y=data.magnetic_field.y
     ls_org.update(np.array([[z_x],[z_y]]))
-    print(np.array([[z_x],[z_y]]))
+    # print(np.array([[z_x],[z_y]]))
 
 mag_ekf=kf_lib.ExtendedKalmanFilter(4)
 mag_ekf.F=F

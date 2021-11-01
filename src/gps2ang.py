@@ -52,7 +52,7 @@ def cb_gps(data):
     yy0=y-y0
     gps_len=(x_last-xx0)*(x_last-xx0)+(y_last-yy0)*(y_last-yy0)
     gps_ang=np.arctan2((xx0-x_last),(yy0-y_last))
-    print(gps_len,gps_ang*57.3,ang.z)
+    # print(gps_len,gps_ang*57.3,ang.z)
     x_last=xx0
     y_last=yy0
     if gps_len>0.005:
