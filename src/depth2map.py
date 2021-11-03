@@ -170,68 +170,70 @@ def depth_to_topView(z_depth, x_depth):
 
     return mygrid.astype('uint8')
 
+
+def fromCar2World(x_list,z_list,x,y,theta):
+    M = np.asarray([[-np.sin(theta),np.cos(theta)],[np.cos(theta),np.sin(theta)]])
+    xz=np.array([x_list,z_list])
+    NW=np.dot(M,xz)
+    NW=NW+np.array([[x],[y]])
+    M = np.asarray([[1,0],[0,-1]])
+    NnW=np.dot(M,NW)
+    return NnW
+
 def into_world_map(map,z_depth, x_depth,x,y,theta):
     """
         x(mm)
         y(mm)
         theta(rad)
     """
-    M = np.asarray([[np.cos(theta),-np.sin(theta)],[np.sin(theta),np.cos(theta)]])
-    xy=np.array([x_depth,z_depth])
-    # xy=np.array([[1000,1000,1000,1000,1000,1000,2000,2000,2000,2000,2000,2000,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
 
-    xy=np.dot(M,xy)
-    xy=xy+np.array([[x],[y]])
-    xy=xy/MAP_RESOLUTION+np.array([[MAP_X_CENTER],[MAP_Y_CENTER]])
-    x_list=xy[0,:]
-    y_list=xy[1,:]
-    mask=np.ones((len(xy[1,:]),))
-    mask[x_list>MAP_X_SIZE]=0
-    mask[x_list<0]=0
-    mask[y_list>MAP_Y_SIZE]=0
-    mask[y_list<0]=0
-    x_list=x_list[~(mask==0)]
-    y_list=y_list[~(mask==0)]
-    x_list=x_list.astype("uint16")
-    y_list=y_list.astype("uint16")
+    NnW=fromCar2World(x_depth,z_depth,x,y,theta)
+    NnW=NnW/MAP_RESOLUTION+np.array([[MAP_X_CENTER],[MAP_Y_CENTER]])
+    n_list=NnW[0,:]
+    neg_w_list=NnW[1,:]
+    mask=np.ones((len(NnW[1,:]),))
+    mask[n_list>MAP_X_SIZE]=0
+    mask[n_list<0]=0
+    mask[neg_w_list>MAP_Y_SIZE]=0
+    mask[neg_w_list<0]=0
+    n_list=n_list[~(mask==0)]
+    neg_w_list=neg_w_list[~(mask==0)]
+
+    n_list=n_list.astype("uint16")
+    neg_w_list=neg_w_list.astype("uint16")
     map_temp=np.zeros((MAP_X_SIZE,MAP_X_SIZE))
-    for i in range(len(x_list)):
-        map_temp[x_list[i],y_list[i]]+=1
+    for i in range(len(n_list)):
+        map_temp[neg_w_list[i],n_list[i]]+=1
     map_temp=map_temp>3
     map=map+map_temp
     return map.astype('uint8')
 
 def circle_to_world(map,centre_x_list,centre_z_list,radius_r_list,x,y,theta):
 
-    M = np.asarray([[np.cos(theta),-np.sin(theta)],[np.sin(theta),np.cos(theta)]])
-    xz=np.array([centre_x_list,centre_z_list])
 
-    # xz=np.array([[1000,2000,3000],[0,0,0]])
-    # radius_r_list=[1000,1000,1000]
-    xz=np.dot(M,xz)
-    xz=xz+np.array([[x],[y]])
-    xz=xz/MAP_RESOLUTION+np.array([[MAP_X_CENTER],[MAP_Y_CENTER]])
-    x_list=xz[0,:]
-    z_list=xz[1,:]
+    NnW=fromCar2World(centre_x_list,centre_z_list,x,y,theta)
+    NnW=NnW/MAP_RESOLUTION+np.array([[MAP_X_CENTER],[MAP_Y_CENTER]])
+    n_list=NnW[0,:]
+    neg_w_list=NnW[1,:]
     r_list=np.array(radius_r_list)/MAP_RESOLUTION
-    mask=np.ones((len(xz[1,:]),))
-    mask[x_list>MAP_X_SIZE]=0
-    mask[x_list<0]=0
-    mask[z_list>MAP_Y_SIZE]=0
-    mask[z_list<0]=0
-    x_list=x_list[~(mask==0)]
-    z_list=z_list[~(mask==0)]
+    mask=np.ones((len(NnW[1,:]),))
+    mask[n_list>MAP_X_SIZE]=0
+    mask[n_list<0]=0
+    mask[neg_w_list>MAP_Y_SIZE]=0
+    mask[neg_w_list<0]=0
+    n_list=n_list[~(mask==0)]
+    neg_w_list=neg_w_list[~(mask==0)]
     r_list=r_list[~(mask==0)]
-    x_list=x_list.astype("uint16")
-    z_list=z_list.astype("uint16")
+    n_list=n_list.astype("uint16")
+    neg_w_list=neg_w_list.astype("uint16")
     r_list=r_list.astype("uint16")
-    for i in range(len(x_list)):
+    for i in range(len(n_list)):
         # if r_list[i]<10:
         #     r=10
         # else:
         #     r=r_list[i]
-         map=cv2.circle(map,(z_list[i], x_list[i]), r_list[i], 50, 2)
-        #  map=cv2.circle(map,(z_list[i], x_list[i]), 1, 50, 2)
+         map=cv2.circle(map,(n_list[i], neg_w_list[i]), r_list[i], 50, 2)
+        #  map=cv2.circle(map,(n_list[i], w_list[i]), 1, 50, 2)
     return map
 
 def draw_arrowed(x,y,theta,img,color=(0,255,0)):
@@ -240,8 +242,8 @@ def draw_arrowed(x,y,theta,img,color=(0,255,0)):
         y(mm)
         theta(rad)
     """
-    arrowed_start=np.array([y,x])
-    arrowed_end=arrowed_start+np.array([np.sin(theta)*1000,np.cos(theta)*1000])
+    arrowed_start=np.array([x,-y])
+    arrowed_end=arrowed_start+np.array([np.cos(theta)*1000,-np.sin(theta)*1000])
     arrowed_start=(arrowed_start/MAP_RESOLUTION+2500).astype("uint16")
     arrowed_end=(arrowed_end/MAP_RESOLUTION+2500).astype("uint16")
     arrowed_start=tuple(arrowed_start)
@@ -282,10 +284,12 @@ def topView_to_circle(tv):
 
     labels_spr=coo_matrix(labels)
     labels_spr=np.asarray([labels_spr.row,labels_spr.col,labels_spr.data])
+    # row = z in world
+    # col = x in world
     labels_spr=labels_spr.T
     labels_spr=labels_spr[labels_spr[:,2].argsort()]
     centre_x_list = []
-    centre_y_list = []
+    centre_z_list = []
     radius_r_list = []
     circle_bd = np.zeros(hieght_or.shape, dtype=np.uint8)
     # print('>>>>num_objects:',num_objects)
@@ -334,13 +338,13 @@ def topView_to_circle(tv):
         k = np.dot(k,np.ones((k.shape[1],1)))
 
         t33=time.time()
-        centre_x = k[0][0]/(-2)
-        centre_y = k[1][0]/(-2)
-        radius_r = np.sqrt(centre_x*centre_x+centre_y*centre_y-k[2][0])
+        centre_z = k[0][0]/(-2)
+        centre_x = k[1][0]/(-2)
+        radius_r = np.sqrt(centre_z*centre_z+centre_x*centre_x-k[2][0])
 
         # Convert pixel to mm
-        centre_x_mm=centre_x*MAP_RESOLUTION
-        centre_y_mm=(centre_y-LOCAL_MAP_Y_SIZE*0.5)*MAP_RESOLUTION
+        centre_z_mm=centre_z*MAP_RESOLUTION
+        centre_x_mm=(centre_x-LOCAL_MAP_Y_SIZE*0.5)*MAP_RESOLUTION
         radius_r_mm=radius_r*MAP_RESOLUTION 
 
 
@@ -348,17 +352,17 @@ def topView_to_circle(tv):
         # print('x_pix,y_pix,r_pix: ', centre_x, centre_y, radius_r)
         # 
         
-        tv=cv2.circle(tv,(int(centre_y+0.5), int(centre_x+0.5)), int(radius_r+0.5), (100,100,0), 2)
+        tv=cv2.circle(tv,(int(centre_x+0.5), int(centre_z+0.5)), int(radius_r+0.5), (100,100,0), 2)
         
+        centre_z_list.append(centre_z_mm)
         centre_x_list.append(centre_x_mm)
-        centre_y_list.append(centre_y_mm)
         radius_r_list.append(radius_r_mm)
         t34=time.time()
         # print(t34-t31,t32-t31,t33-t32,t34-t33)
     t4=time.time()
     # print(t4-t1,t2-t1,t3-t2,t4-t3)
 
-    return centre_x_list,centre_y_list,radius_r_list,tv
+    return centre_x_list,centre_z_list,radius_r_list,tv
 
 def circle_filter(centre_x_list,centre_y_list,radius_r_list):
     centre_x_list=np.array(centre_x_list)
@@ -378,6 +382,52 @@ def circle_filter(centre_x_list,centre_y_list,radius_r_list):
 
 def cerate_map():
     return np.zeros((MAP_X_SIZE,MAP_Y_SIZE)).astype("uint8")
+
+def depth_dir_tree_rth(npPointX,npDepth,tm,image=np.zeros((480,640))):
+
+
+
+    kernel = np.ones((10,10), np.uint8)
+    tm = cv2.dilate(tm,kernel,iterations = 1)
+    kernel = np.ones((13,13), np.uint8)
+    tm = cv2.erode(tm, kernel, iterations = 1)
+    _,contours, _ = cv2.findContours(tm.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # print(len(contours))
+    th_list=[]
+    r_list=[]
+    for i in range(0, len(contours)):
+        x, y, w, h = cv2.boundingRect(contours[i])
+        # print(x,y,w,h)
+        image=cv2.rectangle(image,(x,y),(x+w,y+h),10000,2)
+
+
+        a_tree_depth=np.nanmean(npDepth[y:y+h,x:x+w])
+        a_tree_X=np.nanmean(npPointX[y:y+h,x:x+w])
+        th=np.arctan2(a_tree_X,a_tree_depth)
+        r=np.sqrt(a_tree_X*a_tree_X+a_tree_depth*a_tree_depth)
+        th_list.append(th)
+        r_list.append(r)
+        org_in_img_x=320
+        org_in_img_y=480
+
+        cv2.line(image,(org_in_img_x,org_in_img_y) , (int(org_in_img_x-np.sin(th)*r/100), int(org_in_img_y-np.cos(th)*r/100)),30000, 5)
+        cv2.circle(image, (int(org_in_img_x-np.sin(th)*r/100), int(org_in_img_y-np.cos(th)*r/100)), 3,60000, -1)
+        
+        # print(a_tree_X,a_tree_depth,r,th*57)
+
+    return r_list,th_list,image
+
+def rth2xyr(r_list,th_list):
+    centre_x_list = []
+    centre_y_list = []
+    radius_r_list = []
+
+    for i in range(len(r_list)):
+        centre_x_list.append(np.sin(th_list[i])*r_list[i])
+        centre_y_list.append(np.cos(th_list[i])*r_list[i])
+        radius_r_list.append(200)
+    return centre_x_list,centre_y_list,radius_r_list
+
 
 class trj:
     def __init__(self):

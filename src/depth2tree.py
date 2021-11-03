@@ -23,27 +23,10 @@ def cbDepth(data):
 
     tm=depth2map.get_tree_mask(npPointX,npHeight,npDepth)
     f_img=depth2map.img_mask(image,tm)
-    _,contours, _ = cv2.findContours(tm.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    print(len(contours))
-    m=np.zeros((100,200))
-    for i in range(0, len(contours)):
-        x, y, w, h = cv2.boundingRect(contours[i])
-        # print(x,y,w,h)
-        image=cv2.rectangle(image,(x,y),(x+w,y+h),1000,2)
-
-
-        a_tree_depth=np.nanmean(npDepth[y:y+h,x:x+w])
-        a_tree_X=np.nanmean(npPointX[y:y+h,x:x+w])
-        th=np.arctan2(a_tree_X,a_tree_depth)/4.0*9.0
-        r=np.sqrt(a_tree_X*a_tree_X+a_tree_depth*a_tree_depth)
-        org_in_img_x=320
-        org_in_img_y=480
-
-        cv2.line(image, (org_in_img_x, org_in_img_y), (int(org_in_img_x-np.sin(th)*r/100), int(org_in_img_y-np.cos(th)*r/100)), 60000, 5)
-
-        print(a_tree_X,a_tree_depth,r,th*57)
-
-
+    r_list,th_list=depth2map.depth_dir_tree_rth(npPointX,npDepth,tm)
+    centre_x_list,centre_y_list,radius_r_list=depth2map.rth2xyr(r_list,th_list)
+    
+    
     cv2.imshow("map",image)
     cv2.waitKey(1)
     out_msg=bridge.cv2_to_imgmsg(f_img, '16UC1')

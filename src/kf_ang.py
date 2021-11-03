@@ -68,7 +68,7 @@ def cb_gps(data):
     global gps_ang,n2pi
     _,_,z=tf.transformations.euler_from_quaternion([data.orientation.x,data.orientation.y,data.orientation.z,data.orientation.w])
     gps_ang.update(np.array([[z+n2pi*2.0*np.pi]]))
-    print(z+n2pi*2.0*np.pi)
+    # print(z+n2pi*2.0*np.pi)
 
 def cb_ls(data):
     global ls_org
@@ -97,9 +97,10 @@ mag_ekf.Q[1][1]=10**(-7)
 mag_ekf.Q[2][2]=10**(-6)
 mag_ekf.Q[3][3]=10**(-2)
 
-mag_ekf.P[0][0]=10**(-2)
-mag_ekf.P[1][1]=10**(-2)
-mag_ekf.P[2][2]=10**(-3)
+# mag_ekf.P[0][0]=10**(-2)
+# mag_ekf.P[1][1]=10**(-2)
+mag_ekf.P[2][2]=10
+mag_ekf.P[3][3]=10**(-3)
 
 
 
