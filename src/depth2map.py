@@ -28,16 +28,21 @@ HEIGHT_L=500 # mm
 DEPTH_H=8000 # mm
 DEPTH_L=500 # mm
 
+CX_D = 320.6562194824219 #424
+CY_D = 241.57083129882812 #241
+FX_D = 384.31365966796875 #424
+FY_D = 384.31365966796875 #424
+
 def depth_to_3DPoint(npDepth):
 
     npDepth=cv2.GaussianBlur(npDepth,(11,11),0)
     npDepth = npDepth.astype('float64')
 
     # npDepth[npDepth>10000]=np.nan
-    cx_d = 320.6562194824219 #424
-    cy_d = 241.57083129882812 #241
-    fx_d = 384.31365966796875 #424
-    fy_d = 384.31365966796875 #424
+    cx_d = CX_D
+    cy_d = CY_D
+    fx_d = FX_D
+    fy_d = FY_D
     npPointX = np.asarray(range(640))-cx_d
     npPointX = np.diag(npPointX)
     npPointX = dia_matrix(npPointX)
@@ -417,6 +422,45 @@ def depth_dir_tree_rth(npPointX,npDepth,tm,image=np.zeros((480,640))):
 
     return r_list,th_list,image
 
+def depth_dir_tree_dthr(npPointX,npDepth,tm,image=np.zeros((480,640))):
+
+
+
+    kernel = np.ones((10,10), np.uint8)
+    tm = cv2.dilate(tm,kernel,iterations = 1)
+    kernel = np.ones((13,13), np.uint8)
+    tm = cv2.erode(tm, kernel, iterations = 1)
+    _,contours, _ = cv2.findContours(tm.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # print(len(contours))
+    th_list=[]
+    d_list=[]
+    r_list=[]
+    for i in range(0, len(contours)):
+        x, y, w, h = cv2.boundingRect(contours[i])
+        # print(x,y,w,h)
+        image=cv2.rectangle(image,(x,y),(x+w,y+h),10000,2)
+
+
+        a_tree_depth=np.nanmean(npDepth[y:y+h,x:x+w])
+        a_tree_X=np.nanmean(npPointX[y:y+h,x:x+w])
+        th=np.arctan2(a_tree_X,a_tree_depth)
+        d=np.sqrt(a_tree_X*a_tree_X+a_tree_depth*a_tree_depth)
+        wm=a_tree_depth*w/FX_D
+        r=np.sqrt(wm*wm+d*d)/d*wm
+        th_list.append(th)
+        d_list.append(d)
+        r_list.append(r)
+        org_in_img_x=320
+        org_in_img_y=480
+
+        cv2.line(image,(org_in_img_x,org_in_img_y) , (int(org_in_img_x-np.sin(th)*d/100), int(org_in_img_y-np.cos(th)*d/100)),30000, 5)
+        cv2.circle(image, (int(org_in_img_x-np.sin(th)*d/100), int(org_in_img_y-np.cos(th)*d/100)), 3,60000, -1)
+        
+        # print(a_tree_X,a_tree_depth,r,th*57)
+
+    return d_list,th_list,r_list,image
+
+
 def rth2xyr(r_list,th_list):
     centre_x_list = []
     centre_y_list = []
@@ -426,6 +470,17 @@ def rth2xyr(r_list,th_list):
         centre_x_list.append(np.sin(th_list[i])*r_list[i])
         centre_y_list.append(np.cos(th_list[i])*r_list[i])
         radius_r_list.append(200)
+    return centre_x_list,centre_y_list,radius_r_list
+
+def dthr2xyr(d_list,th_list,r_list):
+    centre_x_list = []
+    centre_y_list = []
+    radius_r_list = []
+
+    for i in range(len(r_list)):
+        centre_x_list.append(np.sin(th_list[i])*d_list[i])
+        centre_y_list.append(np.cos(th_list[i])*d_list[i])
+        radius_r_list.append(r_list[i])
     return centre_x_list,centre_y_list,radius_r_list
 
 

@@ -67,8 +67,21 @@ n2pi=0
 def cb_gps(data):
     global gps_ang,n2pi
     _,_,z=tf.transformations.euler_from_quaternion([data.orientation.x,data.orientation.y,data.orientation.z,data.orientation.w])
-    gps_ang.update(np.array([[z+n2pi*2.0*np.pi]]))
-    # print(z+n2pi*2.0*np.pi)
+    z_eul=z+n2pi*2.0*np.pi
+    z_eul_n=z+(n2pi-1)*2.0*np.pi
+    z_eul_p=z+(n2pi+1)*2.0*np.pi
+    y=gps_ang.get_Y([[z_eul]])[0][0]
+    y_n=gps_ang.get_Y([[z_eul_n]])[0][0]
+    y_p=gps_ang.get_Y([[z_eul_p]])[0][0]
+    print(y,y_n,y_p)
+    if abs(y)<abs(y_n) and abs(y)<abs(y_p):
+        gps_ang.update(np.array([[z_eul]]))
+    elif abs(y_n)<abs(y) and abs(y_n)<abs(y_p):
+        gps_ang.update(np.array([[z_eul_n]]))
+    elif abs(y_p)<abs(y) and abs(y_p)<abs(y_n):
+        gps_ang.update(np.array([[z_eul_p]]))
+
+
 
 def cb_ls(data):
     global ls_org
@@ -99,7 +112,7 @@ mag_ekf.Q[3][3]=10**(-2)
 
 # mag_ekf.P[0][0]=10**(-2)
 # mag_ekf.P[1][1]=10**(-2)
-mag_ekf.P[2][2]=10
+mag_ekf.P[2][2]=1000
 mag_ekf.P[3][3]=10**(-3)
 
 
@@ -114,7 +127,7 @@ imu_mag.H_d=H1_d
 imu_omg=kf_lib.EKF_updater(1,mag_ekf)
 imu_omg.H=H2
 imu_omg.H_d=H2_d
-imu_omg.R[0][0]=10**(-2)
+imu_omg.R[0][0]=10**(-3)
 
 gps_ang=kf_lib.EKF_updater(1,mag_ekf)
 gps_ang.H=H3

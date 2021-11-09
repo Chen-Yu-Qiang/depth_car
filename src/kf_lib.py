@@ -96,6 +96,9 @@ class EKF_updater:
         self.kf.X=self.kf.X+np.dot(K,Y)
         self.kf.P=np.dot(np.eye(self.kf.n)-np.dot(K,self.H_d(self.kf.X)),self.kf.P)
 
+    def get_Y(self,Z):
+        return Z-self.H(self.kf.X)
+
 
 class ExtendedKalmanFilter:
     def __init__(self,n):
