@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import numpy as np
-from numpy.core import machar
 
 
 tree_data=[[1,2,0.3],[2,4,0.2],[3,3,0.1]]

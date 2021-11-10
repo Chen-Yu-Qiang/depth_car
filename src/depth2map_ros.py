@@ -14,10 +14,12 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64MultiArray,MultiArrayDimension
 import depth2map
 import max_like_tree
+import EKF_localization
 car_x=0
 car_y=0
 car_theta=0
 map=depth2map.cerate_map()
+
 car1=depth2map.trj()
 AA=0
 ARRAY_LAY1=20
@@ -94,6 +96,7 @@ def list2ROSmsg_dthr_each(d_list,th_list,r_list,car_x,car_y,car_theta,AA,puber):
         like_max_i,like_max=max_like_tree.max_like(car_x,car_y,car_theta,tree_data,d_list[i]*0.001,th_list[i],radius_r_list[i]*0.001)
         a[11]=like_max_i+1
         a[12]=like_max
+        
         b=Float64MultiArray(data=a)
         
         b.layout.dim=[MultiArrayDimension()]

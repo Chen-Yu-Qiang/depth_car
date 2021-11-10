@@ -73,7 +73,7 @@ def cb_gps(data):
     y=gps_ang.get_Y([[z_eul]])[0][0]
     y_n=gps_ang.get_Y([[z_eul_n]])[0][0]
     y_p=gps_ang.get_Y([[z_eul_p]])[0][0]
-    print(y,y_n,y_p)
+
     if abs(y)<abs(y_n) and abs(y)<abs(y_p):
         gps_ang.update(np.array([[z_eul]]))
     elif abs(y_n)<abs(y) and abs(y_n)<abs(y_p):
