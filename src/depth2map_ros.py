@@ -79,6 +79,7 @@ def list2ROSmsg_dthr_each(d_list,th_list,r_list,car_x,car_y,car_theta,AA,puber):
     centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
     NnW=depth2map.fromCar2World(centre_x_list,centre_z_list,car_x*1000,car_y*1000,car_theta)
     tree_data_1900=[[2.5,12.5,0.5],[3.5,5.0,0.5],[4.0,-1.0,0.5],[9.0,10.0,0.5],[9.5,6.0,0.5],[10.0,3.0,0.5],[13.5,8.0,0.5]]
+    tree_data_1726=[[-4.58,25.74,0.5],[-3.27,19.23,0.5],[-3.36,11.97,0.5],[2.9,23.56,0.5],[2.6,19.29,0.5],[3.15,16.94,0.5],[7.27,21.5,0.5]]
     tree_data=tree_data_1900
     for i in range(len(centre_x_list)):
         a=[0 for j in range(ARRAY_LAY1)]
@@ -190,10 +191,10 @@ def cbDepth_2(data):
     cv2.imshow("map",map_rgb_small)
     
     
-    if AA%30==0:
-        cv2.imwrite("map/"+str(AA)+".png",map_rgb)
-    if AA%5==0:
-        cv2.imwrite("each/"+str(AA)+".png",image)     
+    # if AA%30==0:
+    #     cv2.imwrite("map/"+str(AA)+".png",map_rgb)
+    # if AA%5==0:
+    #     cv2.imwrite("each/"+str(AA)+".png",image)     
     print(time.time()-t)
     cv2.waitKey(1)
 
@@ -226,6 +227,7 @@ if __name__=="__main__":
 
     # subIMU = rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cbIMU)
     subOdom = rospy.Subscriber("/my_filtered_map", Odometry, cbOdom)
+    subOdom = rospy.Subscriber("/landmark_odom", Odometry, cbOdom)
     # subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom)
     rospy.spin()
 

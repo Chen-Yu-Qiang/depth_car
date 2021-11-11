@@ -13,14 +13,16 @@ from std_msgs.msg import Float64MultiArray
 import EKF_localization
 u_init=EKF_localization.set_u_init(-0.0138,-7.835,-1.017)
 ekf=EKF_localization.EKF_localization(u_init)
-
+use_landmark=-1
 
 def cb_array(data):
-    a,b,c,d=ekf.update_landmark(EKF_localization.list_2_landmark_Z(data.data))
+    global use_landmark
+    a,b,c,d,e=ekf.update_landmark(EKF_localization.list_2_landmark_Z(data.data))
     if not a==-1:
-        l=[a,b,c[0][0],c[1][0],c[2][0],d[0][0],d[1][0],d[2][0]]
+        l=[a,b,c[0][0],c[1][0],c[2][0],d[0][0],d[1][0],d[2][0],e[0][0],e[1][0],e[2][0]]
         m=Float64MultiArray(data=l)
         ekf_out_landmark_z.publish(m)
+        use_landmark=a
 def cb_pos(data):
     ekf.update_positon(EKF_localization.Odom_2_position_Z(data))
 v=0
@@ -37,6 +39,7 @@ if __name__=="__main__":
     rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd)
     rospy.Subscriber("/my_filtered_map", Odometry, cb_pos)
     ekf_out=rospy.Publisher("landmark",Twist,queue_size=1)
+    ekf_out2=rospy.Publisher("landmark_odom",Odometry,queue_size=1)
     ekf_out_sigma=rospy.Publisher("landmark_sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("landmark_z",Float64MultiArray,queue_size=1)
     rate=rospy.Rate(10)
@@ -48,15 +51,26 @@ if __name__=="__main__":
         ekf_out_msg=Twist()
         ekf_out_msg.linear.x=ekf.u[0][0]
         ekf_out_msg.linear.y=ekf.u[1][0]
+        ekf_out_msg.linear.z=use_landmark
         ekf_out_msg.angular.z=ekf.u[2][0]
         ekf_out.publish(ekf_out_msg)
+
+        ekf_out2_msg=Odometry()
+        ekf_out2_msg.pose.pose.position.x=ekf.u[0][0]
+        ekf_out2_msg.pose.pose.position.y=ekf.u[1][0]
+        ang_0_2pi=ekf.u[2][0] % (6.28318)
+        ang_q=tf.transformations.quaternion_from_euler(0,0,ang_0_2pi)
+        ekf_out2_msg.pose.pose.orientation.z=ang_q[2]
+        ekf_out2_msg.pose.pose.orientation.w=ang_q[3]
+        ekf_out2.publish(ekf_out2_msg)
+
         ekf_out_sigma_msg=Twist()
         ekf_out_sigma_msg.linear.x=ekf.sigma[0][0]
         ekf_out_sigma_msg.linear.y=ekf.sigma[1][1]
         ekf_out_sigma_msg.angular.z=ekf.sigma[2][2]
         ekf_out_sigma.publish(ekf_out_sigma_msg)
 
-
+        use_landmark=-1
 
         rate.sleep()
 

@@ -30,10 +30,10 @@ def get_Vt(v,omg,theta):
 
 def get_Mt(v,omg):
     Mt=np.zeros((2,2))
-    alpha1=1
+    alpha1=1.0
     alpha2=0
     alpha3=0
-    alpha4=1
+    alpha4=1.0
     Mt[0][0]=alpha1*v*v+alpha2*omg*omg
     Mt[1][1]=alpha3*v*v+alpha4*omg*omg
     return Mt
@@ -77,6 +77,7 @@ def list_2_landmark_Z(a):
     z[0][0]=a[3]
     z[1][0]=a[4]
     z[2][0]=a[2]
+    z[2][0]=0.5
     return z
 
 def Odom_2_position_Z(a):
@@ -97,14 +98,16 @@ class EKF_localization:
     def __init__(self,u_init):
         self.sigma=np.eye(3)
         self.Qt=np.zeros((3,3))
-        self.Qt[0][0]=10**(-2)
-        self.Qt[1][1]=10**(-2)
-        self.Qt[2][2]=100
+        self.Qt[0][0]=10**(-3)
+        self.Qt[1][1]=10**(-3)
+        self.Qt[2][2]=10**(-3)
         self.Qt2=np.eye(3)
+        self.Qt2[2][2]=10**(-2)
 
         self.u=u_init
         tree_data_1900=[[2.5,12.5,0.5],[3.5,5.0,0.5],[4.0,-1.0,0.5],[9.0,10.0,0.5],[9.5,6.0,0.5],[10.0,3.0,0.5],[13.5,8.0,0.5]]
-        self.tree_data=tree_data_1900
+        tree_data_1726=[[-4.58,25.74,0.5],[-3.27,19.23,0.5],[-3.36,11.97,0.5],[2.9,23.56,0.5],[2.6,19.29,0.5],[3.15,16.94,0.5],[7.27,21.5,0.5]]
+        self.tree_data=tree_data_1726
 
     def prediction(self,v,omg):
         theta=self.u[2][0]
@@ -119,7 +122,7 @@ class EKF_localization:
         S=[]
         j=[]
         max_j_index=-1
-        max_j=0.1
+        max_j=1.0
         for i in range(len(self.tree_data)):
             mx=self.tree_data[i][0]
             my=self.tree_data[i][1]
@@ -129,19 +132,18 @@ class EKF_localization:
             H.append(H_k)
             S.append(S_k)
             z_error=Z-z_hat_k
-            z_error[2][0]=0
             j_k=np.linalg.det(2*np.pi*S_k)**(-0.5)*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
             if j_k>max_j:
                 max_j=j_k
                 max_j_index=i
         if max_j_index==-1:
-            return max_j_index,-1,Z,-1
+            return max_j_index,-1,Z,-1,-1
         j=max_j_index
         print(j+1,max_j[0][0],Z,z_hat[j])
         K=np.dot(np.dot(self.sigma,H[j].T),np.linalg.inv(S[j]))
         self.u=self.u+np.dot(K,(Z-z_hat[j]))
         self.sigma=np.dot((np.eye(3)-np.dot(K,H[j])),self.sigma)
-        return j,max_j[0][0],Z,z_hat[j]
+        return j,max_j[0][0],Z,z_hat[j],np.dot(K,(Z-z_hat[j]))
 
 
     def update_positon(self,Z):
