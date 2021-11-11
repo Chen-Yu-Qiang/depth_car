@@ -60,7 +60,7 @@ def a_landmark(sigma,Qt,mx,my,ms,u):
     q=(mx-u[0][0])**2+(my-u[1][0])**2
     z_hat=np.zeros((3,1))
     z_hat[0][0]=np.sqrt(q)
-    z_hat[1][0]=np.arctan2((my-u[1][0]),(mx-u[0][0]))-u[2][0]
+    z_hat[1][0]=((np.arctan2((my-u[1][0]),(mx-u[0][0]))-u[2][0]+np.pi)%np.pi*2.0)-np.pi
     z_hat[2][0]=ms
     H=np.zeros((3,3))
     H[0][0]=-(mx-u[0][0])/np.sqrt(q)
@@ -98,9 +98,9 @@ class EKF_localization:
     def __init__(self,u_init):
         self.sigma=np.eye(3)
         self.Qt=np.zeros((3,3))
-        self.Qt[0][0]=10**(-3)
-        self.Qt[1][1]=10**(-3)
-        self.Qt[2][2]=10**(-3)
+        self.Qt[0][0]=10**(-1)
+        self.Qt[1][1]=10**(-1)
+        self.Qt[2][2]=10**(-1)
         self.Qt2=np.eye(3)
         self.Qt2[2][2]=10**(-2)
 
@@ -122,7 +122,7 @@ class EKF_localization:
         S=[]
         j=[]
         max_j_index=-1
-        max_j=1.0
+        max_j=1.5
         for i in range(len(self.tree_data)):
             mx=self.tree_data[i][0]
             my=self.tree_data[i][1]
@@ -148,6 +148,17 @@ class EKF_localization:
 
     def update_positon(self,Z):
         z_hat=self.u
+        n2pi=int((z_hat[2][0]+np.pi)/(2*np.pi))
+        e_p=abs(Z[2][0]+(n2pi+1)*2*np.pi-z_hat[2][0])
+        e_n=abs(Z[2][0]+(n2pi-1)*2*np.pi-z_hat[2][0])
+        e=abs(Z[2][0]+(n2pi)*2*np.pi-z_hat[2][0])
+        if e_p<e and e_p<e_n:
+            Z[2][0]=Z[2][0]+(n2pi+1)*2*np.pi
+        elif e_n<e and e_n<e_p:
+            Z[2][0]=Z[2][0]+(n2pi-1)*2*np.pi
+        elif e<e_n and e<e_p:
+            Z[2][0]=Z[2][0]+(n2pi)*2*np.pi
+        # print(z_hat[2][0],Z[2][0],n2pi,e,e_p,e_n)
         S=self.sigma+self.Qt2
         K=np.dot(self.sigma,np.linalg.inv(S))
         self.u=self.u+np.dot(K,(Z-z_hat))

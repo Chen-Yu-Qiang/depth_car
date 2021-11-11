@@ -20,7 +20,7 @@ def cb_array(data):
     a,b,c,d,e=ekf.update_landmark(EKF_localization.list_2_landmark_Z(data.data))
     if not a==-1:
         l=[a,b,c[0][0],c[1][0],c[2][0],d[0][0],d[1][0],d[2][0],e[0][0],e[1][0],e[2][0]]
-        m=Float64MultiArray(data=l)
+        m=Float64MultiArray(data=(l+list(data.data)))
         ekf_out_landmark_z.publish(m)
         use_landmark=a
 def cb_pos(data):
