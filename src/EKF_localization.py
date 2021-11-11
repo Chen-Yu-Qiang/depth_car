@@ -135,13 +135,13 @@ class EKF_localization:
                 max_j=j_k
                 max_j_index=i
         if max_j_index==-1:
-            return
+            return max_j_index,-1,Z,-1
         j=max_j_index
         print(j+1,max_j[0][0],Z,z_hat[j])
         K=np.dot(np.dot(self.sigma,H[j].T),np.linalg.inv(S[j]))
         self.u=self.u+np.dot(K,(Z-z_hat[j]))
         self.sigma=np.dot((np.eye(3)-np.dot(K,H[j])),self.sigma)
-        return
+        return j,max_j[0][0],Z,z_hat[j]
 
 
     def update_positon(self,Z):

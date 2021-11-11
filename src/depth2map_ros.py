@@ -190,9 +190,10 @@ def cbDepth_2(data):
     cv2.imshow("map",map_rgb_small)
     
     
-    # if AA%5==0:
-    #     cv2.imwrite("map/"+str(AA)+".png",map_rgb)  
-    #     cv2.imwrite("each/"+str(AA)+".png",image)     
+    if AA%30==0:
+        cv2.imwrite("map/"+str(AA)+".png",map_rgb)
+    if AA%5==0:
+        cv2.imwrite("each/"+str(AA)+".png",image)     
     print(time.time()-t)
     cv2.waitKey(1)
 
