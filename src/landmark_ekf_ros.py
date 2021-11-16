@@ -10,21 +10,37 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64MultiArray
 
-import EKF_localization
-u_init=EKF_localization.set_u_init(-0.0138,-7.835,-1.017)
+import EKF_localization 
+# u_init=EKF_localization.set_u_init(0.191,0.366,1.902) # 1726
+u_init=EKF_localization.set_u_init(2767716.07,-352874.54,1.902) # 1726 in utm
+# u_init=EKF_localization.set_u_init(-0.01105,-7.835,-1.017)  # 1900
+# u_init=EKF_localization.set_u_init(276770.86,-3528707.92,-1.017)  # 1900 in utm
+
 ekf=EKF_localization.EKF_localization(u_init)
 use_landmark=-1
 
 def cb_array(data):
     global use_landmark
-    a,b,c,d,e=ekf.update_landmark(EKF_localization.list_2_landmark_Z(data.data))
-    if not a==-1:
-        l=[a,b,c[0][0],c[1][0],c[2][0],d[0][0],d[1][0],d[2][0],e[0][0],e[1][0],e[2][0]]
+    j,max_j,Z,z_hat,delta_z=ekf.update_landmark(EKF_localization.list_2_landmark_Z(data.data))
+    if j>0:
+        l=[j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0],delta_z[0][0],delta_z[1][0],delta_z[2][0]]
+        use_landmark=j
+
+        print("is tree!",j,max_j,Z[0][0],Z[1][0],z_hat[0][0],z_hat[1][0])
         m=Float64MultiArray(data=(l+list(data.data)))
         ekf_out_landmark_z.publish(m)
-        use_landmark=a
+    else:
+        l=[j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0],-1,-1,-1]
+        print("no tree!",j,max_j,Z[0][0],Z[1][0],z_hat[0][0],z_hat[1][0])
+    
+
+t0=time.time()
 def cb_pos(data):
-    ekf.update_positon(EKF_localization.Odom_2_position_Z(data))
+    if time.time()-t0<10:
+        pass
+        # ekf.update_positon(EKF_localization.Odom_2_position_Z(data))
+    else:
+        ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
 v=0
 omg=0
 def cb_cmd(data):
@@ -32,12 +48,18 @@ def cb_cmd(data):
     v=data.linear.x
     omg=data.angular.z
 
+def cb_gps(data):
+    if time.time()-t0<10:
+        ekf.update_gps_utm(EKF_localization.gps_2_utm_Z(data))
+
+
 if __name__=="__main__":
     print("Python version: ",sys.version)
     rospy.init_node("landmark_ekf", anonymous=True)
     rospy.Subscriber("/tree_data2", Float64MultiArray,cb_array)
     rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd)
     rospy.Subscriber("/my_filtered_map", Odometry, cb_pos)
+    rospy.Subscriber("/navsat/fix", Odometry, cb_gps)
     ekf_out=rospy.Publisher("landmark",Twist,queue_size=1)
     ekf_out2=rospy.Publisher("landmark_odom",Odometry,queue_size=1)
     ekf_out_sigma=rospy.Publisher("landmark_sigma",Twist,queue_size=1)

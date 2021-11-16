@@ -161,7 +161,7 @@ def cbDepth_2(data):
     #     tree_data_msg=list2ROSmsg_xzr(centre_x_list2,centre_z_list2,radius_r_list2,car_x*1000,car_y*1000,car_theta,AA)
     #     tree_data.publish(tree_data_msg)
 
-    d_list,th_list,r_list,image=depth2map.depth_dir_tree_dthr(npPointX,npDepth,tm,image)
+    d_list,th_list,r_list,xywh_list,image=depth2map.depth_dir_tree_dthr(npPointX,npDepth,tm,image)
     cv2.putText(image,str(int(car_x*1000)),(0,30), cv2.FONT_HERSHEY_SIMPLEX,1, 60000, 1, cv2.LINE_AA)
     cv2.putText(image,str(int(car_y*1000)),(0,60), cv2.FONT_HERSHEY_SIMPLEX,1, 60000, 1, cv2.LINE_AA)
     cv2.putText(image,str(int((car_theta)*57.3)),(0,90), cv2.FONT_HERSHEY_SIMPLEX,1, 60000, 1, cv2.LINE_AA)
@@ -226,7 +226,7 @@ if __name__=="__main__":
     tree_data2=rospy.Publisher("/tree_data2", Float64MultiArray,queue_size=1)
 
     # subIMU = rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cbIMU)
-    subOdom = rospy.Subscriber("/my_filtered_map", Odometry, cbOdom)
+    # subOdom = rospy.Subscriber("/my_filtered_map", Odometry, cbOdom)
     subOdom = rospy.Subscriber("/landmark_odom", Odometry, cbOdom)
     # subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom)
     rospy.spin()

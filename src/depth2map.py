@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from logging import info
+from numpy.core.numeric import NaN
 
 from scipy.sparse import csr_matrix,coo_matrix,dia_matrix
 import sys
@@ -24,7 +25,7 @@ MAP_X_CENTER=2500 # pixel
 MAP_Y_CENTER=2500 # pixel
 
 HEIGHT_H=1000 # mm
-HEIGHT_L=500 # mm
+HEIGHT_L=400 # mm
 DEPTH_H=8000 # mm
 DEPTH_L=500 # mm
 
@@ -104,13 +105,14 @@ def get_tree_mask(npPointX,npHeight,npDepth):
     # plt.savefig("z.svg")
     # plt.show(block=False)
 
-
+    # down_component2=down_component.copy()
     down_component[npDepth>DEPTH_H]=0
     down_component[npDepth<DEPTH_L]=0
     down_component[npHeight>HEIGHT_H]=0
     down_component[npHeight<HEIGHT_L]=0
+    tree_mask=down_component<-0.4  
+    # cv2.imshow("bef",tree_mask.astype('uint8')*255)
 
-    tree_mask=down_component<-0.6
     # plt.figure()
     # plt.contourf(range(640),479-np.asarray(range(480)),npPointX_d/v1_norm,100)
     # plt.colorbar()
@@ -133,10 +135,10 @@ def get_tree_mask(npPointX,npHeight,npDepth):
     # plt.show()
     tree_mask=tree_mask.astype('uint16')
 
-    kernel = np.ones((5,5), np.uint16)
+    kernel = np.ones((15,10), np.uint16)
     tree_mask = cv2.erode(tree_mask, kernel, iterations = 1)
-    kernel = np.ones((20,5), np.uint16)
-    tree_mask = cv2.dilate(tree_mask,kernel,iterations = 3)
+    kernel = np.ones((15,10), np.uint16)
+    tree_mask = cv2.dilate(tree_mask,kernel,iterations = 1)
 
     return tree_mask
 
@@ -426,6 +428,7 @@ def depth_dir_tree_dthr(npPointX,npDepth,tm,image=np.zeros((480,640))):
 
 
 
+    cv2.imshow("tm",tm.astype('uint8')*255)
     kernel = np.ones((10,10), np.uint8)
     tm = cv2.dilate(tm,kernel,iterations = 1)
     kernel = np.ones((13,13), np.uint8)
@@ -435,6 +438,7 @@ def depth_dir_tree_dthr(npPointX,npDepth,tm,image=np.zeros((480,640))):
     th_list=[]
     d_list=[]
     r_list=[]
+    xywh_list=[]
     for i in range(0, len(contours)):
         x, y, w, h = cv2.boundingRect(contours[i])
         # print(x,y,w,h)
@@ -450,6 +454,7 @@ def depth_dir_tree_dthr(npPointX,npDepth,tm,image=np.zeros((480,640))):
         th_list.append(th)
         d_list.append(d)
         r_list.append(r)
+        xywh_list.append([x, y, w, h ])
         org_in_img_x=320
         org_in_img_y=480
 
@@ -458,7 +463,7 @@ def depth_dir_tree_dthr(npPointX,npDepth,tm,image=np.zeros((480,640))):
         
         # print(a_tree_X,a_tree_depth,r,th*57)
 
-    return d_list,th_list,r_list,image
+    return d_list,th_list,r_list,xywh_list,image
 
 
 def rth2xyr(r_list,th_list):

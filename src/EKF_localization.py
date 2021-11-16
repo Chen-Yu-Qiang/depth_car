@@ -2,6 +2,10 @@
 
 import numpy as np
 import tf
+from pyproj import Proj
+from sensor_msgs.msg import NavSatFix
+
+
 DELTA_T=0.1
 def get_Gt(v,omg,theta):
     Gt=np.eye(3)
@@ -60,7 +64,7 @@ def a_landmark(sigma,Qt,mx,my,ms,u):
     q=(mx-u[0][0])**2+(my-u[1][0])**2
     z_hat=np.zeros((3,1))
     z_hat[0][0]=np.sqrt(q)
-    z_hat[1][0]=((np.arctan2((my-u[1][0]),(mx-u[0][0]))-u[2][0]+np.pi)%np.pi*2.0)-np.pi
+    z_hat[1][0]=((np.arctan2((my-u[1][0]),(mx-u[0][0]))-u[2][0]+np.pi)%(np.pi*2.0))-np.pi
     z_hat[2][0]=ms
     H=np.zeros((3,3))
     H[0][0]=-(mx-u[0][0])/np.sqrt(q)
@@ -85,7 +89,26 @@ def Odom_2_position_Z(a):
     z[0][0]=a.pose.pose.position.x
     z[1][0]=a.pose.pose.position.y
     z[2][0]=tf.transformations.euler_from_quaternion([0,0,a.pose.pose.orientation.z,a.pose.pose.orientation.w])[2]
+
     return z
+
+def Odom_2_angle_Z(a):
+    return tf.transformations.euler_from_quaternion([0,0,a.pose.pose.orientation.z,a.pose.pose.orientation.w])[2]
+
+def gps_2_utm_Z(a):
+    z=np.zeros((2,1))
+    WD=a.latitude  # WD(N)
+    JD=a.longitude # JD(E)
+    p = Proj(proj='utm',zone=51,ellps='WGS84', preserve_units=False)
+    E,N = p(JD, WD)
+    x=N
+    y=-E # W
+    z[0][0]=x
+    z[1][0]=y
+
+    return z
+
+
 
 def set_u_init(x,y,theta):
     u=np.zeros((3,1))
@@ -98,16 +121,21 @@ class EKF_localization:
     def __init__(self,u_init):
         self.sigma=np.eye(3)
         self.Qt=np.zeros((3,3))
-        self.Qt[0][0]=10**(-1)
-        self.Qt[1][1]=10**(-1)
-        self.Qt[2][2]=10**(-1)
+        self.Qt[0][0]=10**(-2)
+        self.Qt[1][1]=10**(-2)
+        self.Qt[2][2]=10**(-2)
         self.Qt2=np.eye(3)
         self.Qt2[2][2]=10**(-2)
+        self.Qt3=0.01
+        self.Qt_utm=np.eye(2)*0.01
 
         self.u=u_init
         tree_data_1900=[[2.5,12.5,0.5],[3.5,5.0,0.5],[4.0,-1.0,0.5],[9.0,10.0,0.5],[9.5,6.0,0.5],[10.0,3.0,0.5],[13.5,8.0,0.5]]
         tree_data_1726=[[-4.58,25.74,0.5],[-3.27,19.23,0.5],[-3.36,11.97,0.5],[2.9,23.56,0.5],[2.6,19.29,0.5],[3.15,16.94,0.5],[7.27,21.5,0.5]]
-        self.tree_data=tree_data_1726
+        tree_data_1726_utm=[[2767711.3, -352849.18, 0.5], [2767712.61, -352855.69, 0.5], [2767712.52, -352862.95, 0.5], [2767718.78, -352851.36, 0.5], [2767718.48, -352855.63, 0.5], [2767719.03, -352857.98, 0.5], [2767723.15, -352853.42, 0.5]]
+        tree_data_1900_utm=[[276773.38, -352850.58, 0.5], [276774.38, -352858.08, 0.5], [276774.88, -352864.08, 0.5], [276779.88, -352853.08, 0.5], [276780.38, -352857.08, 0.5], [276780.88, -352860.08, 0.5], [276784.38, -352855.08, 0.5]]
+
+        self.tree_data=tree_data_1726_utm                                      
 
     def prediction(self,v,omg):
         theta=self.u[2][0]
@@ -121,8 +149,9 @@ class EKF_localization:
         H=[]
         S=[]
         j=[]
-        max_j_index=-1
-        max_j=1.5
+        max_j_index=0
+        max_j=0
+        max_j_th=0.1
         for i in range(len(self.tree_data)):
             mx=self.tree_data[i][0]
             my=self.tree_data[i][1]
@@ -134,16 +163,19 @@ class EKF_localization:
             z_error=Z-z_hat_k
             j_k=np.linalg.det(2*np.pi*S_k)**(-0.5)*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
             if j_k>max_j:
-                max_j=j_k
-                max_j_index=i
-        if max_j_index==-1:
-            return max_j_index,-1,Z,-1,-1
-        j=max_j_index
-        print(j+1,max_j[0][0],Z,z_hat[j])
+                max_j=j_k[0][0]
+                max_j_index=i+1
+        
+        j=max_j_index-1
+        if max_j_index==0 or max_j<max_j_th:
+            print(max_j_index*(-1),max_j,Z,z_hat,-1)
+            return max_j_index*(-1),max_j,Z,z_hat[j],-1
+        
+        # print(j+1,max_j,Z,z_hat[j])
         K=np.dot(np.dot(self.sigma,H[j].T),np.linalg.inv(S[j]))
         self.u=self.u+np.dot(K,(Z-z_hat[j]))
         self.sigma=np.dot((np.eye(3)-np.dot(K,H[j])),self.sigma)
-        return j,max_j[0][0],Z,z_hat[j],np.dot(K,(Z-z_hat[j]))
+        return max_j_index,max_j,Z,z_hat[j],np.dot(K,(Z-z_hat[j]))
 
 
     def update_positon(self,Z):
@@ -165,3 +197,35 @@ class EKF_localization:
         self.sigma=np.dot((np.eye(3)-K),self.sigma)
         return
 
+    def update_angle(self,Z):
+        z_hat=self.u[2][0]
+        n2pi=int((z_hat+np.pi)/(2*np.pi))
+        e_p=abs(Z+(n2pi+1)*2*np.pi-z_hat)
+        e_n=abs(Z+(n2pi-1)*2*np.pi-z_hat)
+        e=abs(Z+(n2pi)*2*np.pi-z_hat)
+        if e_p<e and e_p<e_n:
+            Z=Z+(n2pi+1)*2*np.pi
+        elif e_n<e and e_n<e_p:
+            Z=Z+(n2pi-1)*2*np.pi
+        elif e<e_n and e<e_p:
+            Z=Z+(n2pi)*2*np.pi
+        # print(z_hat,Z,n2pi,e,e_p,e_n)
+        H=np.zeros((1,3))
+        H[0][2]=1
+        S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt3
+        K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
+        self.u=self.u+np.dot(K,(Z-z_hat))
+        self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
+        return
+
+    def update_gps_utm(self,Z):
+        z_hat=self.u[0:2]
+
+        H=np.zeros((2,3))
+        H[0][0]=1
+        H[1][1]=1
+        S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt_utm
+        K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
+        self.u=self.u+np.dot(K,(Z-z_hat))
+        self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
+        return
