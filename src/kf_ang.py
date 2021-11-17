@@ -4,7 +4,8 @@ import rospy
 import tf
 import numpy as np
 from sensor_msgs.msg import MagneticField,Imu
-
+from nav_msgs.msg import Odometry
+import time
 
 import kf_lib
 
@@ -80,8 +81,12 @@ def cb_gps(data):
         gps_ang.update(np.array([[z_eul_n]]))
     elif abs(y_p)<abs(y) and abs(y_p)<abs(y_n):
         gps_ang.update(np.array([[z_eul_p]]))
-
-
+t=time.time()
+def cb_pos(data):
+    global builtIn_ang,t
+    if time.time()-t<30:
+        ang=tf.transformations.euler_from_quaternion([0,0,data.pose.pose.orientation.z,data.pose.pose.orientation.w])[2]
+        builtIn_ang.update(np.array([[ang]]))
 
 def cb_ls(data):
     global ls_org
@@ -110,8 +115,8 @@ mag_ekf.Q[1][1]=10**(-7)
 mag_ekf.Q[2][2]=10**(-6)
 mag_ekf.Q[3][3]=10**(-2)
 
-# mag_ekf.P[0][0]=10**(-2)
-# mag_ekf.P[1][1]=10**(-2)
+mag_ekf.P[0][0]=10**(5)
+mag_ekf.P[1][1]=10**(5)
 mag_ekf.P[2][2]=1000
 mag_ekf.P[3][3]=10**(-3)
 
@@ -140,6 +145,12 @@ ls_org.H_d=H4_d
 ls_org.R[0][0]=10**(-2)
 ls_org.R[1][1]=10**(-2)
 
+builtIn_ang=kf_lib.EKF_updater(1,mag_ekf)
+builtIn_ang.H=H3
+builtIn_ang.H_d=H3_d
+builtIn_ang.R[0][0]=10**(-4)
+
+
 rospy.init_node('kf', anonymous=True)
 
 mag_sub = rospy.Subscriber('/imu/mag', MagneticField, cb_mag)
@@ -148,6 +159,7 @@ gps_sub = rospy.Subscriber('/gps_ang', Imu, cb_gps)
 ls_sub = rospy.Subscriber('/LS/mag_org', MagneticField, cb_ls)
 mag_org_pub = rospy.Publisher('/EKF/mag_org', MagneticField, queue_size=1)
 mag_ang_pub = rospy.Publisher('/EKF/mag_ang', Imu, queue_size=1)
+rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos)
 rate = rospy.Rate(50.0)
 
 
@@ -168,7 +180,7 @@ while not rospy.is_shutdown():
 
     mag_ang_msg=Imu()
     mag_ang_msg.angular_velocity.z=mag_ekf.X[3]
-    ang_0_2pi=mag_ekf.X[2] % (2.0*np.pi)
+    ang_0_2pi=((mag_ekf.X[2]+np.pi)% (2.0*np.pi))-np.pi
     n2pi=int((mag_ekf.X[2]+np.pi)/(2.0*np.pi))
     ang_q=tf.transformations.quaternion_from_euler(0,0,ang_0_2pi)
     mag_ang_msg.orientation.z=ang_q[2]

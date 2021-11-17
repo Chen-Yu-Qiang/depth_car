@@ -33,10 +33,10 @@ def get_Vt(v,omg,theta):
 
 def get_Mt(v,omg):
     Mt=np.zeros((2,2))
-    alpha1=1.0
-    alpha2=0
-    alpha3=0
-    alpha4=1.0
+    alpha1=3.0
+    alpha2=1.0
+    alpha3=1.0
+    alpha4=3.0
     Mt[0][0]=alpha1*v*v+alpha2*omg*omg
     Mt[1][1]=alpha3*v*v+alpha4*omg*omg
     return Mt
@@ -118,15 +118,15 @@ def set_u_init(x,y,theta):
 
 class EKF_localization:
     def __init__(self,u_init):
-        self.sigma=np.eye(3)
+        self.sigma=np.eye(3)*1.0
         self.Qt=np.zeros((3,3))
-        self.Qt[0][0]=10**(-1)
-        self.Qt[1][1]=10**(-1)
-        self.Qt[2][2]=10**(-1)
+        self.Qt[0][0]=10.0**(-3)
+        self.Qt[1][1]=10.0**(-4)*5
+        self.Qt[2][2]=10.0**(-3)
         self.Qt2=np.eye(3)
-        self.Qt2[2][2]=10**(-2)
-        self.Qt3=0.01
-        self.Qt_utm=np.eye(2)*0.01
+        self.Qt2[2][2]=10.0**(-2)
+        self.Qt3=0.0001
+        self.Qt_utm=np.eye(2)*0.001
 
         self.u=u_init
         tree_data_1900=[[2.5,12.5,0.5],[3.5,5.0,0.5],[4.0,-1.0,0.5],[9.0,10.0,0.5],[9.5,6.0,0.5],[10.0,3.0,0.5],[13.5,8.0,0.5]]
@@ -134,7 +134,7 @@ class EKF_localization:
         tree_data_1726_utm=[[2767711.3, -352849.18, 0.5], [2767712.61, -352855.69, 0.5], [2767712.52, -352862.95, 0.5], [2767718.78, -352851.36, 0.5], [2767718.48, -352855.63, 0.5], [2767719.03, -352857.98, 0.5], [2767723.15, -352853.42, 0.5]]
         tree_data_1900_utm=[[2767710.38, -352850.58, 0.5], [2767711.38, -352858.08, 0.5], [2767711.88, -352864.08, 0.5], [2767716.88, -352853.08, 0.5], [2767717.38, -352857.08, 0.5], [2767717.88, -352860.08, 0.5], [2767721.38, -352855.08, 0.5]]
 
-        self.tree_data=tree_data_1900_utm                                      
+        self.tree_data=[]
 
     def prediction(self,v,omg):
         theta=self.u[2][0]
@@ -150,7 +150,7 @@ class EKF_localization:
         j=[]
         max_j_index=0
         max_j=0
-        max_j_th=10**(-10)
+        max_j_th=0.4
         for i in range(len(self.tree_data)):
             mx=self.tree_data[i][0]
             my=self.tree_data[i][1]
@@ -160,8 +160,14 @@ class EKF_localization:
             H.append(H_k)
             S.append(S_k)
             z_error=Z-z_hat_k
-            z_error[1][0]=z_error[1][0]*3
+            # z_error[1][0]=z_error[1][0]*3
+            z_hat_k[2][0]=Z[2][0]
             j_k=(np.linalg.det(2*np.pi*S_k)**(-0.5))*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
+            w=np.zeros((3,3))
+            w[0][0]=1
+            w[1][1]=2.5
+            j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
+            print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0])
             if j_k>max_j:
                 max_j=j_k[0][0]
                 max_j_index=i+1
@@ -173,8 +179,8 @@ class EKF_localization:
         
         # print(j+1,max_j,Z,z_hat[j])
         K=np.dot(np.dot(self.sigma,H[j].T),np.linalg.inv(S[j]))
-        self.u=self.u+np.dot(K,(Z-z_hat[j]))
-        self.sigma=np.dot((np.eye(3)-np.dot(K,H[j])),self.sigma)
+        # self.u=self.u+np.dot(K,(Z-z_hat[j]))
+        # self.sigma=np.dot((np.eye(3)-np.dot(K,H[j])),self.sigma)
         return max_j_index,max_j,Z,z_hat[j],np.dot(K,(Z-z_hat[j]))
 
 

@@ -9,8 +9,8 @@ from std_msgs.msg import Float64
 
 mag_x=0
 mag_y=0
-centre_x=-5.75*10**(-5)
-centre_y=-8.75*10**(-5)
+centre_x=-7.75*10**(-5)
+centre_y=-5.2*10**(-5)
 
 def get_near_ang(ang):
     pass
@@ -22,7 +22,7 @@ def cb_mag(data):
 
     ang=np.arctan2(-(mag_y-centre_y),(mag_x-centre_x))
     mag_ang_msg=Imu()
-    ang_0_2pi= ang % (2.0*np.pi)
+    ang_0_2pi= ((ang+np.pi) % (2.0*np.pi))-np.pi
     ang_q=tf.transformations.quaternion_from_euler(0,0,ang_0_2pi)
     mag_ang_msg.orientation.z=ang_q[2]
     mag_ang_msg.orientation.w=ang_q[3]
@@ -35,13 +35,14 @@ for i in range(36):
     mag_x_list[i]=centre_x-np.cos(i*0.1745)*(6.25*10**(-5))
     mag_y_list[i]=centre_y+np.sin(i*0.1745)*(6.25*10**(-5))
 
-
+w=np.ones((36,))*1.0
 def cb_imu(data):
-    global mag_x_list,mag_y_list,mag_x,mag_y,time_list
+    global mag_x_list,mag_y_list,mag_x,mag_y,time_list,w
     ang=tf.transformations.euler_from_quaternion([data.orientation.x,data.orientation.y,data.orientation.z,data.orientation.w])
     p=int((ang[2]% (2.0*np.pi))/0.1745)
     mag_x_list[p-1]=mag_x
     mag_y_list[p-1]=mag_y
+    w[p-1]=1.0
     time_list[p-1]=time.time()
 
 
@@ -57,6 +58,8 @@ rate = rospy.Rate(50.0)
 
 
 k_old=None
+
+
 while not rospy.is_shutdown():
     #t=time.time()
     A_3=-1.0/(mag_x_list*mag_x_list+mag_y_list*mag_y_list)
@@ -70,8 +73,9 @@ while not rospy.is_shutdown():
     # k = np.dot(k,A.T)
     # k = np.dot(k,np.ones((k.shape[1],1)))
     y=np.ones((36,))
+    w_m=np.diag(w)
     try:
-        k,residuals,_,_=np.linalg.lstsq(A,y,rcond=None)
+        k,residuals,_,_=np.linalg.lstsq(np.dot(w_m,A),np.dot(w_m,y),rcond=None)
     except:
         pass
     
