@@ -28,12 +28,12 @@ def cb_array(data):
         use_landmark=j
 
         print("is tree!",j,max_j,Z[0][0],Z[1][0],z_hat[0][0],z_hat[1][0])
-
+        m=Float64MultiArray(data=(l+list(data.data)))
+        ekf_out_landmark_z.publish(m)   
     else:
         l=[j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0],-1,-1,-1]
         print("no tree!",j,max_j,Z[0][0],Z[1][0],z_hat[0][0],z_hat[1][0])
-    m=Float64MultiArray(data=(l+list(data.data)))
-    ekf_out_landmark_z.publish(m)    
+ 
 
 t0=time.time()
 def cb_pos(data):
@@ -50,7 +50,7 @@ def cb_cmd(data):
 
 def cb_gps(data):
     z=EKF_localization.gps_2_utm_Z(data)
-    if time.time()-t0<1000:
+    if time.time()-t0<100:
         ekf.update_gps_utm(z)
 
     gps_utm_out_msg=Twist()

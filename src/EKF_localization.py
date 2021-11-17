@@ -120,9 +120,9 @@ class EKF_localization:
     def __init__(self,u_init):
         self.sigma=np.eye(3)
         self.Qt=np.zeros((3,3))
-        self.Qt[0][0]=10**(-2)
-        self.Qt[1][1]=10**(-2)
-        self.Qt[2][2]=10**(-2)
+        self.Qt[0][0]=10**(-1)
+        self.Qt[1][1]=10**(-1)
+        self.Qt[2][2]=10**(-1)
         self.Qt2=np.eye(3)
         self.Qt2[2][2]=10**(-2)
         self.Qt3=0.01
@@ -150,7 +150,7 @@ class EKF_localization:
         j=[]
         max_j_index=0
         max_j=0
-        max_j_th=10**(50)
+        max_j_th=10**(-10)
         for i in range(len(self.tree_data)):
             mx=self.tree_data[i][0]
             my=self.tree_data[i][1]
@@ -161,7 +161,7 @@ class EKF_localization:
             S.append(S_k)
             z_error=Z-z_hat_k
             z_error[1][0]=z_error[1][0]*3
-            j_k=np.linalg.det(2*np.pi*S_k)**(-0.5)*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
+            j_k=(np.linalg.det(2*np.pi*S_k)**(-0.5))*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
             if j_k>max_j:
                 max_j=j_k[0][0]
                 max_j_index=i+1
