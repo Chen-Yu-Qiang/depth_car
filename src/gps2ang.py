@@ -9,6 +9,7 @@ import time
 import numpy as np
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Twist
+msgFrom = "/outdoor_waypoint_nav/gps/filtered"
 msgFrom = "/navsat/fix"
 
 
@@ -55,7 +56,7 @@ def cb_gps(data):
     # print(gps_len,gps_ang*57.3,ang.z)
     x_last=xx0
     y_last=yy0
-    if gps_len>0.005:
+    if gps_len>0.001:
         gps_ang_msg=Imu()
         if cmd_pn<0:
             gps_ang=gps_ang+np.pi

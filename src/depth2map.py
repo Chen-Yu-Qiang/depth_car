@@ -443,10 +443,13 @@ def depth_dir_tree_dthr(npPointX,npDepth,tm,image=np.zeros((480,640))):
         x, y, w, h = cv2.boundingRect(contours[i])
         # print(x,y,w,h)
         image=cv2.rectangle(image,(x,y),(x+w,y+h),10000,2)
+        npDepth_temp=npDepth.copy()
+        npDepth_temp[tm==0]=np.nan
+        npPointX_temp=npPointX.copy()
+        npPointX_temp[tm==0]=np.nan
 
-
-        a_tree_depth=np.nanmean(npDepth[y:y+h,x:x+w])
-        a_tree_X=np.nanmean(npPointX[y:y+h,x:x+w])
+        a_tree_depth=np.nanmean(npDepth_temp[y:y+h,x:x+w])
+        a_tree_X=np.nanmean(npPointX_temp[y:y+h,x:x+w])
         th=np.arctan2(a_tree_X,a_tree_depth)
         d=np.sqrt(a_tree_X*a_tree_X+a_tree_depth*a_tree_depth)
         wm=a_tree_depth*w/FX_D

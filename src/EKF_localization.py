@@ -3,7 +3,6 @@
 import numpy as np
 import tf
 from pyproj import Proj
-from sensor_msgs.msg import NavSatFix
 
 
 DELTA_T=0.1
@@ -133,9 +132,9 @@ class EKF_localization:
         tree_data_1900=[[2.5,12.5,0.5],[3.5,5.0,0.5],[4.0,-1.0,0.5],[9.0,10.0,0.5],[9.5,6.0,0.5],[10.0,3.0,0.5],[13.5,8.0,0.5]]
         tree_data_1726=[[-4.58,25.74,0.5],[-3.27,19.23,0.5],[-3.36,11.97,0.5],[2.9,23.56,0.5],[2.6,19.29,0.5],[3.15,16.94,0.5],[7.27,21.5,0.5]]
         tree_data_1726_utm=[[2767711.3, -352849.18, 0.5], [2767712.61, -352855.69, 0.5], [2767712.52, -352862.95, 0.5], [2767718.78, -352851.36, 0.5], [2767718.48, -352855.63, 0.5], [2767719.03, -352857.98, 0.5], [2767723.15, -352853.42, 0.5]]
-        tree_data_1900_utm=[[276773.38, -352850.58, 0.5], [276774.38, -352858.08, 0.5], [276774.88, -352864.08, 0.5], [276779.88, -352853.08, 0.5], [276780.38, -352857.08, 0.5], [276780.88, -352860.08, 0.5], [276784.38, -352855.08, 0.5]]
+        tree_data_1900_utm=[[2767710.38, -352850.58, 0.5], [2767711.38, -352858.08, 0.5], [2767711.88, -352864.08, 0.5], [2767716.88, -352853.08, 0.5], [2767717.38, -352857.08, 0.5], [2767717.88, -352860.08, 0.5], [2767721.38, -352855.08, 0.5]]
 
-        self.tree_data=tree_data_1726_utm                                      
+        self.tree_data=tree_data_1900_utm                                      
 
     def prediction(self,v,omg):
         theta=self.u[2][0]
@@ -151,7 +150,7 @@ class EKF_localization:
         j=[]
         max_j_index=0
         max_j=0
-        max_j_th=0.1
+        max_j_th=10**(50)
         for i in range(len(self.tree_data)):
             mx=self.tree_data[i][0]
             my=self.tree_data[i][1]
@@ -161,6 +160,7 @@ class EKF_localization:
             H.append(H_k)
             S.append(S_k)
             z_error=Z-z_hat_k
+            z_error[1][0]=z_error[1][0]*3
             j_k=np.linalg.det(2*np.pi*S_k)**(-0.5)*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
             if j_k>max_j:
                 max_j=j_k[0][0]
@@ -168,7 +168,7 @@ class EKF_localization:
         
         j=max_j_index-1
         if max_j_index==0 or max_j<max_j_th:
-            print(max_j_index*(-1),max_j,Z,z_hat,-1)
+            # print(max_j_index*(-1),max_j,Z,z_hat,-1)
             return max_j_index*(-1),max_j,Z,z_hat[j],-1
         
         # print(j+1,max_j,Z,z_hat[j])

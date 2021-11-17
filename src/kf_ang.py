@@ -132,7 +132,7 @@ imu_omg.R[0][0]=10**(-3)
 gps_ang=kf_lib.EKF_updater(1,mag_ekf)
 gps_ang.H=H3
 gps_ang.H_d=H3_d
-imu_omg.R[0][0]=10**(-2)
+gps_ang.R[0][0]=10**(-3)
 
 ls_org=kf_lib.EKF_updater(2,mag_ekf)
 ls_org.H=H4
