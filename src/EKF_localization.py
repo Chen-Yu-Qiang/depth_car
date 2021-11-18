@@ -8,7 +8,7 @@ from pyproj import Proj
 DELTA_T=0.1
 def get_Gt(v,omg,theta):
     Gt=np.eye(3)
-    if omg==0:
+    if omg<10**(-3):
         Gt[0][2]=-v*np.sin(theta)*DELTA_T
         Gt[1][2]=v*np.cos(theta)*DELTA_T
     else:
@@ -18,7 +18,7 @@ def get_Gt(v,omg,theta):
 
 def get_Vt(v,omg,theta):
     Vt=np.zeros((3,2))
-    if omg==0:
+    if omg<10**(-3):
         Vt[0][0]=np.cos(theta)*DELTA_T
         Vt[1][0]=np.sin(theta)*DELTA_T
         Vt[0][1]=-v*np.sin(theta)*DELTA_T*DELTA_T*0.5
@@ -33,10 +33,10 @@ def get_Vt(v,omg,theta):
 
 def get_Mt(v,omg):
     Mt=np.zeros((2,2))
-    alpha1=3.0
-    alpha2=1.0
-    alpha3=1.0
-    alpha4=3.0
+    alpha1=0.5
+    alpha2=0.05
+    alpha3=0.05
+    alpha4=0.5
     Mt[0][0]=alpha1*v*v+alpha2*omg*omg
     Mt[1][1]=alpha3*v*v+alpha4*omg*omg
     return Mt
@@ -44,7 +44,7 @@ def get_Mt(v,omg):
 def get_ut(ut_1,v,omg):
     theta=ut_1[2][0]
     A=np.zeros((3,1))
-    if omg==0:
+    if omg<10**(-3):
         A[0][0]=v*np.cos(theta)*DELTA_T
         A[1][0]=v*np.sin(theta)*DELTA_T
         A[2][0]=0
@@ -120,9 +120,9 @@ class EKF_localization:
     def __init__(self,u_init):
         self.sigma=np.eye(3)*1.0
         self.Qt=np.zeros((3,3))
-        self.Qt[0][0]=10.0**(-3)
-        self.Qt[1][1]=10.0**(-4)*5
-        self.Qt[2][2]=10.0**(-3)
+        self.Qt[0][0]=10**(-3)
+        self.Qt[1][1]=10**(-3)
+        self.Qt[2][2]=10**(-3)
         self.Qt2=np.eye(3)
         self.Qt2[2][2]=10.0**(-2)
         self.Qt3=0.0001
@@ -138,6 +138,8 @@ class EKF_localization:
 
     def prediction(self,v,omg):
         theta=self.u[2][0]
+
+        # print("pre",self.sigma,self.u,v,omg,get_Gt(v,omg,theta),get_Vt(v,omg,theta),get_Mt(v,omg))
         self.u=get_ut(self.u,v,omg)
         self.sigma=get_sigma(self.sigma,get_Gt(v,omg,theta),get_Vt(v,omg,theta),get_Mt(v,omg))
 
@@ -165,7 +167,7 @@ class EKF_localization:
             j_k=(np.linalg.det(2*np.pi*S_k)**(-0.5))*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
             w=np.zeros((3,3))
             w[0][0]=1
-            w[1][1]=2.5
+            w[1][1]=5
             j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
             print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0])
             if j_k>max_j:
@@ -179,8 +181,8 @@ class EKF_localization:
         
         # print(j+1,max_j,Z,z_hat[j])
         K=np.dot(np.dot(self.sigma,H[j].T),np.linalg.inv(S[j]))
-        # self.u=self.u+np.dot(K,(Z-z_hat[j]))
-        # self.sigma=np.dot((np.eye(3)-np.dot(K,H[j])),self.sigma)
+        self.u=self.u+np.dot(K,(Z-z_hat[j]))
+        self.sigma=np.dot((np.eye(3)-np.dot(K,H[j])),self.sigma)
         return max_j_index,max_j,Z,z_hat[j],np.dot(K,(Z-z_hat[j]))
 
 
@@ -219,6 +221,7 @@ class EKF_localization:
         H=np.zeros((1,3))
         H[0][2]=1
         S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt3
+        # print("ang",self.sigma)
         K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
         self.u=self.u+np.dot(K,(Z-z_hat))
         self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
@@ -231,6 +234,7 @@ class EKF_localization:
         H[0][0]=1
         H[1][1]=1
         S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt_utm
+        # print("gps",self.sigma)
         K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
         self.u=self.u+np.dot(K,(Z-z_hat))
         self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
