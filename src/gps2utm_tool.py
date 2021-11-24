@@ -55,23 +55,27 @@ for i in range(7):
 print(out_data)
 
 
-tree_data_wow=np.load("center_list_all.npy")
+tree_data_wow=np.load("center_list_all(1122).npy")
 
 
 # for python code
+
+print("------------------python---------")
 s="["
 for i in tree_data_wow:
     s=s+"["+str(i[1])+",-"+str(i[0])+","+str(i[2])+"],"
-s=s+"]"
+s=s[:-1]+"]"
 print(s)
-
+print("------------------python---------")
+print("------------------matlab---------")
 # for matlab code
 s="["
 for i in tree_data_wow:
     s=s+str(i[1])+",-"+str(i[0])+","+str(i[2])+";"
-s=s+"]"
+s=s[:-1]+"]"
 print(s)
 
+print("------------------matlab---------")
 
 
 

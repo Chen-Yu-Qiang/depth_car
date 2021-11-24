@@ -456,13 +456,13 @@ def depth_dir_tree_dthr(npPointX,npDepth,tm,image=np.zeros((480,640))):
         r=np.sqrt(wm*wm+d*d)/d*wm
         th_list.append(th)
         d_list.append(d)
-        r_list.append(r)
+        r_list.append(r*0.5)
         xywh_list.append([x, y, w, h ])
         org_in_img_x=320
         org_in_img_y=480
 
         cv2.line(image,(org_in_img_x,org_in_img_y) , (int(org_in_img_x-np.sin(th)*d/100), int(org_in_img_y-np.cos(th)*d/100)),30000, 5)
-        cv2.circle(image, (int(org_in_img_x-np.sin(th)*d/100), int(org_in_img_y-np.cos(th)*d/100)), 3,60000, -1)
+        cv2.circle(image, (int(org_in_img_x-np.sin(th)*d/100), int(org_in_img_y-np.cos(th)*d/100)), int(r*0.01),60000, -1)
         
         # print(a_tree_X,a_tree_depth,r,th*57)
 
