@@ -66,6 +66,7 @@ def cb_array(data):
             # j,max_j,Z,z_hat,delta_z=ekf.update_landmark_know_cor(EKF_localization.list_2_landmark_Z_together(data.data,i),corr_list[i])
             j,max_j,Z,z_hat,delta_z=ekf.update_landmark(EKF_localization.list_2_landmark_Z_together(data.data,i))
 
+        # if j>0 and (j in[13,15,16,17,18,19,21,23]):
         if j>0:
             l=[j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0],delta_z[0][0],delta_z[1][0],delta_z[2][0]]
             use_landmark=j
@@ -76,8 +77,10 @@ def cb_array(data):
             l=[j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0],-1,-1,-1]
             print("no tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
         d_out[ARRAY_LAY2*i:ARRAY_LAY2*i+11]=l
-        d_out[ARRAY_LAY2*i+20:ARRAY_LAY2*i+20+ARRAY_LAY1]=d
-        
+        d_out[ARRAY_LAY2*i+20:ARRAY_LAY2*i+20+ARRAY_LAY1]=d[ARRAY_LAY1*i:ARRAY_LAY1*(i+1)]
+    
+        print(d_out[25:28])
+    # print("d_out---------------------")
     m=Float64MultiArray(data=d_out)
     ekf_out_landmark_z.publish(m) 
 
@@ -105,13 +108,18 @@ def cb_cmd(data):
         ekf.Qt[0][0]=10**(-2)
         ekf.Qt[1][1]=10**(-2)*0.2
         ekf.Qt[2][2]=10**(-2)
-        ekf.max_j_th=2
+        ekf.max_j_th=1.0
     else:
-        ekf.Qt[0][0]=10**(0)
-        ekf.Qt[1][1]=10**(0)*0.2
-        ekf.Qt[2][2]=10**(0)
-        ekf.max_j_th=6
+        ekf.Qt[0][0]=10**(1)
+        ekf.Qt[1][1]=10**(1)*0.2
+        ekf.Qt[2][2]=10**(1)
+        ekf.max_j_th=2.5
 
+
+    # ekf.Qt[0][0]=10**(-100)
+    # ekf.Qt[1][1]=10**(-100)*0.2
+    # ekf.Qt[2][2]=10**(-100)
+    # ekf.max_j_th=1.0
 
 def cb_gps(data):
     global x0_loc,y0_loc,x0,y0

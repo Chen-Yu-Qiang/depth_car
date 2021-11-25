@@ -82,6 +82,16 @@ def list2ROSmsg_dthr_each_with_cor(d_list,th_list,r_list,car_x,car_y,car_theta,A
         puber.publish(b)
 
 
+def move30cm(d,th):
+    move_dis=300
+    th_abs=abs(th)
+    d2=np.sqrt(d*d+move_dis*move_dis-2.0*move_dis*d*np.cos(np.pi-th_abs))
+    th2=d/d2*np.sin(np.pi-th_abs)
+    if th>0:
+        return d2,th2
+    else:
+        return d2,-th2
+
 def cbTrunkset(data):
     global car_x,car_y,car_theta,AA,image_org
 
@@ -94,7 +104,7 @@ def cbTrunkset(data):
     image=image_org.copy()
     n=len(data.aframe)
     for i in range(n):
-        inAframe = data.aframe.pop()
+        inAframe = data.aframe[i]
         distance = inAframe.d*1000.0
         theta = inAframe.t
         radius = inAframe.r*1000.0
@@ -102,6 +112,8 @@ def cbTrunkset(data):
             cor=-100
         else:
             cor = int(data.match[i])
+
+        distance,theta=move30cm(distance,theta)
         d_list.append(distance)
         r_list.append(radius)
         th_list.append(theta)
@@ -109,11 +121,13 @@ def cbTrunkset(data):
 
         cv2.line(image,(org_in_img_x,org_in_img_y) , (int(org_in_img_x-np.sin(theta)*distance/100), int(org_in_img_y-np.cos(theta)*distance/100)),30000, 5)
         cv2.circle(image, (int(org_in_img_x-np.sin(theta)*distance/100), int(org_in_img_y-np.cos(theta)*distance/100)), int(radius*0.01),60000, -1)
+        if not cor==-100:
+            cv2.putText(image,str(int(cor+1)),((int(org_in_img_x-np.sin(theta)*(distance+100)/100), int(org_in_img_y-np.cos(theta)*(distance+100)/100))), cv2.FONT_HERSHEY_SIMPLEX,1, 60000, 1, cv2.LINE_AA)
     print(cor_list)
     t=time.time()
 
     for i in range(len(d_list)):
-        cv2.putText(image,str(int(d_list[i]))+","+str(int((th_list[i])*57.3))+","+str(int(r_list[i])),(0,400+i*30), cv2.FONT_HERSHEY_SIMPLEX,1, 60000, 1, cv2.LINE_AA)
+        cv2.putText(image,str(int(d_list[i]))+","+str(int((th_list[i])*57.3))+","+str(int(r_list[i]))+","+str(int(cor_list[i]+1)),(0,400+i*30), cv2.FONT_HERSHEY_SIMPLEX,1, 60000, 1, cv2.LINE_AA)
 
     if len(d_list)>=0:
         list2ROSmsg_dthr_with_cor(d_list,th_list,r_list,car_x,car_y,car_theta,AA,tree_data2_together_pub,cor_list)

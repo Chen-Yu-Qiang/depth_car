@@ -176,6 +176,17 @@ class EKF_localization:
         self.u=get_ut(self.u,v,omg)
         self.sigma=get_sigma(self.sigma,get_Gt(v,omg,theta),get_Vt(v,omg,theta),get_Mt(v,omg))
 
+    def get_like(self,z_error):
+        w=np.zeros((3,3))
+        w[0][0]=0.1
+        w[1][1]=1.0
+        w[2][2]=0.4
+        if np.cos(z_error[1][0])<0:
+            return 0
+        j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
+        j_k=np.exp((-0.2)*z_error[0][0]*z_error[0][0])+np.exp((-2.0)*z_error[1][0]*z_error[1][0])+np.exp((-1.5)*z_error[2][0]*z_error[2][0])
+        return j_k     
+
 
     def update_landmark_sim(self,Z,lock_tree={}):
         z_hat=[]
@@ -194,14 +205,9 @@ class EKF_localization:
             H.append(H_k)
             S.append(S_k)
             z_error=Z-z_hat_k
-            w=np.zeros((3,3))
-            w[0][0]=0.1
-            w[1][1]=0.8
-            w[2][2]=0.4
-            j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
-            j_k=np.exp((-0.5)*z_error[0][0]*z_error[0][0])+np.exp((-2.0)*z_error[1][0]*z_error[1][0])+np.exp((-1.0)*z_error[2][0]*z_error[2][0])
-            j_k=[[j_k]]
-            print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0],z_hat_k[2][0])
+
+            j_k=[[self.get_like(z_error)]]
+            # print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0],z_hat_k[2][0])
             if j_k>max_j and not ((i+1) in lock_tree) :
                 max_j=j_k[0][0]
                 max_j_index=i+1
@@ -217,17 +223,32 @@ class EKF_localization:
 
     def update_landmark_know_cor(self,Z,i):
         if i<1:
-            return i,0,Z,np.zeros((3,1))*(-1.0),-1
+            return i,0,Z,np.zeros((3,1))*(-1.0),np.ones((3,1))*(-1.0)
         print("update_landmark_know_cor",i)
         mx=self.tree_data[int(i-1)][0]
         my=self.tree_data[int(i-1)][1]
         ms=self.tree_data[int(i-1)][2]
 
         z_hat,H,S=a_landmark(self.sigma,self.Qt,mx,my,ms,self.u)
+
+
         K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
-        self.u=self.u+np.dot(K,(Z-z_hat))
-        self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
-        return i,1,Z,z_hat,np.dot(K,(Z-z_hat))
+
+        z_error=Z-z_hat
+
+        j_k=self.get_like(z_error)
+
+        delta=np.dot(K,(Z-z_hat))
+        if j_k<self.max_j_th:
+            print("likelihood too small")
+            return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
+        elif abs(delta[0][0])>5 or abs(delta[1][0])>5 or abs(delta[0][0])>1.0:
+            print("Delta too big")
+            return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
+        else:
+            self.u=self.u+delta
+            self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
+            return i,j_k,Z,z_hat,delta
 
     def update_landmark(self,Z):
         max_j_index,max_j,_,z_hat,_=self.update_landmark_sim(Z)

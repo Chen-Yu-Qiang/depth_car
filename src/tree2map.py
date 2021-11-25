@@ -13,6 +13,8 @@ import max_like_tree
 car_x=0
 car_y=0
 car_theta=0
+MAP_OFFSET_X=2767690
+MAP_OFFSET_Y=-352874
 
 car_x2=0
 car_y2=0
@@ -25,8 +27,8 @@ ARRAY_LAY1=20
 AA=0
 
 def cb_tree_each(data):
-    t=time.time()
     global car_x,car_y,car_theta,map
+    t=time.time()
     data=list(data.data)
     r_list=[data[2]]
     th_list=[data[4]]
@@ -62,8 +64,8 @@ def cb_tree_each(data):
     # print("2",time.time()-t)
 
 def cb_tree_together(data):
-    t=time.time()
     global car_x,car_y,car_theta,map
+    t=time.time()
     data=list(data.data)
     n=int(len(data)/20)
     r_list=[]
@@ -139,11 +141,13 @@ def cb_landmark_z(data):
     th_list=[]
     r_list=[]
     for i in range(n):
+        if data[ARRAY_LAY2*i]<0:
+            continue
         d_list.append(data[ARRAY_LAY2*i+2]*1000)
         th_list.append(data[ARRAY_LAY2*i+3])
         r_list.append(data[ARRAY_LAY2*i+4])
-    car_x_loc=car_x-2767707
-    car_y_loc=car_y+352874
+    car_x_loc=car_x-MAP_OFFSET_X
+    car_y_loc=car_y-MAP_OFFSET_Y
     centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
     map=depth2map.circle_to_world(map,centre_x_list,centre_z_list,radius_r_list,car_x_loc*1000,car_y_loc*1000,car_theta)    
 
@@ -155,8 +159,8 @@ def cb_landmark_xz_z(data):
     centre_x_list=[data[2]*1000]
     centre_z_list=[data[3]*1000]
     radius_r_list=[0.2*1000]
-    car_x_loc=car_x-2767707
-    car_y_loc=car_y+352874
+    car_x_loc=car_x-MAP_OFFSET_X
+    car_y_loc=car_y-MAP_OFFSET_Y
     map=depth2map.circle_to_world(map,centre_x_list,centre_z_list,radius_r_list,car_x_loc*1000,car_y_loc*1000,car_theta)    
 
 if __name__=="__main__":
@@ -176,8 +180,8 @@ if __name__=="__main__":
     while not rospy.is_shutdown():
         
         t=time.time()
-        car_x_loc=car_x-2767707
-        car_y_loc=car_y+352874
+        car_x_loc=car_x-MAP_OFFSET_X
+        car_y_loc=car_y-MAP_OFFSET_Y
 
         map_rgb=cv2.cvtColor(map*30, cv2.COLOR_GRAY2BGR)
         map_rgb=depth2map.draw_arrowed(car_x_loc*1000,car_y_loc*1000,car_theta,map_rgb)
