@@ -55,7 +55,7 @@ for i in range(7):
 print(out_data)
 
 
-tree_data_wow=np.load("center_list_all(1122).npy")
+tree_data_wow=np.load("center_list_all(1125).npy")
 
 
 # for python code

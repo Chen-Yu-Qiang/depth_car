@@ -132,18 +132,18 @@ imu_mag.H_d=H1_d
 imu_omg=kf_lib.EKF_updater(1,mag_ekf)
 imu_omg.H=H2
 imu_omg.H_d=H2_d
-imu_omg.R[0][0]=10**(-3)
+imu_omg.R[0][0]=10**(-2)
 
 gps_ang=kf_lib.EKF_updater(1,mag_ekf)
 gps_ang.H=H3
 gps_ang.H_d=H3_d
-gps_ang.R[0][0]=10**(-3)
+gps_ang.R[0][0]=10**(-1)
 
 ls_org=kf_lib.EKF_updater(2,mag_ekf)
 ls_org.H=H4
 ls_org.H_d=H4_d
-ls_org.R[0][0]=10**(-2)
-ls_org.R[1][1]=10**(-2)
+ls_org.R[0][0]=10**(-3)
+ls_org.R[1][1]=10**(-3)
 
 builtIn_ang=kf_lib.EKF_updater(1,mag_ekf)
 builtIn_ang.H=H3
@@ -155,7 +155,7 @@ rospy.init_node('kf', anonymous=True)
 
 mag_sub = rospy.Subscriber('/imu/mag', MagneticField, cb_mag)
 imu_sub = rospy.Subscriber('/imu/data', Imu, cb_imu)
-gps_sub = rospy.Subscriber('/gps_ang', Imu, cb_gps)
+# gps_sub = rospy.Subscriber('/gps_ang', Imu, cb_gps)
 ls_sub = rospy.Subscriber('/LS/mag_org', MagneticField, cb_ls)
 mag_org_pub = rospy.Publisher('/EKF/mag_org', MagneticField, queue_size=1)
 mag_ang_pub = rospy.Publisher('/EKF/mag_ang', Imu, queue_size=1)

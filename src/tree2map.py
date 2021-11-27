@@ -146,6 +146,10 @@ def cb_landmark_z(data):
         d_list.append(data[ARRAY_LAY2*i+2]*1000)
         th_list.append(data[ARRAY_LAY2*i+3])
         r_list.append(data[ARRAY_LAY2*i+4])
+    
+    # car_x=data[13]
+    # car_x=data[14]
+    # car_theta=data[15]
     car_x_loc=car_x-MAP_OFFSET_X
     car_y_loc=car_y-MAP_OFFSET_Y
     centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
