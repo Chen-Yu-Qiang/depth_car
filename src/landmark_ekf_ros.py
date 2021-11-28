@@ -123,13 +123,13 @@ def cb_cmd(data):
         ekf.Qt[0][0]=10**(-3)
         ekf.Qt[1][1]=0.2*10**(-3)
         ekf.Qt[2][2]=10**(-3)
-        ekf.max_j_th=2.5
-        print("no move!!")
+        ekf.max_j_th=2.0
+
     else:
-        ekf.Qt[0][0]=10**(3)
-        ekf.Qt[1][1]=10**(3)*0.2
-        ekf.Qt[2][2]=10**(3)
-        ekf.max_j_th=2.8
+        ekf.Qt[0][0]=10**(0)
+        ekf.Qt[1][1]=10**(0)*0.2
+        ekf.Qt[2][2]=10**(0)
+        ekf.max_j_th=2.5
 
 
     # ekf.Qt[0][0]=10**(-100)

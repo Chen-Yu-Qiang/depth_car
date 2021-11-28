@@ -208,7 +208,7 @@ class EKF_localization:
 
             j_k=[[self.get_like(z_error)]]
             # print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0],z_hat_k[2][0])
-            if j_k>max_j and not ((i+1) in lock_tree) :
+            if j_k[0][0]>max_j and not ((i+1) in lock_tree) :
                 max_j=j_k[0][0]
                 max_j_index=i+1
         
