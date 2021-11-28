@@ -126,9 +126,9 @@ def cb_cmd(data):
         ekf.max_j_th=2.0
 
     else:
-        ekf.Qt[0][0]=10**(0)
-        ekf.Qt[1][1]=10**(0)*0.2
-        ekf.Qt[2][2]=10**(0)
+        ekf.Qt[0][0]=10**(-1)
+        ekf.Qt[1][1]=10**(-1)*0.2
+        ekf.Qt[2][2]=10**(-1)
         ekf.max_j_th=2.5
 
 
