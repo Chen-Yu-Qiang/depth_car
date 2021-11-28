@@ -157,7 +157,7 @@ class EKF_localization:
         self.Qt2=np.eye(3)
         self.Qt2[2][2]=10.0**(-2)
         self.Qt_ang=0.0001
-        self.Qt_utm=np.eye(2)*0.001
+        self.Qt_utm=np.eye(2)*0.00001
 
         self.max_j_th=0.4
 

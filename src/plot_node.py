@@ -19,7 +19,7 @@ from collections import deque
 
 # q = Queue(maxsize=3)
 q_x_gps, q_y_gps = deque([], maxlen=500), deque([], maxlen=500)
-q_x, q_y = deque([], maxlen=500), deque([], maxlen=500)
+q_x, q_y = deque([], maxlen=2500), deque([], maxlen=2500)
 
 
 
@@ -82,15 +82,17 @@ class a_plot:
 
         self.obs_line=[None for i in range(10)]
         for i in range(10):
-            self.obs_line[i]=self.ax.plot([0,1],[1,0],'--')[0]
+            self.obs_line[i]=self.ax.plot([0,1],[1,0],'--', color='k')[0]
         self.real_line=[None for i in range(10)]
+        self.real_tree=[None for i in range(10)]
         for i in range(10):
-            self.real_line[i]=self.ax.plot([0,1],[1,0],'-')[0] 
+            self.real_line[i]=self.ax.plot([0,1],[1,0],'-', color='b')[0] 
+            self.real_tree[i]=self.ax.plot([0,1],[1,0],'o',markersize=10, color='r')[0] 
         self.now_zone="b"
 
     
 
-    def car_position(self,x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r,q_x, q_y, q_x_gps, q_y_gps):
+    def car_position(self,x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r,q_x, q_y, q_x_gps, q_y_gps,z_hat_index):
 
 
 
@@ -108,21 +110,26 @@ class a_plot:
         for i in range(len(z_hat_d)):
             self.obs_line[i].set_visible(True)
             self.real_line[i].set_visible(True)
+            self.real_tree[i].set_visible(True)
             self.obs_line[i].set_data([x,x+z_d[i]*np.cos(z_th[i]+th+np.pi*0.5)],[y,y+z_d[i]*np.sin(z_th[i]+th+np.pi*0.5)])
             self.real_line[i].set_data([x,x+z_hat_d[i]*np.cos(z_hat_th[i]+th+np.pi*0.5)],[y,y+z_hat_d[i]*np.sin(z_hat_th[i]+th+np.pi*0.5)])
+            print(z_hat_index[i])
+            self.real_tree[i].set_data(TREE_DATA[z_hat_index[i],0],TREE_DATA[z_hat_index[i],1])
 
 
         for i in range(len(z_hat_d),len(z_d)):
             self.obs_line[i].set_visible(True)
             self.real_line[i].set_visible(False)
+            self.real_tree[i].set_visible(False)
             self.obs_line[i].set_data([x,x+z_d[i]*np.cos(z_th[i]+th+np.pi*0.5)],[y,y+z_d[i]*np.sin(z_th[i]+th+np.pi*0.5)])
 
 
         for i in range(len(z_d),10):
             self.obs_line[i].set_visible(False)
             self.real_line[i].set_visible(False)
+            self.real_tree[i].set_visible(False)
 
-        if len(z_d)==0:
+        if len(z_hat_d)==0:
             self.car_3.set_visible(False)
             self.car_3_th.set_visible(False)
         else:
@@ -144,6 +151,7 @@ class a_plot:
         for i in range(len(z_d)):
             self.ax.draw_artist(self.obs_line[i])
             self.ax.draw_artist(self.real_line[i])
+            self.ax.draw_artist(self.real_tree[i])
         self.ax.draw_artist(self.trj_lm)
         self.ax.draw_artist(self.trj_gps)
 
@@ -160,8 +168,9 @@ class a_plot:
 ARRAY_LAY2=40
 x_gps,y_gps=2767650,-352910
 x,y,th,x_pro,y_pro,th_pro,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r=2767650,-352910,0,2767650,-352910,0,[],[],[],[],[],[]
+z_hat_index=[]
 def cb_landmark_z(data):
-    global x,y,th,x_pro,y_pro,th_pro,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y
+    global x,y,th,x_pro,y_pro,th_pro,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y,z_hat_index
     d=list(data.data)
     n=int(len(d)/ARRAY_LAY2)
 
@@ -171,6 +180,7 @@ def cb_landmark_z(data):
     z_hat_d=[]
     z_hat_th=[]
     z_hat_r=[]
+    z_hat_index=[]
     x_pro=0
     y_pro=0
     th_pro=0
@@ -187,6 +197,7 @@ def cb_landmark_z(data):
             x_pro=d[ARRAY_LAY2*i+13]
             y_pro=d[ARRAY_LAY2*i+14]
             th_pro=d[ARRAY_LAY2*i+15]
+            z_hat_index.append(int(d[ARRAY_LAY2*i]-1))
     for i in range(n):
         if d[ARRAY_LAY2*i]<0:
             z_d.append(d[ARRAY_LAY2*i+2])
@@ -229,7 +240,7 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         # print(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r)
         t=time.time()
-        a.car_position(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y, q_x_gps, q_y_gps)
+        a.car_position(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y, q_x_gps, q_y_gps,z_hat_index)
         # print("plot time",time.time()-t)
         rate.sleep()
     # for i in range(10):
