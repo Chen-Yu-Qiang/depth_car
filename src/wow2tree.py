@@ -164,6 +164,7 @@ if __name__=="__main__":
     rospy.init_node("depth_to_tree", anonymous=True)
     rospy.Subscriber("/wow/trunk_info", Trunkset, cbTrunkset,queue_size=1, buff_size=2**24)
     # rospy.Subscriber("/camera/depth/image_rect_raw", Image, cbDepth,queue_size=1, buff_size=2**24)
+        
     tree_data2_each_pub=rospy.Publisher("/tree_data2_each", Float64MultiArray,queue_size=1)
     tree_data2_together_pub=rospy.Publisher("/tree_data2_together", Float64MultiArray,queue_size=1)
 

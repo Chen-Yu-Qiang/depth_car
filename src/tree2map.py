@@ -187,21 +187,21 @@ if __name__=="__main__":
         car_x_loc=car_x-MAP_OFFSET_X
         car_y_loc=car_y-MAP_OFFSET_Y
 
-        map_rgb=cv2.cvtColor(map*30, cv2.COLOR_GRAY2BGR)
-        map_rgb=depth2map.draw_arrowed(car_x_loc*1000,car_y_loc*1000,car_theta,map_rgb)
-        car1.add_car(car_x_loc*1000,car_y_loc*1000,car_theta)
+        # map_rgb=cv2.cvtColor(map*30, cv2.COLOR_GRAY2BGR)
+        # map_rgb=depth2map.draw_arrowed(car_x_loc*1000,car_y_loc*1000,car_theta,map_rgb)
+        # car1.add_car(car_x_loc*1000,car_y_loc*1000,car_theta)
 
-        map_rgb=car1.add_img(map_rgb)
+        # map_rgb=car1.add_img(map_rgb)
         
         
-        map_rgb_small=cv2.resize(map_rgb, (1000,1000))
-        cv2.imshow("map",map_rgb_small)
+        # map_rgb_small=cv2.resize(map_rgb, (1000,1000))
+        # cv2.imshow("map",map_rgb_small)
         # if AA%30==0:
         #     cv2.imwrite("map/"+str(AA)+".png",map_rgb)
         # if AA%5==0:
         #     cv2.imwrite("each/"+str(AA)+".png",image)     
 
-        cv2.waitKey(1)
+        # cv2.waitKey(1)
 
         
         AA+=1
