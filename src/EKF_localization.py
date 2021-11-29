@@ -156,7 +156,7 @@ class EKF_localization:
         self.Qt[2][2]=10**(2)
         self.Qt2=np.eye(3)
         self.Qt2[2][2]=10.0**(-2)
-        self.Qt_ang=0.0001
+        self.Qt_ang=0.01
         self.Qt_utm=np.eye(2)*0.00001
 
         self.max_j_th=0.4
@@ -246,6 +246,11 @@ class EKF_localization:
             print("Delta too big")
             return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
         else:
+            print("self.u ",self.u)
+            print("delta ",delta)
+            print("K ",K)
+            print("inv(S) ",np.linalg.inv(S))
+
             self.u=self.u+delta
             self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
             return i,j_k,Z,z_hat,delta

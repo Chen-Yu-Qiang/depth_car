@@ -30,7 +30,7 @@
     <remap from="base_scan" to="scan"/>
   </node>
 
-<node pkg="mapping_explorer" type="trunk_center_from_ls.py" name="trunk_center_from_ls" output="screen"/>
+<node pkg="mapping_explorer" type="trunk_center_from_ls.py" name="trunk_center_from_ls"/>
 <node pkg="depth_car" type="wow2tree.py" name="wow2tree" output="screen"/>
 <node pkg="depth_car" type="tree2map.py" name="tree2map" output="screen"/>
 <node pkg="depth_car" type="landmark_ekf_ros.py" name="landmark_ekf_ros" output="screen"/>

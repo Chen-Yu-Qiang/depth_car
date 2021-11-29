@@ -17,6 +17,7 @@ from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import Twist
 from mapping_explorer.msg import Trunkset, Trunkinfo, Correspondence
 
+
 from collections import deque
 
 # q = Queue(maxsize=3)
@@ -47,10 +48,9 @@ class a_plot:
             self.fig, self.ax = plt.subplots(1, 1,dpi=120,figsize=(10,10))
         self.ax.set_aspect('equal')
         self.mode=mode
-
         gps_init=rospy.wait_for_message("/gps_utm", Twist)
         # print("!!!!!!!!!!!!!!!!!!1")
-        if (gps_init.linear.y*(-1.0))<352875:
+        if (gps_init.linear.x)>2767690:
             # for H
             self.ax.set_xlim(352840,352870)
             self.ax.set_ylim(2767700,2767735)
@@ -61,8 +61,6 @@ class a_plot:
             self.ax.set_ylim(2767645,2767690)
             self.now_zone="b"
         # self.ax.hold(True)
-        self.ax.set_xlim(352840,352910)
-        self.ax.set_ylim(2767650,2767745)         
         x, y, th= 352910,2767650,0
         
         self.ax.plot(TREE_DATA[:,0], TREE_DATA[:,1], 'x', color='g', markersize=5)[0]
@@ -78,8 +76,7 @@ class a_plot:
             self.ax.text(TREE_DATA[j,0]+1,TREE_DATA[j,1],str(j),fontsize=20, color='k')
         self.ax.tick_params(axis="x", labelsize=20)
         self.ax.tick_params(axis="y", labelsize=20)
-        self.ax.grid(True,which='major',axis='both')
-        self.ax.grid(True,which='minor',axis='both')
+        self.ax.grid(True,which='both',axis='both')
 
 
         plt.show(False)
@@ -91,17 +88,17 @@ class a_plot:
 
 
         r=0.1
-        self.car_2 = self.ax.plot(x, y, 'o',markersize=20, color='yellow', markeredgecolor='k')[0]
+        self.car_2 = self.ax.plot(x, y, 'o',markersize=25, color='yellow', markeredgecolor='k')[0]
         self.car_1 = self.ax.plot(x, y, 'o',markersize=20, color='lightblue', markeredgecolor='k')[0]
-        self.car_1_th = self.ax.plot([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)], '-',linewidth=5)[0]
+        self.car_1_th = self.ax.plot([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)], '-',linewidth=5, color='r')[0]
 
         r=0.1
-        self.car_3 = self.ax.plot(x, y, 'o', markersize=20,)[0]
-        self.car_3_th = self.ax.plot([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)], '-',linewidth=5)[0]
+        self.car_3 = self.ax.plot(x, y, 'o', markersize=20,color='lightgreen')[0]
+        self.car_3_th = self.ax.plot([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)], '-', linewidth=5, color='r')[0]
 
         self.trj_lm=self.ax.plot([],[],'-')[0]
         self.trj_gps=self.ax.plot([],[],'-')[0]
-        self.corres=self.ax.text(352840,2767700,'',fontsize=14, color='k')
+        self.corres=self.ax.text(352842,2767702,'',fontsize=14, color='k')
 
         self.obs_line=[None for i in range(10)]
         for i in range(10):
@@ -114,11 +111,7 @@ class a_plot:
         self.now_zone="b"
 
     def save_fig(self):
-
-        if sys.version[0]=='2':
-            self.fig.savefig('/home/yuqiang/211125/' + datetime.now().strftime("%d-%m-%Y %H:%M:%S")+'.png',)
-        elif sys.version[0]=='3':
-            self.fig.savefig('/home/ncslaber/110-1/211125_localTest/z_hat/' + datetime.now().strftime("%d-%m-%Y_%H:%M:%S")+'.png',)
+        self.fig.savefig('/home/ncslaber/110-1/211125_localTest/z_hat/' + datetime.now().strftime("%d-%m-%Y_%H:%M:%S")+'.png',)
 
     def car_position(self,x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r,q_x, q_y, q_x_gps, q_y_gps,z_hat_index,correspondence):
         
@@ -149,7 +142,11 @@ class a_plot:
             self.obs_line[i].set_visible(True)
             self.real_line[i].set_visible(False)
             self.real_tree[i].set_visible(False)
-            self.obs_line[i].set_data([x,x+z_d[i]*np.cos(z_th[i]+th+np.pi*0.5)],[y,y+z_d[i]*np.sin(z_th[i]+th+np.pi*0.5)])
+            if self.mode==3:
+                self.obs_line[i].set_data([x_pro,x_pro+z_d[i]*np.cos(z_th[i]+th+np.pi*0.5)],[y_pro,y_pro+z_d[i]*np.sin(z_th[i]+th+np.pi*0.5)])
+                print(x_pro,y_pro)
+            else:
+                self.obs_line[i].set_data([x,x+z_d[i]*np.cos(z_th[i]+th+np.pi*0.5)],[y,y+z_d[i]*np.sin(z_th[i]+th+np.pi*0.5)])
 
 
         for i in range(len(z_d),10):
@@ -166,13 +163,51 @@ class a_plot:
             self.car_3.set_data(x_pro, y_pro)
             self.car_3_th.set_data([x_pro,x_pro+r*np.cos(th_pro+np.pi*0.5)],[y_pro,y_pro+r*np.sin(th_pro+np.pi*0.5)])
 
+        if self.mode==1:
+            self.car_1.set_visible(False)
+            self.car_1_th.set_visible(False)
+            self.car_2.set_visible(True)
+            self.car_3.set_visible(False)
+            self.car_3_th.set_visible(False)
+            self.trj_lm.set_visible(False)
+            self.trj_gps.set_visible(True)
+            for i in range(10):
+                self.obs_line[i].set_visible(False)
+                self.real_line[i].set_visible(False)
+                self.real_tree[i].set_visible(False)
+        if self.mode==2:
+            self.car_1.set_visible(True)
+            self.car_1_th.set_visible(True)
+            self.car_2.set_visible(False)
+            self.car_3.set_visible(False)
+            self.car_3_th.set_visible(False)
+            self.trj_lm.set_visible(True)
+            self.trj_gps.set_visible(False)
+            for i in range(len(z_d)):
+                self.obs_line[i].set_visible(True)
+                self.real_line[i].set_visible(True)
+                self.real_tree[i].set_visible(True)
+        if self.mode==3:
+            self.car_1.set_visible(False)
+            self.car_1_th.set_visible(False)
+            self.car_2.set_visible(False)
+            self.car_3.set_visible(True)
+            self.car_3_th.set_visible(True)
+            self.trj_lm.set_visible(True)
+            self.trj_gps.set_visible(False)
+            for i in range(len(z_d)):
+                self.obs_line[i].set_visible(True)
+                self.real_line[i].set_visible(True)
+                self.real_tree[i].set_visible(True)
+        for i in range(10):
+            self.real_line[i].set_visible(False)
         # restore background
         self.fig.canvas.draw()
         self.fig.canvas.restore_region(self.background)
 
         # redraw just the points
-        self.ax.draw_artist(self.car_1)
         self.ax.draw_artist(self.car_2)
+        self.ax.draw_artist(self.car_1)
         self.ax.draw_artist(self.car_3)
         self.ax.draw_artist(self.car_1_th)
         self.ax.draw_artist(self.car_3_th)
@@ -183,7 +218,6 @@ class a_plot:
         self.ax.draw_artist(self.trj_lm)
         self.ax.draw_artist(self.trj_gps)
         self.ax.draw_artist(self.corres)
-
 
 
         # fill in the axes rectangle
@@ -200,8 +234,11 @@ x_gps,y_gps=352910,2767650
 x,y,th,x_pro,y_pro,th_pro,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r=2767650,-352910,0,2767650,-352910,0,[],[],[],[],[],[]
 z_hat_index=[]
 correspondence=[]
+np_z_hat, np_z = np.array([[]]), np.array([[]])
+
 def cb_landmark_z(data):
     global x,y,th,x_pro,y_pro,th_pro,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y,z_hat_index,correspondence
+    global np_z, np_z_hat
     d=list(data.data)
     n=int(len(d)/ARRAY_LAY2)
 
@@ -216,6 +253,9 @@ def cb_landmark_z(data):
     y_pro=0
     th_pro=0
 
+    z_hat_set=[]
+    z_set=[]
+
     # print("d:",d)
     for i in range(n):
         if d[ARRAY_LAY2*i]>0:
@@ -225,10 +265,21 @@ def cb_landmark_z(data):
             z_hat_d.append(d[ARRAY_LAY2*i+5])
             z_hat_th.append(d[ARRAY_LAY2*i+6])
             z_hat_r.append(d[ARRAY_LAY2*i+7])
-            x_pro=d[ARRAY_LAY2*i+13]
-            y_pro=d[ARRAY_LAY2*i+14]
+            x_pro=d[ARRAY_LAY2*i+14]* (-1)
+            y_pro=d[ARRAY_LAY2*i+13] 
             th_pro=d[ARRAY_LAY2*i+15]
             z_hat_index.append(int(d[ARRAY_LAY2*i]-1))
+
+            z_set.append(d[ARRAY_LAY2*i+2:ARRAY_LAY2*i+5])
+            z_hat_set.append(d[ARRAY_LAY2*i+5:ARRAY_LAY2*i+8])
+    
+    np_z_hat_tmp = np.asarray(z_hat_set)
+    np_z_hat = np_z_hat_tmp.T
+    # print('in cbLML z_hat #:', np_z_hat.shape)
+    np_z_tmp = np.asarray(z_set)
+    np_z = np_z_tmp.T
+    # print('in cbLML z_ #:', np_z.shape)
+
     for i in range(n):
         if d[ARRAY_LAY2*i]<0:
             z_d.append(d[ARRAY_LAY2*i+2])
@@ -252,7 +303,7 @@ def cb_gps(data):
     q_y_gps.append(y_gps)
 
 def cb_lm(data):
-    global x,y,th, q_x, q_y
+    global x,y,th
     x=data.linear.y*(-1.0)
     y=data.linear.x
     th=data.angular.z
@@ -271,15 +322,28 @@ if __name__ == '__main__':
     gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,queue_size=1)
     lm_sub=rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1)
     subTrunk = rospy.Subscriber("/wow/trunk_info", Trunkset, cbTrunk,queue_size=1)
-    rate=rospy.Rate(30)
-    a=a_plot()
-
+    rate=rospy.Rate(10)
+    all_plot=a_plot()
+    gps_plot=a_plot(1)
+    lm_plot=a_plot(2)
+    pro_plot=a_plot(3)
+    start = time.time()
     while not rospy.is_shutdown():
         # print(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r)
         t=time.time()
-
-        a.car_position(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y, q_x_gps, q_y_gps,z_hat_index,correspondence)
-        # a.save_fig()
+        all_plot.car_position(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y, q_x_gps, q_y_gps,z_hat_index,correspondence)
+        gps_plot.car_position(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y, q_x_gps, q_y_gps,z_hat_index,correspondence)
+        lm_plot.car_position(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y, q_x_gps, q_y_gps,z_hat_index,correspondence)
+        pro_plot.car_position(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y, q_x_gps, q_y_gps,z_hat_index,correspondence)
+        
+        # if (time.time() - start) > 1:
+        #     a.save_fig()
+            # robot_utm_urs = np.array( [x_gps,y_gps,0] )
+            # robot_utm_postirior = np.array( [x_pro,y_pro,0] )
+            # bel_pose = np.array( [x,y,0] )
+            # print("TREE_DATA:", correspondence)
+            # plot_utils.plot_traj_for_demo(TREE_DATA.T, np_z_hat, np_z, bel_pose, correspondence, robot_utm_urs, robot_utm_postirior)  
+            # start = time.time()
         # print("plot time",time.time()-t)
         rate.sleep()
     # for i in range(10):

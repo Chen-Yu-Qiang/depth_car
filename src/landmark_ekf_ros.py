@@ -81,11 +81,11 @@ def cb_array(data):
 
 
             l=[j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0],delta_z[0][0],delta_z[1][0],delta_z[2][0],new_Z[0,0]*0.001,new_Z[1,0]*0.001,new_car_x,new_car_y,new_car_th]
-            print("is tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
+            # print("is tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
     
         else:
             l=[j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0],-1,-1,-1,-1,-1,-1,-1,-1]
-            print("no tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
+            # print("no tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
         d_out[ARRAY_LAY2*i:ARRAY_LAY2*i+11]=l
         d_out[ARRAY_LAY2*i+20:ARRAY_LAY2*i+20+ARRAY_LAY1]=d[ARRAY_LAY1*i:ARRAY_LAY1*(i+1)]
     
@@ -110,15 +110,15 @@ def cb_pos(data):
     ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
 v=0
 omg=0
-ekf.Qt[0][0]=10**(-100)
-ekf.Qt[1][1]=0.2*10**(-100)
-ekf.Qt[2][2]=10**(-100)
-ekf.max_j_th=2.5
+ekf.Qt[0][0]=10**(100)
+ekf.Qt[1][1]=0.2*10**(100)
+ekf.Qt[2][2]=10**(100)
+ekf.max_j_th=2.0
 def cb_cmd(data):
     global v,omg
     v=data.linear.x
     omg=data.angular.z
-    print("v= ",v,"  , omg= ",omg)
+    # print("v= ",v,"  , omg= ",omg)
     if abs(v)<(10**(-4)) and abs(omg)<(10**(-4)):
         ekf.Qt[0][0]=10**(-3)
         ekf.Qt[1][1]=0.2*10**(-3)
@@ -126,10 +126,10 @@ def cb_cmd(data):
         ekf.max_j_th=2.0
 
     else:
-        ekf.Qt[0][0]=10**(-1)
-        ekf.Qt[1][1]=10**(-1)*0.2
-        ekf.Qt[2][2]=10**(-1)
-        ekf.max_j_th=2.5
+        ekf.Qt[0][0]=10**(-3)
+        ekf.Qt[1][1]=10**(-3)*0.2
+        ekf.Qt[2][2]=10**(-3)
+        ekf.max_j_th=2.0
 
 
     # ekf.Qt[0][0]=10**(-100)
