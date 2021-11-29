@@ -138,6 +138,8 @@ def gps_2_utm_Z(a):
 
     return z
 
+def get_dis(ax,ay,bx,by):
+    return np.sqrt((ax-bx)**2+(ay-by)**2)
 
 
 def set_u_init(x,y,theta):
@@ -246,10 +248,10 @@ class EKF_localization:
             print("Delta too big")
             return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
         else:
-            print("self.u ",self.u)
-            print("delta ",delta)
-            print("K ",K)
-            print("inv(S) ",np.linalg.inv(S))
+        #     print("self.u ",self.u)
+        #     print("delta ",delta)
+        #     print("K ",K)
+        #     print("inv(S) ",np.linalg.inv(S))
 
             self.u=self.u+delta
             self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
@@ -327,7 +329,7 @@ class EKF_localization:
             w[1][1]=0.5
             w[2][2]=1.0
             j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
-            print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0])
+            # print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0])
             if j_k>max_j:
                 max_j=j_k[0][0]
                 max_j_index=i+1
