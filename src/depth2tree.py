@@ -65,6 +65,7 @@ def list2ROSmsg_dthr(d_list,th_list,r_list,car_x,car_y,car_theta,AA,puber):
         a[i*ARRAY_LAY1+8]=AA
         a[i*ARRAY_LAY1+9]=NnW[0,i]
         a[i*ARRAY_LAY1+10]=NnW[1,i]
+        a[i*ARRAY_LAY1+11]=-100
     b=Float64MultiArray(data=a)
     
     b.layout.dim=[MultiArrayDimension()]
@@ -92,6 +93,7 @@ def list2ROSmsg_dthr_each(d_list,th_list,r_list,car_x,car_y,car_theta,AA,puber):
         a[8]=AA
         a[9]=NnW[0,i]*0.001
         a[10]=NnW[1,i]*0.001
+        a[11]=-100
 
         
         b=Float64MultiArray(data=a)

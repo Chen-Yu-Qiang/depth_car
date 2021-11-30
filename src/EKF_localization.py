@@ -33,12 +33,12 @@ def get_Vt(v,omg,theta):
 
 def get_Mt(v,omg):
     Mt=np.zeros((2,2))
-    alpha1=0.5
-    alpha2=0.05
-    alpha3=0.05
-    alpha4=0.5
-    Mt[0][0]=alpha1*v*v+alpha2*omg*omg
-    Mt[1][1]=alpha3*v*v+alpha4*omg*omg
+    alpha1=1.0
+    alpha2=0.1
+    alpha3=0.1
+    alpha4=1.0
+    Mt[0][0]=alpha1*v*v+alpha2*omg*omg+0.01
+    Mt[1][1]=alpha3*v*v+alpha4*omg*omg+0.01
     return Mt
 
 def get_ut(ut_1,v,omg):
