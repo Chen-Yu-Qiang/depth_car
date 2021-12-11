@@ -14,14 +14,15 @@ import rospy
 import sys
 import time
 from std_msgs.msg import Float64MultiArray
+from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from mapping_explorer.msg import Trunkset, Trunkinfo, Correspondence
 
 from collections import deque
 
 # q = Queue(maxsize=3)
-q_x_gps, q_y_gps = deque([], maxlen=500), deque([], maxlen=500)
-q_x, q_y = deque([], maxlen=2500), deque([], maxlen=2500)
+# q_x_gps, q_y_gps = deque([], maxlen=500), deque([], maxlen=500)
+# q_x, q_y = deque([], maxlen=2500), deque([], maxlen=2500)
 
 
 
@@ -37,6 +38,59 @@ elif sys.version[0]=='3':
     tree_data_np = np.load('/home/ncslaber/center_list_all.npy')
 TREE_DATA=tree_data_np
 # print(tree_data_np)
+
+class data_set:
+    def __init__(self):
+        self.d={}
+    
+    def get(self,n):
+        if n in self.d:
+            return self.d[n]
+        else:
+            return -1
+
+    def set(self,n,v):
+        self.d[n]=v
+    
+    def append(self,n,v):
+        if (n in self.d) and (type(self.d[n]) is list):
+            self.d[n].append(v)
+        else:
+            self.d[n]=[v]
+
+class car_obj:
+    def __init__(self,plot_obj,r=0.1,c="red",trj_en=1):
+        self.x=0
+        self.y=0
+        self.th=0
+        self.trj_data_x=deque([], maxlen=2500)
+        self.trj_data_y=deque([], maxlen=2500)
+        self.trj_data_th=deque([], maxlen=2500)
+
+
+        self.r=r
+        self.trj_en=trj_en
+        self.ax_obj=plot_obj.ax.plot([], [], 'o',markersize=10, color=c, markeredgecolor='k')[0]
+        self.ax_th_obj=plot_obj.ax.plot([],[], '-',linewidth=5)[0]
+        self.ax_trj_obj=plot_obj.ax.plot([],[],'-')[0]
+
+
+    def update(self,x,y,th):
+        r=self.r
+        self.ax_obj.set_data(x,y)
+        self.ax_th_obj.set_data([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)])
+        if self.trj_en:
+            self.trj_data_x.append(x)
+            self.trj_data_y.append(y)
+            self.trj_data_th.append(th)
+            self.ax_trj_obj.set_data(self.trj_data_x,self.trj_data_y)
+
+
+    def update2(self,plot_obj):    
+        plot_obj.ax.draw_artist(self.ax_obj)
+        plot_obj.ax.draw_artist(self.ax_th_obj)
+        plot_obj.ax.draw_artist(self.ax_trj_obj)
+
 
 
 class a_plot:
@@ -61,8 +115,8 @@ class a_plot:
             self.ax.set_ylim(2767645,2767690)
             self.now_zone="b"
         # self.ax.hold(True)
-        # self.ax.set_xlim(352840,352910)
-        # self.ax.set_ylim(2767650,2767745)         
+        self.ax.set_xlim(352840,352910)
+        self.ax.set_ylim(2767650,2767745)         
         x, y, th= 352910,2767650,0
         
         self.ax.plot(TREE_DATA[:,0], TREE_DATA[:,1], 'x', color='g', markersize=5)[0]
@@ -79,7 +133,6 @@ class a_plot:
         self.ax.tick_params(axis="x", labelsize=20)
         self.ax.tick_params(axis="y", labelsize=20)
         self.ax.grid(True,which='major',axis='both')
-        self.ax.grid(True,which='minor',axis='both')
 
 
         plt.show(False)
@@ -91,13 +144,16 @@ class a_plot:
 
 
         r=0.1
-        self.car_2 = self.ax.plot(x, y, 'o',markersize=20, color='yellow', markeredgecolor='k')[0]
-        self.car_1 = self.ax.plot(x, y, 'o',markersize=20, color='lightblue', markeredgecolor='k')[0]
+        self.car_2 = self.ax.plot(x, y, 'o',markersize=10, color='yellow', markeredgecolor='k')[0]
+        self.car_1 = self.ax.plot(x, y, 'o',markersize=10, color='lightblue', markeredgecolor='k')[0]
         self.car_1_th = self.ax.plot([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)], '-',linewidth=5)[0]
 
         r=0.1
-        self.car_3 = self.ax.plot(x, y, 'o', markersize=20,)[0]
+        self.car_3 = self.ax.plot(x, y, 'o', markersize=10,)[0]
         self.car_3_th = self.ax.plot([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)], '-',linewidth=5)[0]
+
+
+
 
         self.trj_lm=self.ax.plot([],[],'-')[0]
         self.trj_gps=self.ax.plot([],[],'-')[0]
@@ -128,8 +184,40 @@ class a_plot:
         elif sys.version[0]=='3':
             self.fig.savefig('/home/ncslaber/110-1/211125_localTest/z_hat/' + datetime.now().strftime("%d-%m-%Y_%H:%M:%S.%f")+'.png',)
 
-    def car_position(self,x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r,q_x, q_y, q_x_gps, q_y_gps,z_hat_index,correspondence, resid_scalar,mean_error):
+        #def car_position(self,x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r,q_x, q_y, q_x_gps, q_y_gps,z_hat_index,correspondence, resid_scalar,mean_error):
+    def car_position(self,ds):
         
+        x=ds.get("x")
+        y=ds.get("y")
+        th=ds.get("th")
+        x_fm=ds.get("x_fm")
+        y_fm=ds.get("y_fm")
+        th_fm=ds.get("th_fm")
+        x_pro=ds.get("x_pro")
+        y_pro=ds.get("y_pro")
+        th_pro=ds.get("th_pro")
+        x_gps=ds.get("x_gps")
+        y_gps=ds.get("y_gps")
+        z_d=ds.get("z_d")
+        z_th=ds.get("z_th")
+        z_r=ds.get("z_r")
+        z_hat_d=ds.get("z_hat_d")
+        z_hat_th=ds.get("z_hat_th")
+        z_hat_r=ds.get("z_hat_r")
+        q_x=ds.get("q_x")
+        q_y=ds.get("q_y")
+        q_x_gps=ds.get("q_x_gps")
+        q_y_gps=ds.get("q_y_gps")
+        z_hat_index=ds.get("z_hat_index")
+        correspondence=ds.get("correspondence")
+        resid_scalar=ds.get("resid_scalar")
+        mean_error=ds.get("mean_error")
+
+
+
+
+
+
                
         self.corres.set_text(str(correspondence)+"\nResid = "+str(round(resid_scalar,2))+" m\nMatch Error(RMS)= "+str(round(mean_error,3))+" m")
 
@@ -138,6 +226,7 @@ class a_plot:
         self.car_1_th.set_data([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)])
 
         self.car_2.set_data(x_gps, y_gps)
+
 
 
         self.trj_lm.set_data(q_x, q_y)
@@ -204,80 +293,143 @@ class a_plot:
 
 
 ARRAY_LAY2=40
-x_gps,y_gps=352910,2767650
-x,y,th,x_pro,y_pro,th_pro,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r=2767650,-352910,0,2767650,-352910,0,[],[],[],[],[],[]
-z_hat_index=[]
-correspondence=[]
+# x_gps,y_gps=352910,2767650
+# x,y,th,x_pro,y_pro,th_pro,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r=2767650,-352910,0,2767650,-352910,0,[],[],[],[],[],[]
+# z_hat_index=[]
+# correspondence=[]
+
+
+ds=data_set()
+ds.set("q_x",deque([], maxlen=2500))
+ds.set("q_y",deque([], maxlen=2500))
+ds.set("q_x_gps",deque([], maxlen=500))
+ds.set("q_y_gps",deque([], maxlen=500))
+
 def cb_landmark_z(data):
-    global x,y,th,x_pro,y_pro,th_pro,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y,z_hat_index,correspondence
+    # global x,y,th,x_pro,y_pro,th_pro,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y,z_hat_index,correspondence
     d=list(data.data)
     n=int(len(d)/ARRAY_LAY2)
 
-    z_d=[]
-    z_th=[]
-    z_r=[]
-    z_hat_d=[]
-    z_hat_th=[]
-    z_hat_r=[]
-    z_hat_index=[]
-    x_pro=0
-    y_pro=0
-    th_pro=0
+    # z_d=[]
+    # z_th=[]
+    # z_r=[]
+    # z_hat_d=[]
+    # z_hat_th=[]
+    # z_hat_r=[]
+    # z_hat_index=[]
+    # x_pro=0
+    # y_pro=0
+    # th_pro=0
+
+    ds.set("z_d",[])
+    ds.set("z_th",[])
+    ds.set("z_r",[])
+    ds.set("z_hat_d",[])
+    ds.set("z_hat_th",[])
+    ds.set("z_hat_r",[])
+    ds.set("z_hat_index",[])
+    ds.set("x_pro",0)
+    ds.set("y_pro",0)
+    ds.set("th_pro",0)
+
+
+
 
     # print("d:",d)
     for i in range(n):
         if d[ARRAY_LAY2*i]>0 and i<10:
-            z_d.append(d[ARRAY_LAY2*i+2])
-            z_th.append(d[ARRAY_LAY2*i+3])
-            z_r.append(d[ARRAY_LAY2*i+4])
-            z_hat_d.append(d[ARRAY_LAY2*i+5])
-            z_hat_th.append(d[ARRAY_LAY2*i+6])
-            z_hat_r.append(d[ARRAY_LAY2*i+7])
-            x_pro=d[ARRAY_LAY2*i+13]
-            y_pro=d[ARRAY_LAY2*i+14]
-            th_pro=d[ARRAY_LAY2*i+15]
-            z_hat_index.append(int(d[ARRAY_LAY2*i]-1))
+            # z_d.append(d[ARRAY_LAY2*i+2])
+            # z_th.append(d[ARRAY_LAY2*i+3])
+            # z_r.append(d[ARRAY_LAY2*i+4])
+            # z_hat_d.append(d[ARRAY_LAY2*i+5])
+            # z_hat_th.append(d[ARRAY_LAY2*i+6])
+            # z_hat_r.append(d[ARRAY_LAY2*i+7])
+            # x_pro=d[ARRAY_LAY2*i+13]
+            # y_pro=d[ARRAY_LAY2*i+14]
+            # th_pro=d[ARRAY_LAY2*i+15]
+            # z_hat_index.append(int(d[ARRAY_LAY2*i]-1))
+            ds.append("z_d",d[ARRAY_LAY2*i+2])
+            ds.append("z_th",d[ARRAY_LAY2*i+3])
+            ds.append("z_r",d[ARRAY_LAY2*i+4])
+            ds.append("z_hat_d",d[ARRAY_LAY2*i+5])
+            ds.append("z_hat_th",d[ARRAY_LAY2*i+6])
+            ds.append("z_hat_r",d[ARRAY_LAY2*i+7])
+            ds.set("x_pro",d[ARRAY_LAY2*i+13])
+            ds.set("y_pro",d[ARRAY_LAY2*i+14])
+            ds.append("z_hat_index",int(d[ARRAY_LAY2*i]-1))
+
     for i in range(n):
         if d[ARRAY_LAY2*i]<0:
-            z_d.append(d[ARRAY_LAY2*i+2])
-            z_th.append(d[ARRAY_LAY2*i+3])
-            z_r.append(d[ARRAY_LAY2*i+4])
+            # z_d.append(d[ARRAY_LAY2*i+2])
+            # z_th.append(d[ARRAY_LAY2*i+3])
+            # z_r.append(d[ARRAY_LAY2*i+4])
+            ds.append("z_d",d[ARRAY_LAY2*i+2])
+            ds.append("z_th",d[ARRAY_LAY2*i+3])
+            ds.append("z_r",d[ARRAY_LAY2*i+4])
 
     if len(d):
-        y=d[25]
-        x=d[26]*(-1.0)
-        th=d[27]
-        q_x.append(x)
-        q_y.append(y)
+        # y=d[25]
+        # x=d[26]*(-1.0)
+        # th=d[27]
+
+        ds.set("x",d[26]*(-1.0))
+        ds.set("y",d[25])
+        ds.set("th",d[27])
+        ds.append("q_x",d[26]*(-1.0))
+        ds.append("q_y",d[25])
+        # q_x.append(x)
+        # q_y.append(y)
 
 
 def cb_gps(data):
-    global x_gps,y_gps, q_x_gps, q_y_gps
-    x_gps=data.linear.y*(-1.0)
-    y_gps=data.linear.x
-    
-    q_x_gps.append(x_gps)
-    q_y_gps.append(y_gps)
+    # global x_gps,y_gps, q_x_gps, q_y_gps
+    # x_gps=data.linear.y*(-1.0)
+    # y_gps=data.linear.x
+    ds.set("x_gps",data.linear.y*(-1.0))
+    ds.set("y_gps",data.linear.x)
+    ds.append("q_x_gps",data.linear.y*(-1.0))
+    ds.append("q_y_gps",data.linear.x)
 
 def cb_lm(data):
-    global x,y,th, q_x, q_y
-    x=data.linear.y*(-1.0)
-    y=data.linear.x
-    th=data.angular.z
-    q_x.append(x)
-    q_y.append(y)
+    # global x,y,th, q_x, q_y
+    # x=data.linear.y*(-1.0)
+    # y=data.linear.x
+    # th=data.angular.z
+    # q_x.append(x)
+    # q_y.append(y)
+
+
+    ds.set("x",data.linear.y*(-1.0))
+    ds.set("y",data.linear.x)
+    ds.set("th",data.angular.z)
+    ds.set("x_fm",data.linear.y*(-1.0)+1.0)
+    ds.set("y_fm",data.linear.x+1.0)
+    ds.set("th_fm",data.angular.z)
+    ds.append("q_x",data.linear.y*(-1.0))
+    ds.append("q_y",data.linear.x)
+
+
 resid_scalar=-1
 def cbTrunk(msg):
-    global correspondence, resid_scalar
-    correspondence = msg.match
-    resid_scalar = msg.residuals
+    # global correspondence, resid_scalar
+    # correspondence = msg.match
+    # resid_scalar = msg.residuals
+    ds.set("correspondence",msg.match)
+    ds.set("resid_scalar",msg.residuals)
+
+
 mean_error=0
 def cb_landmark_error(msg):
-    global mean_error
+    # global mean_error
     d=list(msg.data)
     if len(d):
-        mean_error = d[1]
+        # mean_error = d[1]
+        ds.set("mean_error",d[1])
     
+
+
+
+
 if __name__ == '__main__':
 
     print("Python version: ",sys.version)
@@ -294,8 +446,12 @@ if __name__ == '__main__':
         # print(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r)
         t=time.time()
 
-        a.car_position(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y, q_x_gps, q_y_gps,z_hat_index,correspondence, resid_scalar,mean_error)
-        a.save_fig()
+        # a.car_position(x,y,th,x_pro,y_pro,th_pro,x_gps,y_gps,z_d,z_th,z_r,z_hat_d,z_hat_th,z_hat_r, q_x, q_y, q_x_gps, q_y_gps,z_hat_index,correspondence, resid_scalar,mean_error)
+        try:
+            a.car_position(ds)
+        except:
+            pass
+        # a.save_fig()
         # print("plot time",time.time()-t)
         rate.sleep()
     # for i in range(10):

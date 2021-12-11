@@ -36,8 +36,8 @@ def get_Mt(v,omg):
     alpha1=1.0
     alpha2=0.1
     alpha3=0.1
-    alpha4=1.0
-    Mt[0][0]=alpha1*v*v+alpha2*omg*omg+0.01
+    alpha4=2.0
+    Mt[0][0]=alpha1*v*v+alpha2*omg*omg+0.1
     Mt[1][1]=alpha3*v*v+alpha4*omg*omg+0.01
     return Mt
 
@@ -182,11 +182,11 @@ class EKF_localization:
         w=np.zeros((3,3))
         w[0][0]=0.1
         w[1][1]=1.0
-        w[2][2]=0.4
+        w[2][2]=1.0
         if np.cos(z_error[1][0])<0:
             return 0
         j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
-        j_k=np.exp((-0.2)*z_error[0][0]*z_error[0][0])+np.exp((-2.0)*z_error[1][0]*z_error[1][0])+np.exp((-1.5)*z_error[2][0]*z_error[2][0])
+        j_k=np.exp((-0.5)*z_error[0][0]*z_error[0][0])+np.exp((-2.0)*z_error[1][0]*z_error[1][0])+np.exp((-1.5)*z_error[2][0]*z_error[2][0])
         return j_k     
 
 
@@ -209,7 +209,7 @@ class EKF_localization:
             z_error=Z-z_hat_k
 
             j_k=[[self.get_like(z_error)]]
-            # print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0],z_hat_k[2][0])
+            print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0],z_hat_k[2][0])
             if j_k[0][0]>max_j and not ((i+1) in lock_tree) :
                 max_j=j_k[0][0]
                 max_j_index=i+1
@@ -244,7 +244,7 @@ class EKF_localization:
         if j_k<self.max_j_th:
             print("likelihood too small")
             return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
-        elif abs(delta[0][0])>5 or abs(delta[1][0])>5 or abs(delta[0][0])>1.0:
+        elif abs(delta[0][0])>0.4 or abs(delta[1][0])>0.4 or abs(delta[2][0])>0.1:
             print("Delta too big")
             return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
         else:

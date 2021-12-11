@@ -64,7 +64,8 @@ def cb_array(data):
 
     dis=0
     n_in=0
-    for i in range(n):
+    # for i in range(n):
+    for i in range(min(n,1)):
         if n>=2 and (d[i*ARRAY_LAY1+11]>-1):
             j,max_j,Z,z_hat,delta_z=ekf.update_landmark_know_cor(EKF_localization.list_2_landmark_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
             print(d[i*ARRAY_LAY1+11]+1)
@@ -132,23 +133,23 @@ def cb_cmd(data):
     v=data.linear.x
     omg=data.angular.z
     # print("v= ",v,"  , omg= ",omg)
-    if abs(v)<(10**(-4)) and abs(omg)<(10**(-4)):
-        ekf.Qt[0][0]=10**(-2)
-        ekf.Qt[1][1]=0.2*10**(-2)
-        ekf.Qt[2][2]=10**(-2)
-        ekf.max_j_th=2.0
+    # if abs(v)<(10**(-4)) and abs(omg)<(10**(-4)):
+    #     ekf.Qt[0][0]=10**(-1)
+    #     ekf.Qt[1][1]=0.2*10**(-1)
+    #     ekf.Qt[2][2]=10**(-1)
+    #     ekf.max_j_th=1
 
-    else:
-        ekf.Qt[0][0]=10**(-2)
-        ekf.Qt[1][1]=10**(-2)*0.2
-        ekf.Qt[2][2]=10**(-2)
-        ekf.max_j_th=2.0
+    # else:
+    #     ekf.Qt[0][0]=10**(-1)
+    #     ekf.Qt[1][1]=10**(-1)*0.2
+    #     ekf.Qt[2][2]=10**(-1)
+    #     ekf.max_j_th=1
 
 
-    # ekf.Qt[0][0]=10**(-100)
-    # ekf.Qt[1][1]=10**(-100)*0.2
-    # ekf.Qt[2][2]=10**(-100)
-    # ekf.max_j_th=1.0
+    ekf.Qt[0][0]=10**(-2)
+    ekf.Qt[1][1]=10**(-1)
+    ekf.Qt[2][2]=10**(-2)
+    ekf.max_j_th=1.0
 
 def cb_gps(data):
     global x0_loc,y0_loc,x0,y0
@@ -170,8 +171,8 @@ if __name__=="__main__":
     rospy.init_node("landmark_ekf", anonymous=True)
     rospy.Subscriber("/tree_data_together", Float64MultiArray,cb_array)
     rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd)
-    rospy.Subscriber("/my_filtered_map", Odometry, cb_pos)
-    # rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos)
+    # rospy.Subscriber("/my_filtered_map", Odometry, cb_pos)
+    rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos)
     rospy.Subscriber("/navsat/fix", NavSatFix, cb_gps)
     gps_utm_out=rospy.Publisher("gps_utm",Twist,queue_size=1)
     ekf_out=rospy.Publisher("landmark",Twist,queue_size=1)
