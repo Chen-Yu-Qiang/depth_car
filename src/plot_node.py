@@ -15,7 +15,7 @@ import sys
 import time
 from std_msgs.msg import Float64MultiArray
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist,PoseStamped
 from mapping_explorer.msg import Trunkset, Trunkinfo, Correspondence
 
 import TREEDATA
@@ -70,7 +70,7 @@ class car_obj:
         self.trj_en=trj_en
         self.theta_en=theta_en
         self.ax_obj=plot_obj.ax.plot([], [], 'o',markersize=ms, color=c, markeredgecolor=ec)[0]
-        
+
         if self.theta_en:        
             self.ax_th_obj=plot_obj.ax.plot([],[], '-',linewidth=5)[0]
         if trj_en:
@@ -178,6 +178,7 @@ class a_plot:
         self.car2_obj=car_obj(self,c='yellow',theta_en=0)
         self.car1_obj=car_obj(self,c='lightblue')
         self.car3_obj=car_obj(self,trj_en=0)
+        self.car4_obj=car_obj(self,c='k',trj_en=1)
 
 
         if self.now_zone=="h":
@@ -235,7 +236,8 @@ class a_plot:
         resid_scalar=ds.get("resid_scalar")
         mean_error=ds.get("mean_error")
 
-
+        x_utm_waypoint=ds.get("waypoint_utm_x")
+        y_utm_waypoint=ds.get("waypoint_utm_y")
 
 
 
@@ -248,6 +250,10 @@ class a_plot:
         
         self.car2_obj.update(x_gps, y_gps, 0)
         self.car1_obj.update(x, y, th)
+        self.car4_obj.update(x_utm_waypoint, y_utm_waypoint, 0)
+
+
+
 
         for i in range(len(z_hat_d)):
             self.obs_line[i].set_visible(True)
@@ -304,6 +310,9 @@ class a_plot:
         self.car2_obj.draw_artist(self)
         self.car1_obj.draw_artist(self)
         self.car3_obj.draw_artist(self)
+        self.car4_obj.draw_artist(self)
+
+
 
 
         # fill in the axes rectangle
@@ -399,7 +408,9 @@ def cb_landmark_error(msg):
         ds.set("mean_error",d[1])
     
 
-
+def cbGoal(msg):
+    ds.append("waypoint_utm_x",msg.pose.position.x)
+    ds.append("waypoint_utm_y",msg.pose.position.y)
 
 
 if __name__ == '__main__':
@@ -411,6 +422,7 @@ if __name__ == '__main__':
     gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,queue_size=1)
     lm_sub=rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1)
     subTrunk = rospy.Subscriber("/wow/trunk_info", Trunkset, cbTrunk,queue_size=1)
+    subGoal = rospy.Subscriber("/wow_utm_waypoint", PoseStamped, cbGoal,queue_size=1)
     rate=rospy.Rate(10)
     a=a_plot()
 

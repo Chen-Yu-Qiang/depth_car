@@ -6,6 +6,7 @@ import matplotlib
 matplotlib.use('TKAgg')
 from matplotlib import pyplot as plt
 from datetime import datetime
+import numpy as np
 
 import rospy
 import sys
@@ -27,7 +28,11 @@ class data_set:
             return self.d[n]
         else:
             return -1
-
+    def get_last(self,n):
+        if n in self.d and len(self.d[n])>0:
+            return self.d[n][-1]
+        else:
+            return -1
     def set(self,n,v):
         self.d[n]=v
     
@@ -41,16 +46,21 @@ class data_set:
 class a_plot:
     def __init__(self):
         if sys.version[0]=='2':
-            self.fig, ((self.ax1,self.ax2),(self.ax3,self.ax4)) = plt.subplots(1, 2,dpi=70,figsize=(10,5))
+            self.fig, ((self.ax1,self.ax2),(self.ax3,self.ax4)) = plt.subplots(2, 2,dpi=70,figsize=(10,10))
         elif sys.version[0]=='3':
-            self.fig, ((self.ax1,self.ax2),(self.ax3,self.ax4)) = plt.subplots(1, 2,dpi=120,figsize=(10,10))
+            self.fig, ((self.ax1,self.ax2),(self.ax3,self.ax4)) = plt.subplots(2, 2,dpi=120,figsize=(10,10))
         
 
         self.ax1.set_aspect('equal')
         self.ax2.set_aspect('equal')
 
+
         self.ax2.set_xlim(-0.0002,0)
         self.ax2.set_ylim(-0.00014,0.00002)
+        self.ax3.set_xlim(-30,0)
+        self.ax3.set_ylim(-1,1)
+        self.ax4.set_xlim(-30,0)
+        self.ax4.set_ylim(-1,1)
 
         plt.show(False)
         plt.draw()
@@ -66,6 +76,9 @@ class a_plot:
         self.mag_line=self.ax2.plot([],[],'-', color='b')[0] 
         self.cmd_v_line=self.ax3.plot([],[],'-', color='b')[0] 
         self.cmd_omg_line=self.ax3.plot([],[],'-', color='r')[0] 
+        self.sigma_x_line=self.ax4.plot([],[],'-', color='b')[0] 
+        self.sigma_y_line=self.ax4.plot([],[],'-', color='r')[0] 
+        self.sigma_th_line=self.ax4.plot([],[],'-', color='g')[0] 
 
 
         self.corres=self.ax1.text(0,0,'',fontsize=14, color='k')
@@ -80,13 +93,13 @@ class a_plot:
 
     def car_position(self,ds):
         
-        mag_x=ds.get("mag_x")
-        mag_y=ds.get("mag_y")
+
         gps_lat=ds.get("gps_lat")
         gps_lon=ds.get("gps_lon")
         gps_qual=ds.get("gps_qual")
-        cmd_v=ds.get("cmd_v")
-        cmd_omg=ds.get("cmd_omg")
+        cmd_v=ds.get_last("cmd_v")
+        cmd_omg=ds.get_last("cmd_omg")
+
         self.corres.set_text(datetime.now().strftime("%Y/%m/%d %H:%M:%S.%f")+\
             "\n\n GPS(lat WD) = "+str(gps_lat)+\
             "\n GPS(lon JD) = "+str(gps_lon)+\
@@ -94,22 +107,52 @@ class a_plot:
             "\n\n CMD v = "+str(cmd_v)+\
             "\n CMD omg = "+str(cmd_omg)+\
             "\n ")
-        self.mag_line.set_data(mag_x,mag_y)
+        
+        
+        self.mag_line.set_data(ds.get("mag_x"),ds.get("mag_y"))
 
+        c_t=list(np.array(ds.get("cmd_t"))-time.time())
+
+        cmd_v=ds.get("cmd_v")
+        cmd_omg=ds.get("cmd_omg")
+        cmd_t=ds.get("cmd_t")
+        self.cmd_v_line.set_data(cmd_t,cmd_v)
+        # self.cmd_omg_line.set_data(c_t,ds.get("cmd_omg"))
+        # self.sigma_x_line.set_data(ds.get("sigma_th"),ds.get("sigma_x"))
+        # self.sigma_y_line.set_data(ds.get("sigma_th"),ds.get("sigma_y"))
+        # self.sigma_th_line.set_data(ds.get("sigma_th"),ds.get("sigma_th"))
+
+
+
+        # self.cmd_v_line.set_data([-1,-2],[1,0.5])
+        # self.cmd_omg_line.set_data([-1,-2],[1,0.5])
+        # self.sigma_x_line.set_data([-1,-2],[1,0.5])
+        # self.sigma_y_line.set_data([-1,-2],[1,0.5])
+        # self.sigma_th_line.set_data([-1,-2],[1,0.5])
 
         # restore background
         self.fig.canvas.draw()
-        self.fig.canvas.restore_region(self.background)
+        self.fig.canvas.restore_region(self.background1)
         self.fig.canvas.restore_region(self.background2)
+        self.fig.canvas.restore_region(self.background3)
+        self.fig.canvas.restore_region(self.background4)
 
         # redraw just the points
         self.ax1.draw_artist(self.corres)
         self.ax2.draw_artist(self.mag_line)
+        self.ax3.draw_artist(self.cmd_v_line)
+        self.ax3.draw_artist(self.cmd_omg_line)
+        self.ax4.draw_artist(self.sigma_x_line)
+        self.ax4.draw_artist(self.sigma_y_line)
+        self.ax4.draw_artist(self.sigma_th_line)
+
 
 
         # fill in the axes rectangle
         self.fig.canvas.blit(self.ax1.bbox)
         self.fig.canvas.blit(self.ax2.bbox)
+        self.fig.canvas.blit(self.ax3.bbox)
+        self.fig.canvas.blit(self.ax4.bbox)
 
 
 ds=data_set()
@@ -127,10 +170,24 @@ def cb_gps(data):
 def cb_gps_qual(data):
     ds.set("gps_qual",data.data)
 
-
+ds.set("cmd_v",deque([], maxlen=500))
+ds.set("cmd_omg",deque([], maxlen=500))
+ds.set("cmd_t",deque([], maxlen=500))
 def cb_cmd(data):
-    ds.set("cmd_v",data.linear.x)
-    ds.set("cmd_omg",data.angular.z)
+    ds.append("cmd_v",data.linear.x)
+    ds.append("cmd_omg",data.angular.z)
+    ds.append("cmd_t",time.time())
+
+
+ds.set("sigma_x",deque([], maxlen=500))
+ds.set("sigma_y",deque([], maxlen=500))
+ds.set("sigma_th",deque([], maxlen=500))
+ds.set("sigma_t",deque([], maxlen=500))
+def cb_sigma(data):
+    ds.append("sigma_x",data.linear.x)
+    ds.append("sigma_y",data.linear.y)
+    ds.append("sigma_th",data.angular.z)
+    ds.append("sigma_t",time.time())
 
 if __name__ == '__main__':
 

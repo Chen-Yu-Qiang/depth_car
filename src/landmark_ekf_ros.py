@@ -91,7 +91,16 @@ def cb_array(data):
     ekf_out_landmark_z.publish(m) 
 
 t0=time.time()
+
+#=Auto first point=========================
 x0,y0=0,0
+#==========================================
+
+#=for fixed point strat====================
+# x0=2767671.53
+# y0=-352851.478
+#==========================================
+
 x0_loc,y0_loc=0,0
 def cb_pos(data):
     global x0_loc,y0_loc,x0,y0
@@ -160,6 +169,7 @@ if __name__=="__main__":
     gps_utm_out=rospy.Publisher("gps_utm",Twist,queue_size=1)
     ekf_out=rospy.Publisher("landmark",Twist,queue_size=1)
     ekf_out2=rospy.Publisher("landmark_odom",Odometry,queue_size=1)
+    ekf_out3=rospy.Publisher("landmark_local",Twist,queue_size=1)
     ekf_out_sigma=rospy.Publisher("landmark_sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("landmark_z",Float64MultiArray,queue_size=1)
     ekf_out_landmark_error=rospy.Publisher("landmark_error",Float64MultiArray,queue_size=1)
@@ -184,6 +194,15 @@ if __name__=="__main__":
         ekf_out2_msg.pose.pose.orientation.z=ang_q[2]
         ekf_out2_msg.pose.pose.orientation.w=ang_q[3]
         ekf_out2.publish(ekf_out2_msg)
+
+        if x0==0 and y0==0:
+            pass
+        else:
+            ekf_out3_msg=Twist()
+            ekf_out3_msg.linear.x=ekf.u[0][0]-x0
+            ekf_out3_msg.linear.y=ekf.u[1][0]-y0
+            ekf_out3_msg.angular.z=ekf.u[2][0]
+            ekf_out3.publish(ekf_out3_msg)
 
         ekf_out_sigma_msg=Twist()
         ekf_out_sigma_msg.linear.x=ekf.sigma[0][0]
