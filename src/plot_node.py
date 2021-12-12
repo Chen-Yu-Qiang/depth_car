@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-from re import L
+from re import L, TEMPLATE
 import numpy as np
 import time
 import random
 import matplotlib
 matplotlib.use('TKAgg')
 from matplotlib import pyplot as plt
-
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from datetime import datetime
 
 import rospy
@@ -18,6 +18,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from mapping_explorer.msg import Trunkset, Trunkinfo, Correspondence
 
+import TREEDATA
 from collections import deque
 
 
@@ -26,8 +27,7 @@ from collections import deque
 
 TREE_DATA=[]
 if sys.version[0]=='2':
-    TREE_DATA=[[2767694.6000474878,-352852.16121769784,0.3],[2767687.550047488,-352862.78621769784,0.35],[2767694.800047488,-352880.1862176978,0.4],[2767700.5000474877,-352880.1362176978,0.2],[2767698.510047488,-352881.72621769784,0.2],[2767699.6500474876,-352882.8862176978,0.3],[2767697.483380821,-352883.4362176978,0.2],[2767701.3750474877,-352884.3862176978,0.15],[2767699.300047488,-352884.9362176978,0.45],[2767707.6516908277,-352848.88876166823,0.75],[2767730.1016908274,-352849.9387616683,0.15],[2767717.2516908273,-352851.1887616683,0.1],[2767721.1016908274,-352853.78876166826,0.25],[2767710.1016908274,-352856.08876166824,0.2],[2767718.1516908277,-352857.08876166824,0.25],[2767718.4016908277,-352859.48876166827,0.2],[2767729.522274709,-352863.2814219437,0.2],[2767711.022274709,-352863.5314219437,0.2],[2767730.122274709,-352870.4314219437,0.4],[2767730.222274709,-352878.5314219437,0.2],[2767702.022274709,-352888.08142194373,0.3],[2767716.822274709,-352889.6314219437,0.8],[2767726.122274709,-352889.58142194373,0.3],[2767719.072274709,-352889.8814219437,0.35],[2767727.572274709,-352890.33142194373,0.4],[2767725.9222747087,-352891.1314219437,0.35],[2767707.822274709,-352891.7314219437,0.65],[2767727.872274709,-352892.3564219437,0.225],[2767727.272274709,-352899.1814219437,0.2],[2767707.9222747087,-352904.83142194373,0.15],[2767701.572274709,-352905.1814219437,0.3],[2767670.0378069477,-352897.688491822,0.2],[2767664.7878069477,-352903.338491822,0.25],[2767651.7422344387,-352847.6228367216,0.75],[2767653.5922344383,-352851.3728367216,0.3],[2767654.3422344383,-352864.8728367216,0.35],[2767650.7422344387,-352871.07283672155,0.25],[2767697.109163938,-352891.04801889224,0.3],[2767696.909163938,-352893.5980188922,0.35],[2767652.6987745943,-352877.0904607297,0.23333333333333334],[2767654.3321079277,-352881.17379406304,0.5],[2767661.882107928,-352884.4737940631,0.55],[2767656.6821079277,-352888.62379406305,0.35],[2767660.3321079277,-352891.54879406304,0.3],[2767659.9321079277,-352895.2237940631,0.7],[2767665.3321079277,-352894.92379406304,0.35],[2767661.9321079277,-352899.92379406304,0.4],[2767666.382107928,-352886.4737940631,0.55]]
-        
+    TREE_DATA=TREEDATA.TREE_DATA
     tree_data_np=np.array(TREE_DATA)
     a=tree_data_np[:,1].copy()
     tree_data_np[:,1]=tree_data_np[:,0]
@@ -112,14 +112,22 @@ class a_plot:
         # print("!!!!!!!!!!!!!!!!!!1")
         if (gps_init.linear.x)>2767690:
             # for H
-            self.ax.set_xlim(352840,352870)
+            self.ax.set_xlim(352840,352875)
             self.ax.set_ylim(2767700,2767735)
             self.now_zone="h"
         else:
-            # for B
-            self.ax.set_xlim(352860,352905)
-            self.ax.set_ylim(2767645,2767690)
-            self.now_zone="b"
+            if (gps_init.linear.y)< (-352865):
+                # for B
+                self.ax.set_xlim(352860,352905)
+                self.ax.set_ylim(2767645,2767690)
+                self.now_zone="b"
+            else:
+                # for I
+                self.ax.set_xlim(352835,352865)
+                self.ax.set_ylim(2767655,2767690)
+                self.now_zone="i"
+
+
         # self.ax.hold(True)
         # self.ax.set_xlim(352840,352910)
         # self.ax.set_ylim(2767650,2767745)         
@@ -136,9 +144,23 @@ class a_plot:
             neg_bd=np.asarray(neg_bd)
             self.ax.plot(neg_bd[:,0], neg_bd[:,1], 'o', color='k', markersize=3)[0]
             self.ax.text(TREE_DATA[j,0]+1,TREE_DATA[j,1],str(j),fontsize=20, color='k')
-        self.ax.tick_params(axis="x", labelsize=20)
-        self.ax.tick_params(axis="y", labelsize=20)
-        self.ax.grid(True,which='major',axis='both')
+
+
+
+        xminorLocator = MultipleLocator(1)
+        yminorLocator = MultipleLocator(1)
+        self.ax.xaxis.set_minor_locator(xminorLocator)
+        self.ax.yaxis.set_minor_locator(yminorLocator)
+
+        xmajorLocator = MultipleLocator(5)
+        ymajorLocator = MultipleLocator(5)
+        self.ax.xaxis.set_major_locator(xmajorLocator)
+        self.ax.yaxis.set_major_locator(ymajorLocator)
+
+        self.ax.xaxis.grid(True, which='minor',color="silver")
+        self.ax.xaxis.grid(True, which='major',color="k")
+        self.ax.yaxis.grid(True, which='minor',color="silver")
+        self.ax.yaxis.grid(True, which='major',color="k")
 
 
         plt.show(False)
@@ -153,12 +175,14 @@ class a_plot:
         self.car3_obj=car_obj(self,trj_en=0)
 
 
-        if (gps_init.linear.x)>2767690:
-            # for H
+        if self.now_zone=="h":
             self.corres=self.ax.text(352840,2767700,'',fontsize=14, color='k')
-        else:
-            # for B
+        elif self.now_zone=="b":
             self.corres=self.ax.text(352860,2767645,'',fontsize=14, color='k')
+        elif self.now_zone=="i":
+            self.corres=self.ax.text(352835,2767655,'',fontsize=14, color='k')
+        else:
+            self.corres=self.ax.text(352835,2767655,'',fontsize=14, color='k')
 
 
         self.obs_line=[None for i in range(10)]
