@@ -33,10 +33,10 @@ def get_Vt(v,omg,theta):
 
 def get_Mt(v,omg):
     Mt=np.zeros((2,2))
-    alpha1=1.0
+    alpha1=0.5
     alpha2=0.1
-    alpha3=0.1
-    alpha4=2.0
+    alpha3=0.05
+    alpha4=0.1
     Mt[0][0]=alpha1*v*v+alpha2*omg*omg+0.1
     Mt[1][1]=alpha3*v*v+alpha4*omg*omg+0.01
     return Mt
@@ -83,9 +83,9 @@ def a_landmark_xz(sigma,Qt,mx,my,ms,u):
     z_hat[1][0]=(mx-u[0][0])*np.cos(u[2][0])+(my-u[1][0])*np.sin(u[2][0])
     z_hat[2][0]=ms
     H=np.zeros((3,3))
-    H[0][0]=-np.sin(u[2][0])
-    H[0][1]=np.cos(u[2][0])
-    H[0][2]=(mx-u[0][0])*np.cos(u[2][0])-(my-u[1][0])*np.sin(u[2][0])
+    H[0][0]=np.sin(u[2][0])
+    H[0][1]=-np.cos(u[2][0])
+    H[0][2]=(mx-u[0][0])*np.cos(u[2][0])*(-1.0)-(my-u[1][0])*np.sin(u[2][0])
     H[1][0]=-np.cos(u[2][0])
     H[1][1]=-np.sin(u[2][0])
     H[1][2]=(-1.0)*(mx-u[0][0])*np.sin(u[2][0])+(my-u[1][0])*np.cos(u[2][0])
@@ -112,7 +112,13 @@ def list_2_landmark_xz_Z(a):
     z[1][0]=a[1]
     z[2][0]=a[2]
     return z
-
+def list_2_landmark_xz_Z_together(a,i):
+    ARRAY_LAY1=20
+    z=np.zeros((3,1))
+    z[0][0]=a[ARRAY_LAY1*i+0]
+    z[1][0]=a[ARRAY_LAY1*i+1]
+    z[2][0]=a[ARRAY_LAY1*i+2]
+    return z
 
 def Odom_2_position_Z(a,x0,y0):
     z=np.zeros((3,1))
@@ -158,10 +164,10 @@ class EKF_localization:
         self.Qt[2][2]=10**(2)
         self.Qt2=np.eye(3)
         self.Qt2[2][2]=10.0**(-2)
-        self.Qt_ang=0.01
-        self.Qt_utm=np.eye(2)*0.00001
+        self.Qt_ang=0.1
+        self.Qt_utm=np.eye(2)
 
-        self.max_j_th=0.4
+        self.max_j_th=4.0
 
         self.u=u_init
         tree_data_1900=[[2.5,12.5,0.5],[3.5,5.0,0.5],[4.0,-1.0,0.5],[9.0,10.0,0.5],[9.5,6.0,0.5],[10.0,3.0,0.5],[13.5,8.0,0.5]]
@@ -186,7 +192,7 @@ class EKF_localization:
         if np.cos(z_error[1][0])<0:
             return 0
         j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
-        j_k=np.exp((-0.5)*z_error[0][0]*z_error[0][0])+np.exp((-2.0)*z_error[1][0]*z_error[1][0])+np.exp((-1.5)*z_error[2][0]*z_error[2][0])
+        j_k=np.exp((-0.5)*z_error[0][0]*z_error[0][0])+2.0*np.exp((-2.0)*z_error[1][0]*z_error[1][0])+1.7*np.exp((-1.5)*z_error[2][0]*z_error[2][0])
         return j_k     
 
 
@@ -209,7 +215,7 @@ class EKF_localization:
             z_error=Z-z_hat_k
 
             j_k=[[self.get_like(z_error)]]
-            print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0],z_hat_k[2][0])
+            # print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0],z_hat_k[2][0])
             if j_k[0][0]>max_j and not ((i+1) in lock_tree) :
                 max_j=j_k[0][0]
                 max_j_index=i+1
