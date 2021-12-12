@@ -41,9 +41,9 @@ class data_set:
 class a_plot:
     def __init__(self):
         if sys.version[0]=='2':
-            self.fig, (self.ax1,self.ax2) = plt.subplots(1, 2,dpi=70,figsize=(10,5))
+            self.fig, ((self.ax1,self.ax2),(self.ax3,self.ax4)) = plt.subplots(1, 2,dpi=70,figsize=(10,5))
         elif sys.version[0]=='3':
-            self.fig, (self.ax1,self.ax2) = plt.subplots(1, 2,dpi=120,figsize=(10,10))
+            self.fig, ((self.ax1,self.ax2),(self.ax3,self.ax4)) = plt.subplots(1, 2,dpi=120,figsize=(10,10))
         
 
         self.ax1.set_aspect('equal')
@@ -58,9 +58,14 @@ class a_plot:
         
         self.background1 = self.fig.canvas.copy_from_bbox(self.ax1.bbox)
         self.background2 = self.fig.canvas.copy_from_bbox(self.ax2.bbox)
+        self.background3 = self.fig.canvas.copy_from_bbox(self.ax3.bbox)
+        self.background4 = self.fig.canvas.copy_from_bbox(self.ax4.bbox)
+
 
 
         self.mag_line=self.ax2.plot([],[],'-', color='b')[0] 
+        self.cmd_v_line=self.ax3.plot([],[],'-', color='b')[0] 
+        self.cmd_omg_line=self.ax3.plot([],[],'-', color='r')[0] 
 
 
         self.corres=self.ax1.text(0,0,'',fontsize=14, color='k')
@@ -136,6 +141,7 @@ if __name__ == '__main__':
     rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix,cb_gps,queue_size=1)
     rospy.Subscriber("/gps/qual", UInt8,cb_gps_qual,queue_size=1)
     rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd,queue_size=1)
+    rospy.Subscriber("landmark_sigma",Twist,cb_sigma,queue_size=1)
     rate=rospy.Rate(10)
     a=a_plot()
 

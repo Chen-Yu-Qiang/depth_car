@@ -70,33 +70,38 @@ class car_obj:
         self.trj_en=trj_en
         self.theta_en=theta_en
         self.ax_obj=plot_obj.ax.plot([], [], 'o',markersize=ms, color=c, markeredgecolor=ec)[0]
-        self.ax_th_obj=plot_obj.ax.plot([],[], '-',linewidth=5)[0]
-        if theta_en:
-            self.ax_trj_obj=plot_obj.ax.plot([],[],'-')[0]
+        
+        if self.theta_en:        
+            self.ax_th_obj=plot_obj.ax.plot([],[], '-',linewidth=5)[0]
+        if trj_en:
+            self.ax_trj_obj=plot_obj.ax.plot([],[],'-', color=c)[0]
 
 
     def update(self,x,y,th):
         r=self.r
         self.ax_obj.set_data(x,y)
-        self.ax_th_obj.set_data([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)])
+
+        if self.theta_en:
+            self.ax_th_obj.set_data([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)])
         if self.trj_en:
             self.trj_data_x.append(x)
             self.trj_data_y.append(y)
             self.trj_data_th.append(th)
-            if self.theta_en:
-                self.ax_trj_obj.set_data(self.trj_data_x,self.trj_data_y)
+            self.ax_trj_obj.set_data(self.trj_data_x,self.trj_data_y)
 
 
     def draw_artist(self,plot_obj):    
         plot_obj.ax.draw_artist(self.ax_obj)
-        plot_obj.ax.draw_artist(self.ax_th_obj)
         if self.theta_en:
+            plot_obj.ax.draw_artist(self.ax_th_obj)
+        if self.trj_en:
             plot_obj.ax.draw_artist(self.ax_trj_obj)
 
     def set_visible(self,v):
         self.ax_obj.set_visible(v)
-        self.ax_th_obj.set_visible(v)
         if self.theta_en:
+            self.ax_th_obj.set_visible(v)
+        if self.trj_en:
             self.ax_trj_obj.set_visible(v)
 
 class a_plot:
@@ -241,8 +246,8 @@ class a_plot:
         r=1
 
         
-        self.car1_obj.update(x, y, th)
         self.car2_obj.update(x_gps, y_gps, 0)
+        self.car1_obj.update(x, y, th)
 
         for i in range(len(z_hat_d)):
             self.obs_line[i].set_visible(True)
@@ -296,8 +301,8 @@ class a_plot:
             self.ax.draw_artist(self.real_line[i])
             self.ax.draw_artist(self.real_tree[i])
         self.ax.draw_artist(self.corres)
-        self.car1_obj.draw_artist(self)
         self.car2_obj.draw_artist(self)
+        self.car1_obj.draw_artist(self)
         self.car3_obj.draw_artist(self)
 
 
