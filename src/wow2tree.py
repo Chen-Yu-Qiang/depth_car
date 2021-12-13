@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/wowpython
 
 from numpy.lib.type_check import imag
 import rospy

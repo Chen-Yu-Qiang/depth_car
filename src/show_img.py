@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/wowpython
 
 #%%
 '''math tool'''

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/wowpython
 
 
 import rospy
@@ -25,6 +25,7 @@ use_landmark=-1
 
 ARRAY_LAY1=20
 ARRAY_LAY2=40
+x0,y0=0,0
 def cb_array(data):
     global use_landmark
     d=list(data.data)
@@ -93,7 +94,8 @@ def cb_array(data):
 t0=time.time()
 
 
-x0,y0=0,0
+
+
 
 
 
@@ -108,32 +110,15 @@ def cb_pos(data):
     ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
 v=0
 omg=0
-ekf.Qt[0][0]=10**(100)
-ekf.Qt[1][1]=0.2*10**(100)
-ekf.Qt[2][2]=10**(100)
-ekf.max_j_th=2.0
+ekf.Qt[0][0]=10**(-2)
+ekf.Qt[1][1]=0.2*10**(-2)
+ekf.Qt[2][2]=10**(-2)
+ekf.max_j_th=0.45
 def cb_cmd(data):
     global v,omg
     v=data.linear.x
     omg=data.angular.z
-    # print("v= ",v,"  , omg= ",omg)
-    # if abs(v)<(10**(-4)) and abs(omg)<(10**(-4)):
-    #     ekf.Qt[0][0]=10**(-1)
-    #     ekf.Qt[1][1]=0.2*10**(-1)
-    #     ekf.Qt[2][2]=10**(-1)
-    #     ekf.max_j_th=1
 
-    # else:
-    #     ekf.Qt[0][0]=10**(-1)
-    #     ekf.Qt[1][1]=10**(-1)*0.2
-    #     ekf.Qt[2][2]=10**(-1)
-    #     ekf.max_j_th=1
-
-
-    ekf.Qt[0][0]=10**(-2)
-    ekf.Qt[1][1]=10**(-2)
-    ekf.Qt[2][2]=10**(-1)
-    ekf.max_j_th=0.45
 
 def cb_gps(data):
 
@@ -148,17 +133,11 @@ def cb_gps(data):
 
 
 
-
-#=Auto first point=========================
 def cb_x0y0(data):
     global x0,y0
     x0=data.linear.x
     y0=data.linear.y
-#==========================================
-#=for fixed point strat====================
-# x0=2767671.53
-# y0=-352851.478-1.0
-#==========================================
+
 
 
 if __name__=="__main__":
@@ -170,7 +149,12 @@ if __name__=="__main__":
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos)
     # rospy.Subscriber("/navsat/fix", NavSatFix, cb_gps)
     rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix, cb_gps)
-    rospy.Subscriber("utm2local_org", Twist,cb_x0y0)
+
+    if int(rospy.get_param("Enable_Fixed_Point_Strat",default=0))==0:
+        rospy.Subscriber("utm2local_org", Twist,cb_x0y0)
+    else:
+        x0=2767671.53
+        y0=-352851.478-1.0
 
     gps_utm_out=rospy.Publisher("gps_utm",Twist,queue_size=1)
     ekf_out=rospy.Publisher("landmark",Twist,queue_size=1)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/wowpython
 
 from re import L
 import numpy as np

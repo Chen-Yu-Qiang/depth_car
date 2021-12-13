@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/wowpython
 
 from re import L, TEMPLATE
 import numpy as np
@@ -112,7 +112,6 @@ class a_plot:
             self.fig, self.ax = plt.subplots(1, 1,dpi=120,figsize=(10,10))
         self.ax.set_aspect('equal')
         self.mode=mode
-
         gps_init=rospy.wait_for_message("/gps_utm", Twist)
         # print("!!!!!!!!!!!!!!!!!!1")
         if (gps_init.linear.x)>2767690:

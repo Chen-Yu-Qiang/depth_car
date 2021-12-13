@@ -27,13 +27,14 @@
 
 <param name="XZ_MODE" value="1" />
 <node pkg="depth_car" type="landmark_ekf_ros.py" name="landmark_ekf_ros" output="screen"/>
-<node pkg="depth_car" type="plot_node.py" name="plot_node" output="screen"/>
+<!-- <node pkg="depth_car" type="plot_node.py" name="plot_node" output="screen"/> -->
 <node pkg="depth_car" type="plot_node2.py" name="plot_node2" output="screen"/>
+<node pkg="depth_car" type="plot_node3.py" name="plot_node3" output="screen"/>
 
-<param name="Fixed_Point_Strat" value="0" />
+<param name="Enable_Fixed_Point_Strat" value="0" />
 <node pkg="depth_car" type="utm2local_org_node.py" name="utm2local_org_node" output="screen"/>
 
 
-<node pkg="mapping_explorer" type="tf_transformer_map2.py" name="tf_transformer_map2"/>
+<node pkg="mapping_explorer" type="tf_transformer_map2.py" name="tf_transformer_map2" output="screen"/>
 
 </launch>

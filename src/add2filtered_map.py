@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/wowpython
 
 import rospy
 from sensor_msgs.msg import Imu

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/wowpython
 
 from logging import info
 from numpy.core.numeric import NaN
