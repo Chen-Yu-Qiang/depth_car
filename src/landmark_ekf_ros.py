@@ -92,26 +92,19 @@ def cb_array(data):
 
 t0=time.time()
 
-#=Auto first point=========================
+
 x0,y0=0,0
-#==========================================
 
-#=for fixed point strat====================
-# x0=2767671.53
-# y0=-352851.478
-#==========================================
 
-x0_loc,y0_loc=0,0
+
+
 def cb_pos(data):
-    global x0_loc,y0_loc,x0,y0
+    global x0,y0
     if x0==0 and y0==0:
-       z=EKF_localization.Odom_2_position_Z(data,0,0)
-       x0_loc=z[0][0]
-       y0_loc=z[1][0]
+        pass
     else:
         pass
         # ekf.update_positon(EKF_localization.Odom_2_position_Z(data,x0,y0))
-        # ekf.update_positon(EKF_localization.Odom_2_position_Z(data,2767715.47,-352874.09))
     ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
 v=0
 omg=0
@@ -143,18 +136,29 @@ def cb_cmd(data):
     ekf.max_j_th=0.45
 
 def cb_gps(data):
-    global x0_loc,y0_loc,x0,y0
+
     z=EKF_localization.gps_2_utm_Z(data)
-    if time.time()-t0<100:
+    if time.time()-t0<10:
         ekf.update_gps_utm(z)
-    if x0==0 and y0==0 and not(x0_loc==0 or y0_loc==0):
-        x0=z[0][0]-x0_loc
-        y0=z[1][0]-y0_loc
-        print("x0="+str(x0)+" y0="+str(y0))
+
     gps_utm_out_msg=Twist()
     gps_utm_out_msg.linear.x=z[0][0]
     gps_utm_out_msg.linear.y=z[1][0]
     gps_utm_out.publish(gps_utm_out_msg)
+
+
+
+
+#=Auto first point=========================
+def cb_x0y0(data):
+    global x0,y0
+    x0=data.linear.x
+    y0=data.linear.y
+#==========================================
+#=for fixed point strat====================
+# x0=2767671.53
+# y0=-352851.478-1.0
+#==========================================
 
 
 if __name__=="__main__":
@@ -166,6 +170,8 @@ if __name__=="__main__":
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos)
     # rospy.Subscriber("/navsat/fix", NavSatFix, cb_gps)
     rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix, cb_gps)
+    rospy.Subscriber("utm2local_org", Twist,cb_x0y0)
+
     gps_utm_out=rospy.Publisher("gps_utm",Twist,queue_size=1)
     ekf_out=rospy.Publisher("landmark",Twist,queue_size=1)
     ekf_out2=rospy.Publisher("landmark_odom",Odometry,queue_size=1)

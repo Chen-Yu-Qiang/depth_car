@@ -57,19 +57,19 @@ class a_plot:
 
         self.ax2.set_xlim(-0.0002,0)
         self.ax2.set_ylim(-0.00014,0.00002)
-        self.ax3.set_xlim(-30,0)
-        self.ax3.set_ylim(-1,1)
-        self.ax4.set_xlim(-30,0)
-        self.ax4.set_ylim(-1,1)
+        # self.ax3.set_xlim(-30,0)
+        # self.ax3.set_ylim(-1,1)
+        # self.ax4.set_xlim(-30,0)
+        # self.ax4.set_ylim(-1,1)
 
         plt.show(False)
         plt.draw()
         
         
         self.background1 = self.fig.canvas.copy_from_bbox(self.ax1.bbox)
-        self.background2 = self.fig.canvas.copy_from_bbox(self.ax2.bbox)
-        self.background3 = self.fig.canvas.copy_from_bbox(self.ax3.bbox)
-        self.background4 = self.fig.canvas.copy_from_bbox(self.ax4.bbox)
+        # self.background2 = self.fig.canvas.copy_from_bbox(self.ax2.bbox)
+        # self.background3 = self.fig.canvas.copy_from_bbox(self.ax3.bbox)
+        # self.background4 = self.fig.canvas.copy_from_bbox(self.ax4.bbox)
 
 
 
@@ -134,25 +134,25 @@ class a_plot:
         self.fig.canvas.draw()
         self.fig.canvas.restore_region(self.background1)
         self.fig.canvas.restore_region(self.background2)
-        self.fig.canvas.restore_region(self.background3)
-        self.fig.canvas.restore_region(self.background4)
+        # self.fig.canvas.restore_region(self.background3)
+        # self.fig.canvas.restore_region(self.background4)
 
         # redraw just the points
         self.ax1.draw_artist(self.corres)
         self.ax2.draw_artist(self.mag_line)
-        self.ax3.draw_artist(self.cmd_v_line)
-        self.ax3.draw_artist(self.cmd_omg_line)
-        self.ax4.draw_artist(self.sigma_x_line)
-        self.ax4.draw_artist(self.sigma_y_line)
-        self.ax4.draw_artist(self.sigma_th_line)
+        # self.ax3.draw_artist(self.cmd_v_line)
+        # self.ax3.draw_artist(self.cmd_omg_line)
+        # self.ax4.draw_artist(self.sigma_x_line)
+        # self.ax4.draw_artist(self.sigma_y_line)
+        # self.ax4.draw_artist(self.sigma_th_line)
 
 
 
         # fill in the axes rectangle
         self.fig.canvas.blit(self.ax1.bbox)
         self.fig.canvas.blit(self.ax2.bbox)
-        self.fig.canvas.blit(self.ax3.bbox)
-        self.fig.canvas.blit(self.ax4.bbox)
+        # self.fig.canvas.blit(self.ax3.bbox)
+        # self.fig.canvas.blit(self.ax4.bbox)
 
 
 ds=data_set()
