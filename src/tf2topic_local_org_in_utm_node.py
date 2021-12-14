@@ -9,9 +9,9 @@ from geometry_msgs.msg import Twist
 
 
 if __name__ == '__main__':
-    rospy.init_node('utm2local_org_node')
+    rospy.init_node('tf2topic_local_org_in_utm_node')
     listener = tf.TransformListener()
-    a=rospy.Publisher("utm2local_org",Twist,queue_size=1)
+    a=rospy.Publisher("local_org_in_utm",Twist,queue_size=1)
     rate=rospy.Rate(10)
     while not rospy.is_shutdown():
             

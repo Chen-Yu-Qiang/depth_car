@@ -5,7 +5,7 @@ import tf
 from pyproj import Proj
 
 
-DELTA_T=0.1
+DELTA_T=0.2omk ob                                                                                                                       
 def get_Gt(v,omg,theta):
     Gt=np.eye(3)
     if abs(omg)<10**(-3):
@@ -144,6 +144,13 @@ def gps_2_utm_Z(a):
 
     return z
 
+def gps_utm_2_Z(a):
+    z=np.zeros((2,1))
+    z[0][0]=a.linear.x
+    z[1][0]=a.linear.y
+
+    return z
+
 def get_dis(ax,ay,bx,by):
     return np.sqrt((ax-bx)**2+(ay-by)**2)
 
@@ -164,16 +171,12 @@ class EKF_localization:
         self.Qt[2][2]=10**(2)
         self.Qt2=np.eye(3)
         self.Qt2[2][2]=10.0**(-2)
-        self.Qt_ang=0.1
+        self.Qt_ang=0.01
         self.Qt_utm=np.eye(2)
 
         self.max_j_th=4.0
 
         self.u=u_init
-        tree_data_1900=[[2.5,12.5,0.5],[3.5,5.0,0.5],[4.0,-1.0,0.5],[9.0,10.0,0.5],[9.5,6.0,0.5],[10.0,3.0,0.5],[13.5,8.0,0.5]]
-        tree_data_1726=[[-4.58,25.74,0.5],[-3.27,19.23,0.5],[-3.36,11.97,0.5],[2.9,23.56,0.5],[2.6,19.29,0.5],[3.15,16.94,0.5],[7.27,21.5,0.5]]
-        tree_data_1726_utm=[[2767711.3, -352849.18, 0.5], [2767712.61, -352855.69, 0.5], [2767712.52, -352862.95, 0.5], [2767718.78, -352851.36, 0.5], [2767718.48, -352855.63, 0.5], [2767719.03, -352857.98, 0.5], [2767723.15, -352853.42, 0.5]]
-        tree_data_1900_utm=[[2767710.38, -352850.58, 0.5], [2767711.38, -352858.08, 0.5], [2767711.88, -352864.08, 0.5], [2767716.88, -352853.08, 0.5], [2767717.38, -352857.08, 0.5], [2767717.88, -352860.08, 0.5], [2767721.38, -352855.08, 0.5]]
 
         self.tree_data=[]
 
@@ -271,47 +274,40 @@ class EKF_localization:
         else:
             return max_j_index,max_j,Z,z_hat,-1
 
-    # def update_landmark(self,Z):
-    #     z_hat=[]
-    #     H=[]
-    #     S=[]
-    #     j=[]
-    #     max_j_index=0
-    #     max_j=0
-    #     max_j_th=self.max_j_th
-    #     for i in range(len(self.tree_data)):
-    #         mx=self.tree_data[i][0]
-    #         my=self.tree_data[i][1]
-    #         ms=self.tree_data[i][2]
-    #         z_hat_k,H_k,S_k=a_landmark(self.sigma,self.Qt,mx,my,ms,self.u)
-    #         z_hat.append(z_hat_k)
-    #         H.append(H_k)
-    #         S.append(S_k)
-    #         z_error=Z-z_hat_k
-    #         # z_error[1][0]=z_error[1][0]*3
-    #         j_k=(np.linalg.det(2*np.pi*S_k)**(-0.5))*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
-    #         w=np.zeros((3,3))
-    #         w[0][0]=0.1
-    #         w[1][1]=0.8
-    #         w[2][2]=0.4
-    #         j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
-    #         print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0],z_hat_k[2][0])
-    #         if j_k>max_j:
-    #             max_j=j_k[0][0]
-    #             max_j_index=i+1
-        
-    #     j=max_j_index-1
-    #     if max_j_index==0 or max_j<max_j_th:
-    #         # print(max_j_index*(-1),max_j,Z,z_hat,-1)
-    #         return max_j_index*(-1),max_j,Z,z_hat[j],-1
-        
-    #     # print(j+1,max_j,Z,z_hat[j])
-    #     K=np.dot(np.dot(self.sigma,H[j].T),np.linalg.inv(S[j]))
-    #     self.u=self.u+np.dot(K,(Z-z_hat[j]))
-    #     self.sigma=np.dot((np.eye(3)-np.dot(K,H[j])),self.sigma)
-    #     return max_j_index,max_j,Z,z_hat[j],np.dot(K,(Z-z_hat[j]))
 
-    def update_landmark_xz(self,Z):
+
+    def update_landmark_xz_know_cor(self,Z,i):
+        if i<1:
+            return i,0,Z,np.zeros((3,1))*(-1.0),np.ones((3,1))*(-1.0)
+        
+        mx=self.tree_data[int(i-1)][0]
+        my=self.tree_data[int(i-1)][1]
+        ms=self.tree_data[int(i-1)][2]
+        z_hat,H,S=a_landmark_xz(self.sigma,self.Qt,mx,my,ms,self.u)
+
+        z_error=Z-z_hat
+        K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
+        delta=np.dot(K,(Z-z_hat))
+        w=np.zeros((3,3))
+        w[0][0]=0.5
+        w[1][1]=0.5
+        w[2][2]=1.0
+        if i in [48,49,50]:
+            j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
+        else:
+            j_k=-100
+        if j_k<self.max_j_th:
+            print("likelihood too small")
+            return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
+        elif abs(delta[0][0])>0.4 or abs(delta[1][0])>0.4 or abs(delta[2][0])>0.1:
+            print("Delta too big")
+            return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
+        else:        
+            self.u=self.u+delta
+            self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
+            return i,j_k,Z,z_hat,delta
+
+    def update_landmark_xz_sim(self,Z):
         z_hat=[]
         H=[]
         S=[]
@@ -351,9 +347,16 @@ class EKF_localization:
         
         # print(j+1,max_j,Z,z_hat[j])
         K=np.dot(np.dot(self.sigma,H[j].T),np.linalg.inv(S[j]))
-        self.u=self.u+np.dot(K,(Z-z_hat[j]))
-        self.sigma=np.dot((np.eye(3)-np.dot(K,H[j])),self.sigma)
         return max_j_index,max_j,Z,z_hat[j],np.dot(K,(Z-z_hat[j]))
+
+
+    def update_landmark_xz(self,Z):
+        max_j_index,max_j,_,z_hat,_=self.update_landmark_xz_sim(Z)
+        if max_j_index>0:
+            _,_,_,_,delta=self.update_landmark_xz_know_cor(Z,max_j_index)
+            return max_j_index,max_j,Z,z_hat,delta
+        else:
+            return max_j_index,max_j,Z,z_hat,-1
 
 
     def update_positon(self,Z):
@@ -374,6 +377,8 @@ class EKF_localization:
         self.u=self.u+np.dot(K,(Z-z_hat))
         self.sigma=np.dot((np.eye(3)-K),self.sigma)
         return
+
+
 
     def update_angle(self,Z):
         z_hat=self.u[2][0]

@@ -39,13 +39,16 @@ def cb_array(data):
     for i in range(n):
 
         if int(rospy.get_param('XZ_MODE')):
-            j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz(EKF_localization.list_2_landmark_xz_Z_together(data.data,i))
+            if n>=2 and (d[i*ARRAY_LAY1+11]>-1):
+                j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz_know_cor(EKF_localization.list_2_landmark_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
+                print(d[i*ARRAY_LAY1+11]+1)
+            else:
+                j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz(EKF_localization.list_2_landmark_xz_Z_together(data.data,i))
         else:
             if n>=2 and (d[i*ARRAY_LAY1+11]>-1):
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark_know_cor(EKF_localization.list_2_landmark_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
                 print(d[i*ARRAY_LAY1+11]+1)
             else:
-                # j,max_j,Z,z_hat,delta_z=ekf.update_landmark_know_cor(EKF_localization.list_2_landmark_Z_together(data.data,i),corr_list[i])
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark(EKF_localization.list_2_landmark_Z_together(data.data,i))
 
         # if j>0 and (j in[13,15,16,17,18,19,21,23]):
@@ -55,17 +58,18 @@ def cb_array(data):
             new_car_x=ekf.u[0][0]
             new_car_y=ekf.u[1][0]
             new_car_th=ekf.u[2][0]
-            # ###########use use d th r
-            # d_list=[Z[0][0]*1000]
-            # th_list=[Z[1][0]]
-            # r_list=[Z[2][0]]
-            # centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
-            # new_Z=depth2map.fromCar2World(centre_x_list,centre_z_list,new_car_x*1000,new_car_y*1000,new_car_th) # in UTM in mm
-            # dd=EKF_localization.get_dis(new_Z[0,0]*0.001,new_Z[1,0]*(-0.001),TREE_DATA[int(j-1)][0],TREE_DATA[int(j-1)][1])
 
-            # ###########use x z r
-            new_Z=depth2map.fromCar2World([Z[0][0]*1000],[Z[1][0]*1000],new_car_x*1000,new_car_y*1000,new_car_th) # in UTM in mm
-            dd=EKF_localization.get_dis(new_Z[0,0]*0.001,new_Z[1,0]*(-0.001),TREE_DATA[int(j-1)][0],TREE_DATA[int(j-1)][1])
+
+            if int(rospy.get_param('XZ_MODE')):
+                new_Z=depth2map.fromCar2World([Z[0][0]*1000],[Z[1][0]*1000],new_car_x*1000,new_car_y*1000,new_car_th) # in UTM in mm
+                dd=EKF_localization.get_dis(new_Z[0,0]*0.001,new_Z[1,0]*(-0.001),TREE_DATA[int(j-1)][0],TREE_DATA[int(j-1)][1])
+            else:
+                d_list=[Z[0][0]*1000]
+                th_list=[Z[1][0]]
+                r_list=[Z[2][0]]
+                centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
+                new_Z=depth2map.fromCar2World(centre_x_list,centre_z_list,new_car_x*1000,new_car_y*1000,new_car_th) # in UTM in mm
+                dd=EKF_localization.get_dis(new_Z[0,0]*0.001,new_Z[1,0]*(-0.001),TREE_DATA[int(j-1)][0],TREE_DATA[int(j-1)][1]) 
 
 
             
@@ -121,16 +125,12 @@ def cb_cmd(data):
 
 
 def cb_gps(data):
-    t0=time.time()
-    z=EKF_localization.gps_2_utm_Z(data)
-    # print("!!!!!!!!!!!!!!!!!!",time.time()-t0)
+
+    # z=EKF_localization.gps_2_utm_Z(data)
+    z=EKF_localization.gps_utm_2_Z(data)
     if time.time()-t0<10000:
         ekf.update_gps_utm(z)
 
-    gps_utm_out_msg=Twist()
-    gps_utm_out_msg.linear.x=z[0][0]
-    gps_utm_out_msg.linear.y=z[1][0]
-    gps_utm_out.publish(gps_utm_out_msg)
 
 
 def cb_x0y0(data):
@@ -148,15 +148,16 @@ if __name__=="__main__":
     # rospy.Subscriber("/my_filtered_map", Odometry, cb_pos)
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos)
     # rospy.Subscriber("/navsat/fix", NavSatFix, cb_gps)
-    rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix, cb_gps, buff_size=2**20,queue_size=1)
+    # rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix, cb_gps, buff_size=2**20,queue_size=1)
+    rospy.Subscriber("gps_utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
 
     if int(rospy.get_param("Enable_Fixed_Point_Strat",default=0))==0:
-        rospy.Subscriber("utm2local_org", Twist,cb_x0y0)
+        rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0)
     else:
         x0=2767671.53
         y0=-352851.478-1.0
 
-    gps_utm_out=rospy.Publisher("gps_utm",Twist,queue_size=1)
+    # gps_utm_out=rospy.Publisher("gps_utm",Twist,queue_size=1)
     ekf_out=rospy.Publisher("landmark",Twist,queue_size=1)
     ekf_out2=rospy.Publisher("landmark_odom",Odometry,queue_size=1)
     ekf_out3=rospy.Publisher("landmark_local",Twist,queue_size=1)

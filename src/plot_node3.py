@@ -158,7 +158,8 @@ class a_plot:
         for i in range(4):
             self.error_data[i].append(ee[i])
 
-        self.corres.set_text(datetime.now().strftime("%Y/%m/%d %H:%M:%S.%f")+\
+        self.corres.set_text(datetime.now().strftime(\
+            "%Y/%m/%d %H:%M:%S.%f")+\
             "\n\n===GPS==="+\
             "\n lat (WD) = "+str(round(gps_lat,8))+" deg"+\
             "\n lon (JD) = "+str(round(gps_lon,8))+" deg"+\
