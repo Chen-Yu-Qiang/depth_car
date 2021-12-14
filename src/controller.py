@@ -12,28 +12,29 @@ def cb_lm(data):
     now_y=data.linear.y
     now_th=data.angular.z
 
-goal_x,goal_y=0,0,0
+goal_x=2767672.7993394216
+goal_y=-352852.9162779033
 def cb_goalPoint(data):
     global goal_x,goal_y
-    goal_x=0
-    goal_y=0
+    goal_x=-352852.9162779033
+    goal_y=2767672.7993394216
 
 if __name__ == '__main__':
     rospy.init_node('controller_node')
     rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1, buff_size=2**20)
     rospy.Subscriber("/cb_goalPoint", Twist,cb_goalPoint,queue_size=1, buff_size=2**20)
-    cmd_pub=rospy.Publisher("/husky_velocity_controller/cmd_vel",Twist,queue_size=1)
+    cmd_pub=rospy.Publisher("/husky_velocity_controller/cmd_vel2",Twist,queue_size=1)
     rate=rospy.Rate(10)
 
     while not rospy.is_shutdown():
-        v_kp=1
-        v_max=1
+        v_kp=0.1
+        v_max=0.6
         v_min=0.3
-        omg_kp=1
+        omg_kp=0.5
         omg_max=1
-
-        dis=np.sqrt((goal_y-now_y)**2+(goal_y-now_y)**2)
-        ang=np.arctan2((goal_y-now_y),(goal_y-now_y))-now_th
+        dis=np.sqrt((goal_y-now_y)**2+(goal_x-now_x)**2)
+        ang=np.arctan2((goal_y-now_y),(goal_x-now_x))-now_th
+        ang=(ang+np.pi)%(2.0*np.pi)-np.pi
 
         cmd_msg=Twist()
 
@@ -51,5 +52,6 @@ if __name__ == '__main__':
             cmd_msg.angular.z=max(omg_kp*ang,(-1.0)*omg_max)
 
         cmd_pub.publish(cmd_msg)
+        print(goal_y,now_y,goal_x,now_x,dis,ang,cmd_msg.linear.x,cmd_msg.angular.z)
 
         rate.sleep()

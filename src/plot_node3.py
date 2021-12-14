@@ -62,7 +62,7 @@ class a_plot:
         self.ax3.set_xlim(-30,0)
         self.ax3.set_ylim(-1.5,1.5)
         self.ax4.set_xlim(-30,0)
-        self.ax4.set_ylim(-5,10)
+        self.ax4.set_ylim(-1.5,1.5)
         self.ax1.set_title("Information")
         self.ax2.set_title("Magnetometer")
         self.ax3.set_title("Velocity command")
@@ -240,9 +240,9 @@ def cb_sigma(data):
 
 def cb_error(data):
     ds.lock.acquire()
-    ds.set("error_x_loc",data.linear.x)
     ds.set("error_x_loc",data.linear.y)
-    ds.set("error_x_glb",data.angular.x)
+    ds.set("error_y_loc",data.linear.x)
+    ds.set("error_x_glb",data.angular.z)
     ds.set("error_y_glb",data.angular.y)
     ds.lock.release()
 
@@ -261,7 +261,8 @@ if __name__ == '__main__':
     rospy.Subscriber("gps_utm", Twist,cb_gps_utm,queue_size=1)
     rospy.Subscriber("/gps/qual", UInt8,cb_gps_qual,queue_size=1)
     rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd,queue_size=1)
-    rospy.Subscriber("/wow/achieveGoal_error", Twist,cb_error,queue_size=1)
+    rospy.Subscriber("/husky_velocity_controller/cmd_vel2", Twist,cb_error,queue_size=1)
+    # rospy.Subscriber("/wow/achieveGoal_error", Twist,cb_error,queue_size=1)
     rospy.Subscriber("/EKF/mag_org", MagneticField,cb_ekf_org,queue_size=1)
     # rospy.Subscriber("landmark_sigma",Twist,cb_sigma,queue_size=1)
     rate=rospy.Rate(10)
