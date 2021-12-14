@@ -6,8 +6,9 @@ from pyproj import Proj
 
 
 DELTA_T=0.2
+STATE_NUM=5
 def get_Gt(v,omg,theta):
-    Gt=np.eye(3)
+    Gt=np.eye(STATE_NUM)
     if abs(omg)<10**(-3):
         Gt[0][2]=-v*np.sin(theta)*DELTA_T
         Gt[1][2]=v*np.cos(theta)*DELTA_T
@@ -17,7 +18,7 @@ def get_Gt(v,omg,theta):
     return Gt
 
 def get_Vt(v,omg,theta):
-    Vt=np.zeros((3,2))
+    Vt=np.zeros((STATE_NUM,2))
     if abs(omg)<10**(-3):
         Vt[0][0]=np.cos(theta)*DELTA_T
         Vt[1][0]=np.sin(theta)*DELTA_T
@@ -43,7 +44,7 @@ def get_Mt(v,omg):
 
 def get_ut(ut_1,v,omg):
     theta=ut_1[2][0]
-    A=np.zeros((3,1))
+    A=np.zeros((STATE_NUM,1))
     if abs(omg)<10**(-3):
         A[0][0]=v*np.cos(theta)*DELTA_T
         A[1][0]=v*np.sin(theta)*DELTA_T
@@ -55,7 +56,11 @@ def get_ut(ut_1,v,omg):
     return ut_1+A
 
 def get_sigma(sigmat_1,gt,vt,mt):
-    return np.dot(np.dot(gt,sigmat_1),gt.T)+np.dot(np.dot(vt,mt),vt.T)
+    a=np.zeros((5,5))
+    a[3][3]=10**(-10)
+    a[4][4]=10**(-10)
+
+    return np.dot(np.dot(gt,sigmat_1),gt.T)+np.dot(np.dot(vt,mt),vt.T)+a
 
 
 
@@ -65,7 +70,7 @@ def a_landmark(sigma,Qt,mx,my,ms,u):
     z_hat[0][0]=np.sqrt(q)
     z_hat[1][0]=((np.arctan2((my-u[1][0]),(mx-u[0][0]))-u[2][0]+np.pi)%(np.pi*2.0))-np.pi
     z_hat[2][0]=ms
-    H=np.zeros((3,3))
+    H=np.zeros((3,STATE_NUM))
     H[0][0]=-(mx-u[0][0])/np.sqrt(q)
     H[0][1]=-(my-u[1][0])/np.sqrt(q)
     H[1][0]=(my-u[1][0])/q
@@ -82,7 +87,7 @@ def a_landmark_xz(sigma,Qt,mx,my,ms,u):
     z_hat[0][0]=(mx-u[0][0])*np.sin(u[2][0])*(-1.0)+(my-u[1][0])*np.cos(u[2][0])
     z_hat[1][0]=(mx-u[0][0])*np.cos(u[2][0])+(my-u[1][0])*np.sin(u[2][0])
     z_hat[2][0]=ms
-    H=np.zeros((3,3))
+    H=np.zeros((3,STATE_NUM))
     H[0][0]=np.sin(u[2][0])
     H[0][1]=-np.cos(u[2][0])
     H[0][2]=(mx-u[0][0])*np.cos(u[2][0])*(-1.0)-(my-u[1][0])*np.sin(u[2][0])
@@ -156,15 +161,20 @@ def get_dis(ax,ay,bx,by):
 
 
 def set_u_init(x,y,theta):
-    u=np.zeros((3,1))
+    u=np.zeros((STATE_NUM,1))
     u[0][0]=x
     u[1][0]=y
     u[2][0]=theta
+    u[3][0]=0
+    u[4][0]=0
     return u
+
 
 class EKF_localization:
     def __init__(self,u_init):
-        self.sigma=np.eye(3)*1.0
+        self.sigma=np.eye(STATE_NUM)*1.0
+        self.sigma[3][3]=10**(-2)
+        self.sigma[4][4]=10**(-2)
         self.Qt=np.zeros((3,3))
         self.Qt[0][0]=10**(2)
         self.Qt[1][1]=10**(2)
@@ -173,7 +183,6 @@ class EKF_localization:
         self.Qt2[2][2]=10.0**(-2)
         self.Qt_ang=0.01
         self.Qt_utm=np.eye(2)
-
         self.max_j_th=4.0
 
         self.u=u_init
@@ -186,6 +195,7 @@ class EKF_localization:
         # print("pre",self.sigma,self.u,v,omg,get_Gt(v,omg,theta),get_Vt(v,omg,theta),get_Mt(v,omg))
         self.u=get_ut(self.u,v,omg)
         self.sigma=get_sigma(self.sigma,get_Gt(v,omg,theta),get_Vt(v,omg,theta),get_Mt(v,omg))
+        # print(self.sigma)
 
     def get_like(self,z_error):
         w=np.zeros((3,3))
@@ -263,7 +273,7 @@ class EKF_localization:
         #     print("inv(S) ",np.linalg.inv(S))
 
             self.u=self.u+delta
-            self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
+            self.sigma=np.dot((np.eye(STATE_NUM)-np.dot(K,H)),self.sigma)
             return i,j_k,Z,z_hat,delta
 
     def update_landmark(self,Z):
@@ -304,7 +314,7 @@ class EKF_localization:
             return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
         else:        
             self.u=self.u+delta
-            self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
+            self.sigma=np.dot((np.eye(STATE_NUM)-np.dot(K,H)),self.sigma)
             return i,j_k,Z,z_hat,delta
 
     def update_landmark_xz_sim(self,Z):
@@ -372,10 +382,15 @@ class EKF_localization:
         elif e<e_n and e<e_p:
             Z[2][0]=Z[2][0]+(n2pi)*2*np.pi
         # print(z_hat[2][0],Z[2][0],n2pi,e,e_p,e_n)
-        S=self.sigma+self.Qt2
+
+        H=np.zeros((3,STATE_NUM))
+        H[0][0]=1
+        H[1][1]=1
+        H[2][2]=1
+        S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt2
         K=np.dot(self.sigma,np.linalg.inv(S))
         self.u=self.u+np.dot(K,(Z-z_hat))
-        self.sigma=np.dot((np.eye(3)-K),self.sigma)
+        self.sigma=np.dot((np.eye(STATE_NUM)-K),self.sigma)
         return
 
 
@@ -393,24 +408,28 @@ class EKF_localization:
         elif e<e_n and e<e_p:
             Z=Z+(n2pi)*2*np.pi
         # print(z_hat,Z,n2pi,e,e_p,e_n)
-        H=np.zeros((1,3))
+        H=np.zeros((1,STATE_NUM))
         H[0][2]=1
         S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt_ang
         # print("ang",self.sigma)
         K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
         self.u=self.u+np.dot(K,(Z-z_hat))
-        self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
+        self.sigma=np.dot((np.eye(STATE_NUM)-np.dot(K,H)),self.sigma)
         return
 
     def update_gps_utm(self,Z):
-        z_hat=self.u[0:2]
+        z_hat=self.u[0:2]+self.u[3:5]
 
-        H=np.zeros((2,3))
+        H=np.zeros((2,STATE_NUM))
         H[0][0]=1
+        H[0][3]=1
+
         H[1][1]=1
+        H[1][4]=1
+        z_hat=np.dot(H,self.u)
         S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt_utm
         # print("gps",self.sigma)
         K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
         self.u=self.u+np.dot(K,(Z-z_hat))
-        self.sigma=np.dot((np.eye(3)-np.dot(K,H)),self.sigma)
+        self.sigma=np.dot((np.eye(STATE_NUM)-np.dot(K,H)),self.sigma)
         return

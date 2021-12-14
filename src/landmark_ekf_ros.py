@@ -129,6 +129,7 @@ def cb_gps(data):
     # z=EKF_localization.gps_2_utm_Z(data)
     z=EKF_localization.gps_utm_2_Z(data)
     if time.time()-t0<10000:
+        # print("gps~~~~~~~~")
         ekf.update_gps_utm(z)
 
 
@@ -161,6 +162,7 @@ if __name__=="__main__":
     ekf_out=rospy.Publisher("landmark",Twist,queue_size=1)
     ekf_out2=rospy.Publisher("landmark_odom",Odometry,queue_size=1)
     ekf_out3=rospy.Publisher("landmark_local",Twist,queue_size=1)
+    ekf_out4=rospy.Publisher("gps_offset",Twist,queue_size=1)
     ekf_out_sigma=rospy.Publisher("landmark_sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("landmark_z",Float64MultiArray,queue_size=1)
     ekf_out_landmark_error=rospy.Publisher("landmark_error",Float64MultiArray,queue_size=1)
@@ -194,6 +196,13 @@ if __name__=="__main__":
             ekf_out3_msg.linear.y=ekf.u[1][0]-y0
             ekf_out3_msg.angular.z=ekf.u[2][0]
             ekf_out3.publish(ekf_out3_msg)
+
+
+        ekf_out4_msg=Twist()
+        ekf_out4_msg.linear.x=ekf.u[3][0]
+        ekf_out4_msg.linear.y=ekf.u[4][0]
+        ekf_out4.publish(ekf_out4_msg)
+
 
         ekf_out_sigma_msg=Twist()
         ekf_out_sigma_msg.linear.x=ekf.sigma[0][0]

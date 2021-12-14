@@ -60,7 +60,7 @@ class a_plot:
         self.ax2.set_xlim(-0.0003,0.0001)
         self.ax2.set_ylim(-0.00024,0.00016)
         self.ax3.set_xlim(-30,0)
-        self.ax3.set_ylim(-1,1)
+        self.ax3.set_ylim(-1.5,1.5)
         self.ax4.set_xlim(-30,0)
         self.ax4.set_ylim(-5,10)
         self.ax1.set_title("Information")
