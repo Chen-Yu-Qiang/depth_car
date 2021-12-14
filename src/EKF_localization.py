@@ -5,7 +5,7 @@ import tf
 from pyproj import Proj
 
 
-DELTA_T=0.2omk ob                                                                                                                       
+DELTA_T=0.2
 def get_Gt(v,omg,theta):
     Gt=np.eye(3)
     if abs(omg)<10**(-3):
