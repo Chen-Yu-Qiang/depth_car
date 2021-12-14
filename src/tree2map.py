@@ -179,7 +179,7 @@ if __name__=="__main__":
     subOdom = rospy.Subscriber("/landmark_odom", Odometry, cbOdom)
     # subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom2)
 
-    rate=rospy.Rate(10)
+    rate=rospy.Rate(5)
 
     while not rospy.is_shutdown():
         
