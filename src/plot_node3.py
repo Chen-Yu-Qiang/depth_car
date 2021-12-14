@@ -62,11 +62,11 @@ class a_plot:
         self.ax3.set_xlim(-30,0)
         self.ax3.set_ylim(-1,1)
         self.ax4.set_xlim(-30,0)
-        self.ax4.set_ylim(-0.01,0.1)
+        self.ax4.set_ylim(-5,10)
         self.ax1.set_title("Information")
         self.ax2.set_title("Magnetometer")
         self.ax3.set_title("Velocity command")
-        self.ax4.set_title("Sigma")
+        self.ax4.set_title("Error")
 
         self.ax1.set_axis_off()
         self.ax2.set_xlabel("X-component")
@@ -85,10 +85,14 @@ class a_plot:
         self.mag_org_dot=self.ax2.plot([],[],'o', color='g', label='Fitting Center')[0] 
         self.cmd_omg_line=self.ax3.plot([],[],'-', color='salmon', label='Angular')[0] 
         self.cmd_v_line=self.ax3.plot([],[],'-', color='b', label='Linear')[0] 
-        self.sigma_x_line=self.ax4.plot([],[],'-', color='b', label='X')[0] 
-        self.sigma_y_line=self.ax4.plot([],[],'-', color='r', label='Y')[0] 
-        self.sigma_th_line=self.ax4.plot([],[],'-', color='g', label='Theta')[0] 
-
+        # self.sigma_x_line=self.ax4.plot([],[],'-', color='b', label='X')[0] 
+        # self.sigma_y_line=self.ax4.plot([],[],'-', color='r', label='Y')[0] 
+        # self.sigma_th_line=self.ax4.plot([],[],'-', color='g', label='Theta')[0] 
+        self.error_line=[None for i in range(4)]
+        error_line_name=["x(local)","y(local)","x(global)","y(global)"]
+        error_line_color=["red","blue","salmon","cornflowerblue"]
+        for i in range(4):
+            self.error_line[i]=self.ax4.plot([],[],'-', color=error_line_color[i], label=error_line_name[i])[0] 
 
         self.corres=self.ax1.text(0,0,'',fontsize=14, color='k')
         self.ax2.legend()
@@ -98,9 +102,11 @@ class a_plot:
 
         self.cmd_v_data=deque([], maxlen=250)
         self.cmd_omg_data=deque([], maxlen=250)
-        self.sigma_x_data=deque([], maxlen=250)
-        self.sigma_y_data=deque([], maxlen=250)
-        self.sigma_th_data=deque([], maxlen=250)
+        # self.sigma_x_data=deque([], maxlen=250)
+        # self.sigma_y_data=deque([], maxlen=250)
+        # self.sigma_th_data=deque([], maxlen=250)
+
+        self.error_data=[deque([], maxlen=250) for i in range(4)]
 
         self.t_data=deque([], maxlen=250)
 
@@ -121,12 +127,14 @@ class a_plot:
         ds.lock.acquire()
         gps_lat=ds.get("gps_lat")
         gps_lon=ds.get("gps_lon")
+        gps_x=ds.get("gps_x")
+        gps_y=ds.get("gps_y")
         gps_qual=ds.get("gps_qual")
         cmd_v=ds.get("cmd_v")
         cmd_omg=ds.get("cmd_omg")
-        sigma_x=ds.get("sigma_x")
-        sigma_y=ds.get("sigma_y")
-        sigma_th=ds.get("sigma_th")
+        # sigma_x=ds.get("sigma_x")
+        # sigma_y=ds.get("sigma_y")
+        # sigma_th=ds.get("sigma_th")
         mag_x=ds.get("mag_x")
         mag_y=ds.get("mag_y")
 
@@ -134,23 +142,32 @@ class a_plot:
         mag_y_last=ds.get_last("mag_y")
         mag_x_org=ds.get("mag_org_x")
         mag_y_org=ds.get("mag_org_y")
+        error_x_loc=ds.get("error_x_loc")
+        error_y_loc=ds.get("error_y_loc")
+        error_x_glb=ds.get("error_x_glb")
+        error_y_glb=ds.get("error_y_glb")
         ds.lock.release()
 
         self.cmd_v_data.append(cmd_v)
         self.cmd_omg_data.append(cmd_omg)
         self.t_data.append(time.time())
-        self.sigma_x_data.append(sigma_x)
-        self.sigma_y_data.append(sigma_y)
-        self.sigma_th_data.append(sigma_th)
+        # self.sigma_x_data.append(sigma_x)
+        # self.sigma_y_data.append(sigma_y)
+        # self.sigma_th_data.append(sigma_th)
+        ee=[error_x_loc,error_y_loc,error_x_glb,error_y_glb]
+        for i in range(4):
+            self.error_data[i].append(ee[i])
 
         self.corres.set_text(datetime.now().strftime("%Y/%m/%d %H:%M:%S.%f")+\
             "\n\n===GPS==="+\
-            "\n lat (WD)="+str(round(gps_lat,8))+" deg"+\
-            "\n lon (JD)="+str(round(gps_lon,8))+" deg"+\
-            "\n Quality="+str(gps_qual)+\
+            "\n lat (WD) = "+str(round(gps_lat,8))+" deg"+\
+            "\n lon (JD) = "+str(round(gps_lon,8))+" deg"+\
+            "\n UTM x ="+str(round(gps_y,2)*(-1.0))+" m"+\
+            "\n UTM y ="+str(round(gps_x,2))+" m"+\
+            "\n Quality = "+str(gps_qual)+\
             "\n\n===Command==="+\
-            "\n v="+str(round(cmd_v,5))+" m/s"+\
-            "\n omega="+str(round(cmd_omg,5))+" deg/s"+\
+            "\n v = "+str(round(cmd_v,5))+" m/s"+\
+            "\n omega = "+str(round(cmd_omg,5))+" deg/s"+\
             "\n ")
         
         self.mag_dot.set_data(mag_x_last,mag_y_last)
@@ -164,9 +181,11 @@ class a_plot:
 
         self.cmd_omg_line.set_data(cmd_t0,self.cmd_omg_data)
         self.cmd_v_line.set_data(cmd_t0,self.cmd_v_data)
-        self.sigma_x_line.set_data(cmd_t0,self.sigma_x_data)
-        self.sigma_y_line.set_data(cmd_t0,self.sigma_y_data)
-        self.sigma_th_line.set_data(cmd_t0,self.sigma_th_data)
+        # self.sigma_x_line.set_data(cmd_t0,self.sigma_x_data)
+        # self.sigma_y_line.set_data(cmd_t0,self.sigma_y_data)
+        # self.sigma_th_line.set_data(cmd_t0,self.sigma_th_data)
+        for i in range(4):
+            self.error_line[i].set_data(cmd_t0,self.error_data[i])
 
 
         
@@ -185,10 +204,19 @@ def cb_mag(data):
     ds.lock.release()
 
 def cb_gps(data):
+    
     ds.lock.acquire()
     ds.set("gps_lat",data.latitude)
     ds.set("gps_lon",data.longitude)
     ds.lock.release()
+
+def cb_gps_utm(data):
+    
+    ds.lock.acquire()
+    ds.set("gps_x",data.linear.x)
+    ds.set("gps_y",data.linear.y)
+    ds.lock.release()
+
 
 def cb_gps_qual(data):
     ds.lock.acquire()
@@ -209,6 +237,14 @@ def cb_sigma(data):
     ds.set("sigma_th",data.angular.z)
     ds.lock.release()
 
+def cb_error(data):
+    ds.lock.acquire()
+    ds.set("error_x_loc",data.linear.x)
+    ds.set("error_x_loc",data.linear.y)
+    ds.set("error_x_glb",data.angular.x)
+    ds.set("error_y_glb",data.angular.y)
+    ds.lock.release()
+
 def cb_ekf_org(data):
     ds.lock.acquire()
     ds.set("mag_org_x",data.magnetic_field.x)
@@ -219,13 +255,14 @@ if __name__ == '__main__':
 
     print("Python version: ",sys.version)
     rospy.init_node("plot_node3", anonymous=True)
-
     rospy.Subscriber("/imu/mag", MagneticField,cb_mag,queue_size=1)
     rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix,cb_gps,queue_size=1)
+    rospy.Subscriber("gps_utm", Twist,cb_gps_utm,queue_size=1)
     rospy.Subscriber("/gps/qual", UInt8,cb_gps_qual,queue_size=1)
     rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd,queue_size=1)
+    rospy.Subscriber("/wow/achieveGoal_error", Twist,cb_error,queue_size=1)
     rospy.Subscriber("/EKF/mag_org", MagneticField,cb_ekf_org,queue_size=1)
-    rospy.Subscriber("landmark_sigma",Twist,cb_sigma,queue_size=1)
+    # rospy.Subscriber("landmark_sigma",Twist,cb_sigma,queue_size=1)
     rate=rospy.Rate(10)
     a=a_plot()
 
