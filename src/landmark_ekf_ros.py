@@ -121,16 +121,16 @@ def cb_cmd(data):
 
 
 def cb_gps(data):
-
+    t0=time.time()
     z=EKF_localization.gps_2_utm_Z(data)
-    if time.time()-t0<10:
+    # print("!!!!!!!!!!!!!!!!!!",time.time()-t0)
+    if time.time()-t0<10000:
         ekf.update_gps_utm(z)
 
     gps_utm_out_msg=Twist()
     gps_utm_out_msg.linear.x=z[0][0]
     gps_utm_out_msg.linear.y=z[1][0]
     gps_utm_out.publish(gps_utm_out_msg)
-
 
 
 def cb_x0y0(data):
@@ -148,7 +148,7 @@ if __name__=="__main__":
     # rospy.Subscriber("/my_filtered_map", Odometry, cb_pos)
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos)
     # rospy.Subscriber("/navsat/fix", NavSatFix, cb_gps)
-    rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix, cb_gps)
+    rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix, cb_gps, buff_size=2**20,queue_size=1)
 
     if int(rospy.get_param("Enable_Fixed_Point_Strat",default=0))==0:
         rospy.Subscriber("utm2local_org", Twist,cb_x0y0)
@@ -163,7 +163,7 @@ if __name__=="__main__":
     ekf_out_sigma=rospy.Publisher("landmark_sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("landmark_z",Float64MultiArray,queue_size=1)
     ekf_out_landmark_error=rospy.Publisher("landmark_error",Float64MultiArray,queue_size=1)
-    rate=rospy.Rate(10)
+    rate=rospy.Rate(5)
 
     
     while not rospy.is_shutdown():

@@ -352,13 +352,13 @@ def cb_landmark_z(data):
             ds.append("z_th",d[ARRAY_LAY2*i+3])
             ds.append("z_r",d[ARRAY_LAY2*i+4])
 
-    if len(d):
+    # if len(d):
 
-        ds.set("x",d[26]*(-1.0))
-        ds.set("y",d[25])
-        ds.set("th",d[27])
-        ds.append("q_x",d[26]*(-1.0))
-        ds.append("q_y",d[25])
+    #     ds.set("x",d[26]*(-1.0))
+    #     ds.set("y",d[25])
+    #     ds.set("th",d[27])
+    #     ds.append("q_x",d[26]*(-1.0))
+    #     ds.append("q_y",d[25])
 
 
 
@@ -377,8 +377,8 @@ def cb_lm(data):
     ds.set("x_fm",data.linear.y*(-1.0)+1.0)
     ds.set("y_fm",data.linear.x+1.0)
     ds.set("th_fm",data.angular.z)
-    ds.append("q_x",data.linear.y*(-1.0))
-    ds.append("q_y",data.linear.x)
+    # ds.append("q_x",data.linear.y*(-1.0))
+    # ds.append("q_y",data.linear.x)
 
 
 def cbTrunk(msg):
@@ -392,8 +392,8 @@ def cb_landmark_error(msg):
     
 
 def cbGoal(msg):
-    ds.append("waypoint_utm_x",msg.pose.position.x)
-    ds.append("waypoint_utm_y",msg.pose.position.y)
+    ds.set("waypoint_utm_x",msg.pose.position.x)
+    ds.set("waypoint_utm_y",msg.pose.position.y)
 
 
 if __name__ == '__main__':
@@ -403,10 +403,10 @@ if __name__ == '__main__':
     landmark_z_sub=rospy.Subscriber("/landmark_z", Float64MultiArray,cb_landmark_z,queue_size=1)
     landmark_error_sub=rospy.Subscriber("/landmark_error", Float64MultiArray,cb_landmark_error,queue_size=1)
     gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,queue_size=1)
-    lm_sub=rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1)
+    lm_sub=rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1, buff_size=2**20)
     subTrunk = rospy.Subscriber("/wow/trunk_info", Trunkset, cbTrunk,queue_size=1)
     subGoal = rospy.Subscriber("/wow_utm_waypoint", PoseStamped, cbGoal,queue_size=1)
-    rate=rospy.Rate(30)
+    rate=rospy.Rate(10)
     a=a_plot()
 
     while not rospy.is_shutdown():

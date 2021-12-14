@@ -320,6 +320,7 @@ class EKF_localization:
         max_j=0
         max_j_th=self.max_j_th
         for i in range(len(self.tree_data)):
+
             mx=self.tree_data[i][0]
             my=self.tree_data[i][1]
             ms=self.tree_data[i][2]
@@ -329,12 +330,15 @@ class EKF_localization:
             S.append(S_k)
             z_error=Z-z_hat_k
             # z_error[1][0]=z_error[1][0]*3
-            j_k=(np.linalg.det(2*np.pi*S_k)**(-0.5))*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
+            # j_k=(np.linalg.det(2*np.pi*S_k)**(-0.5))*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
             w=np.zeros((3,3))
             w[0][0]=0.5
             w[1][1]=0.5
             w[2][2]=1.0
-            j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
+            if i in [48,49,50]:
+                j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
+            else:
+                j_k=-100
             # print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0])
             if j_k>max_j:
                 max_j=j_k[0][0]
