@@ -14,7 +14,8 @@
 <!-- <node pkg="depth_car" type="plot_node3.py" name="plot_node3" output="screen"/> -->
 
 <param name="Enable_Fixed_Point_Strat" value="0" />
-<node pkg="depth_car" type="utm2local_org_node.py" name="utm2local_org_node" output="screen"/>
+<node pkg="depth_car" type="tf2topic_gps_in_utm_node.py" name="tf2topic_gps_in_utm_node" output="screen"/>
+<node pkg="depth_car" type="tf2topic_local_org_in_utm_node.py" name="tf2topic_local_org_in_utm_node" output="screen"/>
 
 
 <node pkg="mapping_explorer" type="tf_transformer_map2.py" name="tf_transformer_map2" output="screen"/>
