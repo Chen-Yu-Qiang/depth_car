@@ -26,14 +26,20 @@ from collections import deque
 
 
 TREE_DATA=[]
-if sys.version[0]=='2':
-    TREE_DATA=TREEDATA.TREE_DATA
-    tree_data_np=np.array(TREE_DATA)
-    a=tree_data_np[:,1].copy()
-    tree_data_np[:,1]=tree_data_np[:,0]
-    tree_data_np[:,0]=-a
-elif sys.version[0]=='3':
-    tree_data_np = np.load('/home/ncslaber/center_list_all.npy')
+# if sys.version[0]=='2':
+#     TREE_DATA=TREEDATA.TREE_DATA
+#     tree_data_np=np.array(TREE_DATA)
+#     a=tree_data_np[:,1].copy()
+#     tree_data_np[:,1]=tree_data_np[:,0]
+#     tree_data_np[:,0]=-a
+# elif sys.version[0]=='3':
+#     tree_data_np = np.load('/home/ncslaber/center_list_all.npy')
+
+TREE_DATA=TREEDATA.TREE_DATA
+tree_data_np=np.array(TREE_DATA)
+a=tree_data_np[:,1].copy()
+tree_data_np[:,1]=tree_data_np[:,0]
+tree_data_np[:,0]=-a
 TREE_DATA=tree_data_np
 # print(tree_data_np)
 
