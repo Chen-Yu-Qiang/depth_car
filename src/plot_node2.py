@@ -63,7 +63,7 @@ class data_set:
             self.d[n]=[v]
 
 class car_obj:
-    def __init__(self,plot_obj,r=0.1,ms=10,c="red",ec="k",trj_en=1,theta_en=1,car_name=""):
+    def __init__(self,plot_obj,r=1,ms=10,c="red",ec="k",trj_en=1,theta_en=1,car_name=""):
         self.x=0
         self.y=0
         self.th=0

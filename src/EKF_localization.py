@@ -38,7 +38,7 @@ def get_Mt(v,omg):
     alpha2=0.1
     alpha3=0.05
     alpha4=0.1
-    Mt[0][0]=alpha1*v*v+alpha2*omg*omg+0.1
+    Mt[0][0]=alpha1*v*v+alpha2*omg*omg+0.01
     Mt[1][1]=alpha3*v*v+alpha4*omg*omg+0.01
     return Mt
 
@@ -181,7 +181,7 @@ class EKF_localization:
         self.Qt[2][2]=10**(2)
         self.Qt2=np.eye(3)
         self.Qt2[2][2]=10.0**(-2)
-        self.Qt_ang=0.01
+        self.Qt_ang=0.0001
         self.Qt_utm=np.eye(2)
         self.max_j_th=4.0
 
