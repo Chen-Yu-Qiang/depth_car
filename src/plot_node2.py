@@ -124,29 +124,35 @@ class a_plot:
         self.ax.set_ylabel("Y (South--North) [m]")
         plt.ion()
 
-        gps_init=rospy.wait_for_message("/gps_utm", Twist)
+        # gps_init=rospy.wait_for_message("/gps_utm", Twist)
         # print("!!!!!!!!!!!!!!!!!!1")
-        if (gps_init.linear.x)>2767690:
-            # for H
-            self.ax.set_xlim(352840,352875)
-            self.ax.set_ylim(2767700,2767735)
-            self.now_zone="h"
-        else:
-            if (gps_init.linear.y)< (-352865):
-                # for B
-                self.ax.set_xlim(352860,352905)
-                self.ax.set_ylim(2767645,2767690)
-                self.now_zone="b"
-            else:
-                # for I
-                self.ax.set_xlim(352835,352865)
-                self.ax.set_ylim(2767655,2767690)
-                self.now_zone="i"
+        # if (gps_init.linear.x)>2767690:
+        #     # for H
+        #     self.ax.set_xlim(352840,352875)
+        #     self.ax.set_ylim(2767700,2767735)
+        #     self.now_zone="h"
+        # else:
+        #     if (gps_init.linear.y)< (-352865):
+        #         # for B
+        #         self.ax.set_xlim(352860,352905)
+        #         self.ax.set_ylim(2767645,2767690)
+        #         self.now_zone="b"
+        #     else:
+        #         # for I
+        #         self.ax.set_xlim(352835,352865)
+        #         self.ax.set_ylim(2767655,2767690)
+        #         self.now_zone="i"
 
 
         # self.ax.hold(True)
         # self.ax.set_xlim(352840,352910)
-        # self.ax.set_ylim(2767650,2767745)         
+        # self.ax.set_ylim(2767650,2767745)      
+
+
+        self.ax.set_xlim(352835,352865)
+        self.ax.set_ylim(2767655,2767690)
+        self.now_zone="i"
+   
         x, y, th= 352910,2767650,0
         
         self.ax.plot(TREE_DATA[:,0], TREE_DATA[:,1], 'x', color='g', markersize=5, label='Tree')[0]
@@ -183,7 +189,7 @@ class a_plot:
         self.car2_obj=car_obj(self,c='yellow',theta_en=0,car_name="Car (w/ GPS)")
         self.car1_obj=car_obj(self,c='lightblue',car_name="Car (w/ Landmark)")
         self.car3_obj=car_obj(self,trj_en=0)
-        self.car4_obj=car_obj(self,c='k',trj_en=1,car_name="Way point")
+        self.car4_obj=car_obj(self,c='k',trj_en=1,theta_en=0,car_name="Way point")
 
 
         if self.now_zone=="h":
@@ -421,6 +427,7 @@ if __name__ == '__main__':
         try:
             a.car_position(ds)
             plt.pause(0.001)
+
         except:
             pass
         # a.save_fig()

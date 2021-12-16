@@ -39,7 +39,7 @@ def get_Mt(v,omg):
     alpha3=0.05
     alpha4=0.1
     Mt[0][0]=alpha1*v*v+alpha2*omg*omg+0.01
-    Mt[1][1]=alpha3*v*v+alpha4*omg*omg+0.01
+    Mt[1][1]=alpha3*v*v+alpha4*omg*omg+0.005
     return Mt
 
 def get_ut(ut_1,v,omg):
@@ -179,10 +179,10 @@ class EKF_localization:
         self.Qt[0][0]=10**(2)
         self.Qt[1][1]=10**(2)
         self.Qt[2][2]=10**(2)
-        self.Qt2=np.eye(3)
-        self.Qt2[2][2]=10.0**(-2)
-        self.Qt_ang=0.001
-        self.Qt_utm=np.eye(2)
+        self.Qt_pos=np.eye(3)
+        self.Qt_pos[2][2]=10.0**(-2)
+        self.Qt_ang=10**(-5)
+        self.Qt_utm=np.eye(2)*10**(-1)
         self.max_j_th=4.0
 
         self.u=u_init
@@ -387,7 +387,7 @@ class EKF_localization:
         H[0][0]=1
         H[1][1]=1
         H[2][2]=1
-        S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt2
+        S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt_pos
         K=np.dot(self.sigma,np.linalg.inv(S))
         self.u=self.u+np.dot(K,(Z-z_hat))
         self.sigma=np.dot((np.eye(STATE_NUM)-K),self.sigma)

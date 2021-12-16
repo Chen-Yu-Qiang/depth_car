@@ -114,9 +114,9 @@ def cb_pos(data):
     ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
 v=0
 omg=0
-ekf.Qt[0][0]=10**(-1)
-ekf.Qt[1][1]=0.2*10**(-1)
-ekf.Qt[2][2]=10**(-1)
+ekf.Qt[0][0]=10**(-3)
+ekf.Qt[1][1]=0.2*10**(-3)
+ekf.Qt[2][2]=10**(-3)
 ekf.max_j_th=0.45
 def cb_cmd(data):
     global v,omg

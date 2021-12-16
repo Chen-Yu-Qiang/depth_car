@@ -13,12 +13,13 @@ if __name__ == '__main__':
     listener = tf.TransformListener()
     b=rospy.Publisher("gps_utm",Twist,queue_size=1)
     rate=rospy.Rate(10)
+    listener.waitForTransform("utm", "base_link", rospy.Time(), rospy.Duration(5.0))
     while not rospy.is_shutdown():
             
         try:
-
-            listener.waitForTransform("utm", "base_link", rospy.Time(0), rospy.Duration(3.0))
-            (trans,rot) = listener.lookupTransform("utm", "base_link", rospy.Time(0) )
+            now=rospy.Time.now()
+            listener.waitForTransform("utm", "base_link", now, rospy.Duration(3.0))
+            (trans,rot) = listener.lookupTransform("utm", "base_link", now )
             b_msg=Twist()
             b_msg.linear.x=trans[1]
             b_msg.linear.y=trans[0]*(-1.0)

@@ -13,11 +13,14 @@ if __name__ == '__main__':
     listener = tf.TransformListener()
     a=rospy.Publisher("local_org_in_utm",Twist,queue_size=1)
     rate=rospy.Rate(10)
+
+    listener.waitForTransform("utm", "map", rospy.Time(), rospy.Duration(5.0))
     while not rospy.is_shutdown():
             
         try:
-            listener.waitForTransform("utm", "map", rospy.Time(0), rospy.Duration(3.0))
-            (trans,rot) = listener.lookupTransform("utm", "map", rospy.Time(0) )
+            now=rospy.Time.now()
+            listener.waitForTransform("utm", "map", now, rospy.Duration(3.0))
+            (trans,rot) = listener.lookupTransform("utm", "map", now )
             a_msg=Twist()
             a_msg.linear.x=trans[1]
             a_msg.linear.y=trans[0]*(-1.0)
