@@ -14,7 +14,7 @@ if __name__ == '__main__':
     a=rospy.Publisher("local_org_in_utm",Twist,queue_size=1)
     rate=rospy.Rate(10)
 
-    listener.waitForTransform("utm", "map", rospy.Time(), rospy.Duration(5.0))
+    listener.waitForTransform("utm", "map", rospy.Time(), rospy.Duration(10.0))
     while not rospy.is_shutdown():
             
         try:

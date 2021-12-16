@@ -125,9 +125,15 @@ def cb_cmd(data):
 
 
 def cb_gps(data):
+    global x0,y0
 
     # z=EKF_localization.gps_2_utm_Z(data)
     z=EKF_localization.gps_utm_2_Z(data)
+    if x0==0 and y0==0:
+        x0=z[0][0]
+        y0=z[1][0]
+        print("!!!!x0=",x0,"!!!!y0=",y0)
+
     if time.time()-t0<10000:
         # print("gps~~~~~~~~")
         ekf.update_gps_utm(z)
@@ -153,7 +159,9 @@ if __name__=="__main__":
     rospy.Subscriber("gps_utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
 
     if int(rospy.get_param("Enable_Fixed_Point_Strat",default=0))==0:
-        rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0)
+    #     rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0)
+        x0=0
+        y0=0
     else:
         x0=2767671.53
         y0=-352851.478-1.0

@@ -15,13 +15,14 @@
 <param name="Enable_Fixed_Point_Strat" value="0" />
 <node pkg="depth_car" type="landmark_ekf_ros.py" name="landmark_ekf_ros" output="screen"/>
 <node pkg="depth_car" type="plot_node2.py" name="plot_node2" output="screen"/>
+<node pkg="depth_car" type="gps2utm_node.py" name="gps2utm_node" output="screen"/>
 <node pkg="depth_car" type="print_node.py" name="print_node" output="screen" launch-prefix="xterm -geometry 150x20+450+0 -e"/>
 <node pkg="depth_car" type="controller.py" name="controller" output="screen" launch-prefix="xterm -geometry 150x20+450+0 -e"/>
 
-<node pkg="depth_car" type="tf2topic_gps_in_utm_node.py" name="tf2topic_gps_in_utm_node" output="screen"/>
-<node pkg="depth_car" type="tf2topic_local_org_in_utm_node.py" name="tf2topic_local_org_in_utm_node" output="screen"/>
+<!-- <node pkg="depth_car" type="tf2topic_gps_in_utm_node.py" name="tf2topic_gps_in_utm_node" output="screen"/> -->
+<!-- <node pkg="depth_car" type="tf2topic_local_org_in_utm_node.py" name="tf2topic_local_org_in_utm_node" output="screen"/> -->
 
 
-<node pkg="mapping_explorer" type="tf_transformer_map2.py" name="tf_transformer_map2" output="screen"/>
+<!-- <node pkg="mapping_explorer" type="tf_transformer_map2.py" name="tf_transformer_map2" output="screen"/> -->
 
 </launch>
