@@ -25,7 +25,7 @@ if __name__ == '__main__':
     rospy.init_node('controller_node')
     rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1, buff_size=2**20)
     rospy.Subscriber("/wow_utm_waypoint", PoseStamped,cb_goalPoint,queue_size=1, buff_size=2**20)
-    cmd_pub=rospy.Publisher("/cmd_vel2",Twist,queue_size=1)
+    cmd_pub=rospy.Publisher("/cmd_vel",Twist,queue_size=1)
 
     error_pub=rospy.Publisher("lm/d_t_error",Twist,queue_size=1)
     rate=rospy.Rate(10)
@@ -46,17 +46,17 @@ if __name__ == '__main__':
 
         cmd_msg=Twist()
 
-        if s==1 and ang>0.1:
+        if s==1 and abs(ang)>0.1:
             if (omg_kp*ang)>0:
                 cmd_msg.angular.z=min(omg_kp*ang,omg_max)
             else:
                 cmd_msg.angular.z=max(omg_kp*ang,(-1.0)*omg_max)
             cmd_msg.linear.x=0
-        elif s==1 and ang<=0.1:
+        elif s==1 and abs(ang)<=0.1:
             cmd_msg.angular.z=0
             s=2
         
-        elif s==2:
+        elif s==2 and dis > 0.3:
             if (v_kp*dis)>0.05:
                 cmd_msg.linear.x=max(min((v_kp*dis),v_max),v_min)
             elif (v_kp*dis)<-0.05:
@@ -70,7 +70,7 @@ if __name__ == '__main__':
                 cmd_msg.angular.z=max(omg_kp*ang,(-1.0)*omg_max)
 
 
-        elif s==2 and dis< 0.08:
+        elif s==2 and dis< 0.3:
             cmd_msg.linear.x=0
             cmd_msg.angular.z=0
             s=0

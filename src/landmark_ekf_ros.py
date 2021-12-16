@@ -125,7 +125,7 @@ def cb_cmd(data):
 
 
 def cb_gps(data):
-    global x0,y0
+    global x0,y0, t0
 
     # z=EKF_localization.gps_2_utm_Z(data)
     z=EKF_localization.gps_utm_2_Z(data)
@@ -134,7 +134,7 @@ def cb_gps(data):
         y0=z[1][0]
         print("!!!!x0=",x0,"!!!!y0=",y0)
 
-    if time.time()-t0<10000:
+    if time.time()-t0<30:
         # print("gps~~~~~~~~")
         ekf.update_gps_utm(z)
 
