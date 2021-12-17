@@ -292,7 +292,7 @@ class a_plot:
 
 
         for i in range(len(z_hat_d),len(z_d)):
-            self.obs_line[i].set_visible(True)
+            self.obs_line[i].set_visible(False)
             self.real_line[i].set_visible(False)
             self.real_tree[i].set_visible(False)
             if int(rospy.get_param('XZ_MODE')):

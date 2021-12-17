@@ -165,8 +165,12 @@ def set_u_init(x,y,theta):
     u[0][0]=x
     u[1][0]=y
     u[2][0]=theta
+
+    # Here read x_offset file
     u[3][0]=0
     u[4][0]=0
+
+
     return u
 
 
@@ -387,6 +391,8 @@ class EKF_localization:
         H[0][0]=1
         H[1][1]=1
         H[2][2]=1
+        H[1][1]=1
+        H[1][4]=1
         S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt_pos
         K=np.dot(self.sigma,np.linalg.inv(S))
         self.u=self.u+np.dot(K,(Z-z_hat))
