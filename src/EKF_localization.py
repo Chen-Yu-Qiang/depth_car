@@ -3,7 +3,7 @@
 import numpy as np
 import tf
 from pyproj import Proj
-
+import sys
 
 DELTA_T=0.2
 STATE_NUM=5
@@ -130,7 +130,7 @@ def Odom_2_position_Z(a,x0,y0):
     z[0][0]=a.pose.pose.position.x+x0
     z[1][0]=a.pose.pose.position.y+y0
     z[2][0]=tf.transformations.euler_from_quaternion([0,0,a.pose.pose.orientation.z,a.pose.pose.orientation.w])[2]
-
+    # print("pose",a,x0,y0,z)
     return z
 
 def Odom_2_angle_Z(a):
@@ -167,10 +167,20 @@ def set_u_init(x,y,theta):
     u[2][0]=theta
 
     # Here read x_offset file
-    u[3][0]=0
-    u[4][0]=0
+    if sys.version[0]=='2':
+        u[3][0]=0
+        u[4][0]=0
+    elif sys.version[0]=='3':
+        import csv
+        with open('/home/ncslaber/init_offset_17-12-2021_14:51:10.csv', 'r') as csvfile:
+            offset_x, offset_y = csv.reader(csvfile, delimiter=',')
+        offset_x = float(offset_x[0])
+        offset_y = float(offset_y[0])
 
+        print("Get WOW offset!!! ".offset_x,offset_y)
 
+        u[3][0]=offset_y
+        u[4][0]=offset_x*(-1.0)
     return u
 
 
@@ -391,12 +401,13 @@ class EKF_localization:
         H[0][0]=1
         H[1][1]=1
         H[2][2]=1
-        H[1][1]=1
+        H[0][3]=1
         H[1][4]=1
+        z_hat=np.dot(H,self.u)
         S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt_pos
-        K=np.dot(self.sigma,np.linalg.inv(S))
+        K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
         self.u=self.u+np.dot(K,(Z-z_hat))
-        self.sigma=np.dot((np.eye(STATE_NUM)-K),self.sigma)
+        self.sigma=np.dot((np.eye(STATE_NUM)-np.dot(K,H)),self.sigma)
         return
 
 

@@ -103,22 +103,29 @@ t0=time.time()
 
 
 
-
+x0_loc,y0_loc=0,0
+x0y0_finish=0
 def cb_pos(data):
-    global x0,y0
-    if x0==0 and y0==0:
-        pass 
-    elif int(rospy.get_param("Use_GPS_time",default=10000)):
+    global x0,y0,t0,x0_loc,y0_loc,x0y0_finish
+    if x0==0 and y0==0 and x0y0_finish==0:
+        x0_loc= data.pose.pose.position.x
+        y0_loc= data.pose.pose.position.y
+        x0y0_finish=1
+
+    elif time.time()-t0<int(rospy.get_param("Use_GPS_time",default=10000)):
         z=EKF_localization.Odom_2_position_Z(data,x0,y0)
-        ekf.update_positon(z)
+        # ekf.update_positon(z)
         ekf_out5_msg=Twist()
-        ekf_out5_msg.linear.x=z[0][0]+ekf.u[3][0]
-        ekf_out5_msg.linear.y=z[1][0]+ekf.u[4][0]
+        ekf_out5_msg.linear.x=z[0][0]-ekf.u[3][0]
+        ekf_out5_msg.linear.y=z[1][0]-ekf.u[4][0]
         ekf_out5_msg.angular.z=z[2][0]
         ekf_out5.publish(ekf_out5_msg)
-
-
-        ekf_out5
+        filtered_utm_msg=Twist()
+        filtered_utm_msg.linear.x=z[0][0]
+        filtered_utm_msg.linear.y=z[1][0]
+        filtered_utm_msg.angular.z=z[2][0]
+        filtered_utm.publish(filtered_utm_msg)
+    
     ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
 v=0
 omg=0
@@ -133,13 +140,13 @@ def cb_cmd(data):
 
 
 def cb_gps(data):
-    global x0,y0, t0
+    global x0,y0,t0,x0y0_finish
 
     # z=EKF_localization.gps_2_utm_Z(data)
     z=EKF_localization.gps_utm_2_Z(data)
-    if x0==0 and y0==0:
-        x0=z[0][0]
-        y0=z[1][0]
+    if x0==0 and y0==0 and x0y0_finish==1:
+        x0=z[0][0]-x0_loc
+        y0=z[1][0]-y0_loc
         print("!!!!x0=",x0,"!!!!y0=",y0)
 
     if time.time()-t0<int(rospy.get_param("Use_GPS_time",default=10000)):
@@ -179,6 +186,7 @@ if __name__=="__main__":
     ekf_out2=rospy.Publisher("landmark_odom",Odometry,queue_size=1)
     ekf_out3=rospy.Publisher("landmark_local",Twist,queue_size=1)
     ekf_out5=rospy.Publisher("landmark_filtered_offset",Twist,queue_size=1)
+    filtered_utm=rospy.Publisher("filtered_utm",Twist,queue_size=1)
     ekf_out4=rospy.Publisher("gps_offset",Twist,queue_size=1)
     ekf_out_sigma=rospy.Publisher("landmark_sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("landmark_z",Float64MultiArray,queue_size=1)

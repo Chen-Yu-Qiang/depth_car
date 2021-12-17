@@ -34,7 +34,7 @@ if __name__ == '__main__':
         v_kp=0.1
         v_max=0.6
         v_min=0.3
-        omg_kp=0.5
+        omg_kp=1.0
         omg_max=1
         dis=np.sqrt((goal_y-now_y)**2+(goal_x-now_x)**2)
         ang=np.arctan2((goal_y-now_y),(goal_x-now_x))-now_th
@@ -56,7 +56,7 @@ if __name__ == '__main__':
             cmd_msg.angular.z=0
             s=2
         
-        elif s==2 and dis > 0.3:
+        elif s==2 and (dis > 0.1) and (np.cos(ang)>0):
             if (v_kp*dis)>0.05:
                 cmd_msg.linear.x=max(min((v_kp*dis),v_max),v_min)
             elif (v_kp*dis)<-0.05:
@@ -70,7 +70,7 @@ if __name__ == '__main__':
                 cmd_msg.angular.z=max(omg_kp*ang,(-1.0)*omg_max)
 
 
-        elif s==2 and dis< 0.3:
+        elif s==2 and ((dis< 0.1) or (np.cos(ang)<=0)):
             cmd_msg.linear.x=0
             cmd_msg.angular.z=0
             s=0

@@ -190,6 +190,7 @@ class a_plot:
         self.car1_obj=car_obj(self,c='lightblue',car_name="Car (w/ Landmark)")
         self.car3_obj=car_obj(self,trj_en=0)
         self.car4_obj=car_obj(self,c='k',trj_en=1,theta_en=0,car_name="Way point")
+        self.car5_obj=car_obj(self,c='m',trj_en=1,theta_en=0,car_name="gps offset")
 
 
         if self.now_zone=="h":
@@ -257,6 +258,8 @@ class a_plot:
         x_utm_waypoint=ds.get("waypoint_utm_x")
         y_utm_waypoint=ds.get("waypoint_utm_y")
 
+        x_gps_offset=ds.get("x_gps_offset")
+        y_gps_offset=ds.get("y_gps_offset")
 
 
 
@@ -269,6 +272,7 @@ class a_plot:
         self.car2_obj.update(x_gps, y_gps, 0)
         self.car1_obj.update(x, y, th)
         self.car4_obj.update(x_utm_waypoint, y_utm_waypoint, 0)
+        self.car5_obj.update(x_gps_offset, y_gps_offset, 0)
 
 
 
@@ -407,6 +411,11 @@ def cbGoal(msg):
     ds.set("waypoint_utm_x",msg.pose.position.x)
     ds.set("waypoint_utm_y",msg.pose.position.y)
 
+def cb_gps_offset(data):
+
+    ds.set("x_gps_offset",data.linear.y*(-1.0))
+    ds.set("y_gps_offset",data.linear.x)
+
 
 if __name__ == '__main__':
 
@@ -414,8 +423,10 @@ if __name__ == '__main__':
     rospy.init_node("plot_node2", anonymous=True)
     landmark_z_sub=rospy.Subscriber("/landmark_z", Float64MultiArray,cb_landmark_z,queue_size=1)
     landmark_error_sub=rospy.Subscriber("/landmark_error", Float64MultiArray,cb_landmark_error,queue_size=1)
-    gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,queue_size=1)
+    # gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,queue_size=1)
+    gps_sub=rospy.Subscriber("/filtered_utm", Twist,cb_gps,queue_size=1)
     lm_sub=rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1, buff_size=2**20)
+    gps_offset_sub=rospy.Subscriber("/landmark_filtered_offset", Twist,cb_gps_offset,queue_size=1, buff_size=2**20)
     subTrunk = rospy.Subscriber("/wow/trunk_info", Trunkset, cbTrunk,queue_size=1)
     subGoal = rospy.Subscriber("/wow_utm_waypoint", PoseStamped, cbGoal,queue_size=1)
     rate=rospy.Rate(10)
