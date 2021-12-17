@@ -133,7 +133,7 @@ def cb_cmd(data):
 
 
 def cb_gps(data):
-    global x0,y0
+    global x0,y0, t0
 
     # z=EKF_localization.gps_2_utm_Z(data)
     z=EKF_localization.gps_utm_2_Z(data)
