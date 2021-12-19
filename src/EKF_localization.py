@@ -172,10 +172,12 @@ def set_u_init(x,y,theta):
         u[4][0]=0
     elif sys.version[0]=='3':
         import csv
-        with open('/home/ncslaber/init_offset_17-12-2021_17:21:43.csv', 'r') as csvfile:
-            offset_x, offset_y = csv.reader(csvfile, delimiter=',')
-        offset_x = float(offset_x[0])
-        offset_y = float(offset_y[0])
+        with open('/home/ncslaber/init_offset_RTK_camera.csv', 'r') as csvfile:
+            lines = csvfile.readlines()
+            last_line = lines[-1]
+            last_line = last_line.split(",")
+        offset_x = float(last_line[0])
+        offset_y = float(last_line[1])
 
         print("Get WOW offset!!! ",offset_x,offset_y)
 

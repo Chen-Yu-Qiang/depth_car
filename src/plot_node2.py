@@ -415,14 +415,14 @@ if __name__ == '__main__':
 
     print("Python version: ",sys.version)
     rospy.init_node("plot_node2", anonymous=True)
-    landmark_z_sub=rospy.Subscriber("/landmark_z", Float64MultiArray,cb_landmark_z,queue_size=1)
+    landmark_z_sub=rospy.Subscriber("/landmark_z", Float64MultiArray,cb_landmark_z,buff_size=2**20,queue_size=1)
     landmark_error_sub=rospy.Subscriber("/landmark_error", Float64MultiArray,cb_landmark_error,queue_size=1)
-    gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,queue_size=1)
+    gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,buff_size=2**20,queue_size=1)
     # gps_sub=rospy.Subscriber("/filtered_utm", Twist,cb_gps,queue_size=1)
     lm_sub=rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1, buff_size=2**20)
     gps_offset_sub=rospy.Subscriber("/landmark_filtered_offset", Twist,cb_gps_offset,queue_size=1, buff_size=2**20)
-    subTrunk = rospy.Subscriber("/wow/trunk_info", Trunkset, cbTrunk,queue_size=1)
-    subGoal = rospy.Subscriber("/wow_utm_waypoint", PoseStamped, cbGoal,queue_size=1)
+    subTrunk = rospy.Subscriber("/wow/trunk_info", Trunkset, cbTrunk,buff_size=2**20,queue_size=1)
+    subGoal = rospy.Subscriber("/wow_utm_waypoint", PoseStamped, cbGoal,buff_size=2**20,queue_size=1)
     rate=rospy.Rate(10)
     a=a_plot()
 
