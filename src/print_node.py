@@ -138,6 +138,9 @@ if __name__ == '__main__':
 
         win1.addstr(0,0,datetime.now().strftime(\
             "%Y/%m/%d %H:%M:%S.%f")+\
+            "\n"+\
+            datetime.fromtimestamp(rospy.get_time()).strftime(\
+            "%Y/%m/%d %H:%M:%S.%f")+\
             "\n\n===GPS==="+\
             "\n lat (WD) = "+str(round(gps_lat,8))+" deg"+\
             "\n lon (JD) = "+str(round(gps_lon,8))+" deg"+\
@@ -147,6 +150,9 @@ if __name__ == '__main__':
             "\n\n===Command==="+\
             "\n v = "+str(round(cmd_v,5))+" m/s"+\
             "\n omega = "+str(round(cmd_omg,5))+" deg/s\n")
+
+
+        
         mode={-1:"",0:"Standby",1:"Get a New WayPoint and Rotating",2:"Reach the Direction and Moving"}
         win2.addstr(0,0,\
             "\n\n===Error==="+\

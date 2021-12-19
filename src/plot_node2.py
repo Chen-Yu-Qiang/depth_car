@@ -78,7 +78,7 @@ class car_obj:
         self.ax_obj=plot_obj.ax.plot([], [], 'o',markersize=ms, color=c, markeredgecolor=ec,label=car_name)[0]
 
         if self.theta_en:        
-            self.ax_th_obj=plot_obj.ax.plot([],[], '-',linewidth=5)[0]
+            self.ax_th_obj=plot_obj.ax.plot([],[], '-',linewidth=5, color=c)[0]
         if trj_en:
             self.ax_trj_obj=plot_obj.ax.plot([],[],'-', color=c,label=car_name+" Trajectory")[0]
 
@@ -89,7 +89,7 @@ class car_obj:
 
         if self.theta_en:
             self.ax_th_obj.set_data([x,x+r*np.cos(th+np.pi*0.5)],[y,y+r*np.sin(th+np.pi*0.5)])
-        if self.trj_en:
+        if self.trj_en and not(x==-1 or y==-1):
             self.trj_data_x.append(x)
             self.trj_data_y.append(y)
             self.trj_data_th.append(th)
@@ -186,7 +186,7 @@ class a_plot:
 
 
 
-        self.car2_obj=car_obj(self,c='yellow',theta_en=0,car_name="Car (w/ GPS)")
+        self.car2_obj=car_obj(self,c='gold',theta_en=1,car_name="Car (w/ GPS)")
         self.car1_obj=car_obj(self,c='lightblue',car_name="Car (w/ Landmark)")
         self.car3_obj=car_obj(self,trj_en=0)
         self.car4_obj=car_obj(self,c='k',trj_en=1,theta_en=0,car_name="Way point")
@@ -240,16 +240,14 @@ class a_plot:
         th_pro=ds.get("th_pro")
         x_gps=ds.get("x_gps")
         y_gps=ds.get("y_gps")
+        th_gps=ds.get("th_gps")
         z_d=ds.get("z_d")
         z_th=ds.get("z_th")
         z_r=ds.get("z_r")
         z_hat_d=ds.get("z_hat_d")
         z_hat_th=ds.get("z_hat_th")
         z_hat_r=ds.get("z_hat_r")
-        q_x=ds.get("q_x")
-        q_y=ds.get("q_y")
-        q_x_gps=ds.get("q_x_gps")
-        q_y_gps=ds.get("q_y_gps")
+
         z_hat_index=ds.get("z_hat_index")
         correspondence=ds.get("correspondence")
         resid_scalar=ds.get("resid_scalar")
@@ -269,7 +267,7 @@ class a_plot:
         r=1
 
         
-        self.car2_obj.update(x_gps, y_gps, 0)
+        self.car2_obj.update(x_gps, y_gps, th_gps)
         self.car1_obj.update(x, y, th)
         self.car4_obj.update(x_utm_waypoint, y_utm_waypoint, 0)
         self.car5_obj.update(x_gps_offset, y_gps_offset, 0)
@@ -325,10 +323,7 @@ ARRAY_LAY2=40
 
 
 ds=data_set()
-ds.set("q_x",deque([], maxlen=2500))
-ds.set("q_y",deque([], maxlen=2500))
-ds.set("q_x_gps",deque([], maxlen=500))
-ds.set("q_y_gps",deque([], maxlen=500))
+
 
 def cb_landmark_z(data):
     d=list(data.data)
@@ -382,8 +377,7 @@ def cb_gps(data):
 
     ds.set("x_gps",data.linear.y*(-1.0))
     ds.set("y_gps",data.linear.x)
-    ds.append("q_x_gps",data.linear.y*(-1.0))
-    ds.append("q_y_gps",data.linear.x)
+    ds.set("th_gps",data.angular.z)
 
 def cb_lm(data):
 
@@ -423,8 +417,8 @@ if __name__ == '__main__':
     rospy.init_node("plot_node2", anonymous=True)
     landmark_z_sub=rospy.Subscriber("/landmark_z", Float64MultiArray,cb_landmark_z,queue_size=1)
     landmark_error_sub=rospy.Subscriber("/landmark_error", Float64MultiArray,cb_landmark_error,queue_size=1)
-    # gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,queue_size=1)
-    gps_sub=rospy.Subscriber("/filtered_utm", Twist,cb_gps,queue_size=1)
+    gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,queue_size=1)
+    # gps_sub=rospy.Subscriber("/filtered_utm", Twist,cb_gps,queue_size=1)
     lm_sub=rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1, buff_size=2**20)
     gps_offset_sub=rospy.Subscriber("/landmark_filtered_offset", Twist,cb_gps_offset,queue_size=1, buff_size=2**20)
     subTrunk = rospy.Subscriber("/wow/trunk_info", Trunkset, cbTrunk,queue_size=1)
