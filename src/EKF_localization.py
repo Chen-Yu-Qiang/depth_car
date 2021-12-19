@@ -130,7 +130,7 @@ def Odom_2_position_Z(a,x0,y0):
     z[0][0]=a.pose.pose.position.x+x0
     z[1][0]=a.pose.pose.position.y+y0
     z[2][0]=tf.transformations.euler_from_quaternion([0,0,a.pose.pose.orientation.z,a.pose.pose.orientation.w])[2]
-    # print("pose",a,x0,y0,z)
+    print("pose",a,x0,y0,z)
     return z
 
 def Odom_2_angle_Z(a):
@@ -172,12 +172,12 @@ def set_u_init(x,y,theta):
         u[4][0]=0
     elif sys.version[0]=='3':
         import csv
-        with open('/home/ncslaber/init_offset_17-12-2021_14:51:10.csv', 'r') as csvfile:
+        with open('/home/ncslaber/init_offset_17-12-2021_17:21:43.csv', 'r') as csvfile:
             offset_x, offset_y = csv.reader(csvfile, delimiter=',')
         offset_x = float(offset_x[0])
         offset_y = float(offset_y[0])
 
-        print("Get WOW offset!!! ".offset_x,offset_y)
+        print("Get WOW offset!!! ",offset_x,offset_y)
 
         u[3][0]=offset_y
         u[4][0]=offset_x*(-1.0)

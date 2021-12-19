@@ -13,7 +13,7 @@ def cb_gps(data):
     b_msg.linear.x=z[0][0]
     b_msg.linear.y=z[1][0]
     b.publish(b_msg)
-    # print(time.time()-t0)
+    print(time.time()-t0)
 
 if __name__ == '__main__':
     rospy.init_node('tf2topic_gps_in_utm_node')
