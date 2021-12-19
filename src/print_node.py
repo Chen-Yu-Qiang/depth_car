@@ -150,6 +150,9 @@ if __name__ == '__main__':
             "\n\n===Command==="+\
             "\n v = "+str(round(cmd_v,5))+" m/s"+\
             "\n omega = "+str(round(cmd_omg,5))+" deg/s\n")
+
+
+        
         mode={-1:"",0:"Standby",1:"Get a New WayPoint and Rotating",2:"Reach the Direction and Moving"}
         win2.addstr(0,0,\
             "\n\n===Error==="+\

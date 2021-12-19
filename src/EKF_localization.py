@@ -130,7 +130,7 @@ def Odom_2_position_Z(a,x0,y0):
     z[0][0]=a.pose.pose.position.x+x0
     z[1][0]=a.pose.pose.position.y+y0
     z[2][0]=tf.transformations.euler_from_quaternion([0,0,a.pose.pose.orientation.z,a.pose.pose.orientation.w])[2]
-    print("pose",a,x0,y0,z)
+    # print("pose",a,x0,y0,z)
     return z
 
 def Odom_2_angle_Z(a):
