@@ -138,6 +138,9 @@ if __name__ == '__main__':
 
         win1.addstr(0,0,datetime.now().strftime(\
             "%Y/%m/%d %H:%M:%S.%f")+\
+            "\n"+\
+            datetime.fromtimestamp(rospy.get_time()).strftime(\
+            "%Y/%m/%d %H:%M:%S.%f")+\
             "\n\n===GPS==="+\
             "\n lat (WD) = "+str(round(gps_lat,8))+" deg"+\
             "\n lon (JD) = "+str(round(gps_lon,8))+" deg"+\
