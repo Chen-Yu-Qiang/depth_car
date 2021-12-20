@@ -182,8 +182,8 @@ if __name__=="__main__":
     rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos, buff_size=2**20,queue_size=1)
     rospy.Subscriber("gps_utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
-    rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0)
-    rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cb_imu)
+    rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0, buff_size=2**20,queue_size=1)
+    rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cb_imu, buff_size=2**20,queue_size=1)
     # if int(rospy.get_param("Enable_Fixed_Point_Strat",default=0))==0:
     # #     rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0)
     #     x0=0
