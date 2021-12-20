@@ -136,6 +136,9 @@ def Odom_2_position_Z(a,x0,y0):
 def Odom_2_angle_Z(a):
     return tf.transformations.euler_from_quaternion([0,0,a.pose.pose.orientation.z,a.pose.pose.orientation.w])[2]
 
+def Vector_2_angle_Z(a):
+    return a.vector.z*0.0174532
+
 def gps_2_utm_Z(a):
     z=np.zeros((2,1))
     WD=a.latitude  # WD(N)
@@ -171,11 +174,18 @@ def set_u_init(x,y,theta):
         u[3][0]=0
         u[4][0]=0
     elif sys.version[0]=='3':
+
         import csv
-        with open('/home/ncslaber/init_offset_17-12-2021_17:21:43.csv', 'r') as csvfile:
-            offset_x, offset_y = csv.reader(csvfile, delimiter=',')
-        offset_x = float(offset_x[0])
-        offset_y = float(offset_y[0])
+        with open('/home/ncslaber/init_offset_RTK_camera.csv', 'r') as csvfile:
+            lines = csvfile.readlines()
+            last_line = lines[-1]
+            last_line = last_line.split(",")
+            print(type(last_line))
+            print(last_line[0]) # x in East
+            print(last_line[1]) # y in North
+
+            offset_x = float(last_line[0])
+            offset_y = float(last_line[1])
 
         print("Get WOW offset!!! ",offset_x,offset_y)
 

@@ -28,6 +28,6 @@ export Built_In_Topic="/camera/color/camera_info /camera/color/image_raw/compres
 
 
 
-rosbag play 2021-12-17-18-02-26.bag --topic $Built_In_Topic  --clock
-
+rosbag play 2021-12-19-18-07-15.bag --topic $Built_In_Topic  --clock
+rosbag record -a -x "/camera(.*)"
 ```

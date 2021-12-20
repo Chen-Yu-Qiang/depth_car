@@ -11,6 +11,7 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import NavSatFix
 from std_msgs.msg import Float64MultiArray
+from geometry_msgs.msg import Vector3Stamped
 import depth2map
 import EKF_localization 
 import TREEDATA
@@ -134,7 +135,7 @@ def cb_pos(data):
         # # print(z)
         # filtered_utm.publish(filtered_utm_msg)
     
-    ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
+    # ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
 v=0
 omg=0
 ekf.Qt[0][0]=10**(-3)
@@ -163,6 +164,9 @@ def cb_gps(data):
         ekf.update_gps_utm(z)
 
 
+def cb_imu(data):
+    ekf.update_angle(EKF_localization.Vector_2_angle_Z(data))
+
 
 def cb_x0y0(data):
     global x0,y0
@@ -179,6 +183,7 @@ if __name__=="__main__":
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos)
     rospy.Subscriber("gps_utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
     rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0)
+    rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cb_imu)
     # if int(rospy.get_param("Enable_Fixed_Point_Strat",default=0))==0:
     # #     rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0)
     #     x0=0
