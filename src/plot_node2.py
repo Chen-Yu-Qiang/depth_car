@@ -186,7 +186,7 @@ class a_plot:
 
 
 
-        self.car2_obj=car_obj(self,c='gold',theta_en=1,car_name="Car (w/ GPS)")
+        self.car2_obj=car_obj(self,c='gold',theta_en=0,car_name="Car (w/ GPS)")
         self.car1_obj=car_obj(self,c='lightblue',car_name="Car (w/ Landmark)")
         self.car3_obj=car_obj(self,trj_en=0)
         self.car4_obj=car_obj(self,c='k',trj_en=1,theta_en=0,car_name="Way point")
@@ -267,7 +267,7 @@ class a_plot:
         r=1
 
         
-        self.car2_obj.update(x_gps, y_gps, th_gps, theta_en=0)
+        self.car2_obj.update(x_gps, y_gps, th_gps)
         self.car1_obj.update(x, y, th)
         self.car4_obj.update(x_utm_waypoint, y_utm_waypoint, 0)
         self.car5_obj.update(x_gps_offset, y_gps_offset, 0)
