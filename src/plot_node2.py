@@ -267,7 +267,7 @@ class a_plot:
         r=1
 
         
-        self.car2_obj.update(x_gps, y_gps, th_gps)
+        self.car2_obj.update(x_gps, y_gps, th_gps, theta_en=0)
         self.car1_obj.update(x, y, th)
         self.car4_obj.update(x_utm_waypoint, y_utm_waypoint, 0)
         self.car5_obj.update(x_gps_offset, y_gps_offset, 0)
