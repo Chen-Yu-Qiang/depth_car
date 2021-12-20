@@ -121,7 +121,7 @@ def cb_pos(data):
         ekf_out5_msg.linear.y=z[1][0]-ekf.u[4][0]
         ekf_out5_msg.angular.z=z[2][0]
         ekf_out5.publish(ekf_out5_msg)
-        print(time.time())
+        # print(time.time())
         ekf_out6_msg=Twist()
         ekf_out6_msg.linear.x=z[0][0]-ekf.u[3][0]-x0
         ekf_out6_msg.linear.y=z[1][0]-ekf.u[4][0]-y0
