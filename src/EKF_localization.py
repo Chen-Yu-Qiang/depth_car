@@ -53,7 +53,7 @@ def get_ut(ut_1,v,omg):
         A[0][0]=-v*np.sin(theta)/omg+v*np.sin(theta+omg*DELTA_T)/omg
         A[1][0]=v*np.cos(theta)/omg-v*np.cos(theta+omg*DELTA_T)/omg
         A[2][0]=omg*DELTA_T
-    print("delta theta:" ,A[2][0])
+    print("Delta theta",A[2][0])
     return ut_1+A
 
 def get_sigma(sigmat_1,gt,vt,mt):
@@ -171,7 +171,7 @@ def set_u_init(x,y,theta):
     u[2][0]=theta
 
     # Here read x_offset file
-    if sys.version[0]=='2':
+    if sys.version[0]=='3':
         u[3][0]=0
         u[4][0]=0
     elif sys.version[0]=='3':
