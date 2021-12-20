@@ -77,11 +77,11 @@ def cb_array(data):
             dis=dis+dd*dd
             n_in=n_in+1
             l=[j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0],delta_z[0][0],delta_z[1][0],delta_z[2][0],new_Z[0,0]*0.001,new_Z[1,0]*0.001,new_car_x,new_car_y,new_car_th]
-            print("is tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
+            # print("is tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
     
         else:
             l=[j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0],-1,-1,-1,-1,-1,-1,-1,-1]
-            print("no tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
+            # print("no tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
         d_out[ARRAY_LAY2*i:ARRAY_LAY2*i+11]=l
         d_out[ARRAY_LAY2*i+20:ARRAY_LAY2*i+20+ARRAY_LAY1]=d[ARRAY_LAY1*i:ARRAY_LAY1*(i+1)]
     
@@ -107,8 +107,8 @@ t0=time.time()
 x0_loc,y0_loc=0,0
 x0y0_finish=0
 def cb_pos(data):
-    global x0,y0,t0,x0_loc,y0_loc,x0y0_finish
-    if x0==0 and y0==0 and x0y0_finish==0:
+    global x0,y0,t0
+    if x0==0 and y0==0:
     #     x0_loc= data.pose.pose.position.x
     #     y0_loc= data.pose.pose.position.y
     #     x0y0_finish=1
@@ -121,7 +121,7 @@ def cb_pos(data):
         ekf_out5_msg.linear.y=z[1][0]-ekf.u[4][0]
         ekf_out5_msg.angular.z=z[2][0]
         ekf_out5.publish(ekf_out5_msg)
-    
+        print(time.time())
         ekf_out6_msg=Twist()
         ekf_out6_msg.linear.x=z[0][0]-ekf.u[3][0]-x0
         ekf_out6_msg.linear.y=z[1][0]-ekf.u[4][0]-y0
@@ -178,9 +178,9 @@ def cb_x0y0(data):
 if __name__=="__main__":
     print("Python version: ",sys.version)
     rospy.init_node("landmark_ekf", anonymous=True)
-    rospy.Subscriber("/tree_data_together", Float64MultiArray,cb_array)
-    rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd)
-    rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos)
+    rospy.Subscriber("/tree_data_together", Float64MultiArray,cb_array, buff_size=2**20,queue_size=1)
+    rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd, buff_size=2**20,queue_size=1)
+    rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos, buff_size=2**20,queue_size=1)
     rospy.Subscriber("gps_utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
     rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0)
     rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cb_imu)

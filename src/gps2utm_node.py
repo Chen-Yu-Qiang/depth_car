@@ -14,7 +14,7 @@ import tf
 x0=0
 y0=0
 def cb_gps(data):
-    global x0,y0
+    global x0,y0,x0_loc,y0_loc
     # t0=time.time()
     b_msg=Twist()
     z=gps_2_utm_Z(data)
