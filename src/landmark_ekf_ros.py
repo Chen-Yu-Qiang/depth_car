@@ -135,7 +135,7 @@ def cb_pos(data):
         # # print(z)
         # filtered_utm.publish(filtered_utm_msg)
     
-    # ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
+    ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
 v=0
 omg=0
 ekf.Qt[0][0]=10**(-3)
@@ -183,7 +183,7 @@ if __name__=="__main__":
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos, buff_size=2**20,queue_size=1)
     rospy.Subscriber("gps_utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
     rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0, buff_size=2**20,queue_size=1)
-    rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cb_imu, buff_size=2**20,queue_size=1)
+    # rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cb_imu, buff_size=2**20,queue_size=1)
     # if int(rospy.get_param("Enable_Fixed_Point_Strat",default=0))==0:
     # #     rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0)
     #     x0=0

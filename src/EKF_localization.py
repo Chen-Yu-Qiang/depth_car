@@ -9,7 +9,7 @@ DELTA_T=0.2
 STATE_NUM=5
 def get_Gt(v,omg,theta):
     Gt=np.eye(STATE_NUM)
-    if abs(omg)<10**(-3):
+    if abs(omg)<10**(-1):
         Gt[0][2]=-v*np.sin(theta)*DELTA_T
         Gt[1][2]=v*np.cos(theta)*DELTA_T
     else:
@@ -19,7 +19,7 @@ def get_Gt(v,omg,theta):
 
 def get_Vt(v,omg,theta):
     Vt=np.zeros((STATE_NUM,2))
-    if abs(omg)<10**(-3):
+    if abs(omg)<10**(-1):
         Vt[0][0]=np.cos(theta)*DELTA_T
         Vt[1][0]=np.sin(theta)*DELTA_T
         Vt[0][1]=-v*np.sin(theta)*DELTA_T*DELTA_T*0.5
@@ -45,7 +45,7 @@ def get_Mt(v,omg):
 def get_ut(ut_1,v,omg):
     theta=ut_1[2][0]
     A=np.zeros((STATE_NUM,1))
-    if abs(omg)<10**(-3):
+    if abs(omg)<10**(-1):
         A[0][0]=v*np.cos(theta)*DELTA_T
         A[1][0]=v*np.sin(theta)*DELTA_T
         A[2][0]=0
@@ -53,10 +53,11 @@ def get_ut(ut_1,v,omg):
         A[0][0]=-v*np.sin(theta)/omg+v*np.sin(theta+omg*DELTA_T)/omg
         A[1][0]=v*np.cos(theta)/omg-v*np.cos(theta+omg*DELTA_T)/omg
         A[2][0]=omg*DELTA_T
+    print("delta theta:" ,A[2][0])
     return ut_1+A
 
 def get_sigma(sigmat_1,gt,vt,mt):
-    a=np.zeros((5,5))
+    a=np.zeros((STATE_NUM,STATE_NUM))
     a[3][3]=10**(-10)
     a[4][4]=10**(-10)
 
@@ -416,7 +417,13 @@ class EKF_localization:
         z_hat=np.dot(H,self.u)
         S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt_pos
         K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
-        self.u=self.u+np.dot(K,(Z-z_hat))
+
+        delta=np.dot(K,(Z-z_hat))
+
+        delta[0][0]=min(max(delta[0][0],-0.4),0.4)
+        delta[1][0]=min(max(delta[1][0],-0.4),0.4)
+        delta[2][0]=min(max(delta[2][0],-0.1),0.1)
+        self.u=self.u+delta
         self.sigma=np.dot((np.eye(STATE_NUM)-np.dot(K,H)),self.sigma)
         return
 
@@ -440,7 +447,13 @@ class EKF_localization:
         S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt_ang
         # print("ang",self.sigma)
         K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
-        self.u=self.u+np.dot(K,(Z-z_hat))
+
+        delta=np.dot(K,(Z-z_hat))
+
+        delta[0][0]=min(max(delta[0][0],-0.4),0.4)
+        delta[1][0]=min(max(delta[1][0],-0.4),0.4)
+        delta[2][0]=min(max(delta[2][0],-0.1),0.1)
+        self.u=self.u+delta
         self.sigma=np.dot((np.eye(STATE_NUM)-np.dot(K,H)),self.sigma)
         return
 
@@ -457,6 +470,12 @@ class EKF_localization:
         S=np.dot(H,np.dot(self.sigma,H.T))+self.Qt_utm
         # print("gps",self.sigma)
         K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
-        self.u=self.u+np.dot(K,(Z-z_hat))
+
+        delta=np.dot(K,(Z-z_hat))
+
+        delta[0][0]=min(max(delta[0][0],-0.4),0.4)
+        delta[1][0]=min(max(delta[1][0],-0.4),0.4)
+        delta[2][0]=min(max(delta[2][0],-0.1),0.1)
+        self.u=self.u+delta
         self.sigma=np.dot((np.eye(STATE_NUM)-np.dot(K,H)),self.sigma)
         return
