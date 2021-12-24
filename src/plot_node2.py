@@ -149,8 +149,8 @@ class a_plot:
         # self.ax.set_ylim(2767650,2767745)      
 
 
-        self.ax.set_xlim(352835,352865)
-        self.ax.set_ylim(2767655,2767690)
+        self.ax.set_xlim(352845,352860)
+        self.ax.set_ylim(2767665,2767690)
         self.now_zone="i"
    
         x, y, th= 352910,2767650,0
@@ -186,11 +186,11 @@ class a_plot:
 
 
 
-        self.car2_obj=car_obj(self,c='gold',theta_en=0,car_name="Car (w/ GPS)")
-        self.car1_obj=car_obj(self,c='lightblue',car_name="Car (w/ Landmark)")
+        self.car2_obj=car_obj(self,c='red',theta_en=0,car_name="Car (w/ GPS)")
+        self.car1_obj=car_obj(self,c='blue',car_name="Car (w/ Landmark)")
         self.car3_obj=car_obj(self,trj_en=0)
         self.car4_obj=car_obj(self,c='k',trj_en=1,theta_en=0,car_name="Way point")
-        self.car5_obj=car_obj(self,c='m',trj_en=1,theta_en=0,car_name="gps offset")
+        self.car5_obj=car_obj(self,c='green',trj_en=1,theta_en=0,car_name="gps offset")
 
 
         if self.now_zone=="h":
@@ -228,7 +228,7 @@ class a_plot:
             self.fig.savefig('/home/ncslaber/110-1/211125_localTest/z_hat/' + datetime.now().strftime("%d-%m-%Y_%H:%M:%S.%f")+'.png',)
 
     def car_position(self,ds):
-        
+        tt0=time.time()
         x=ds.get("x")
         y=ds.get("y")
         th=ds.get("th")
@@ -241,6 +241,13 @@ class a_plot:
         x_gps=ds.get("x_gps")
         y_gps=ds.get("y_gps")
         th_gps=ds.get("th_gps")
+        if time.time()-ds.get("z_time")>0.1:
+            ds.set("z_d",[])
+            ds.set("z_th",[])
+            ds.set("z_r",[])
+            ds.set("z_hat_d",[])
+            ds.set("z_hat_th",[])
+            ds.set("z_hat_r",[])
         z_d=ds.get("z_d")
         z_th=ds.get("z_th")
         z_r=ds.get("z_r")
@@ -258,6 +265,7 @@ class a_plot:
 
         x_gps_offset=ds.get("x_gps_offset")
         y_gps_offset=ds.get("y_gps_offset")
+        tt1=time.time()
 
 
 
@@ -271,6 +279,7 @@ class a_plot:
         self.car1_obj.update(x, y, th)
         self.car4_obj.update(x_utm_waypoint, y_utm_waypoint, 0)
         self.car5_obj.update(x_gps_offset, y_gps_offset, 0)
+        tt2=time.time()
 
 
 
@@ -294,7 +303,7 @@ class a_plot:
 
 
         for i in range(len(z_hat_d),len(z_d)):
-            self.obs_line[i].set_visible(False)
+            self.obs_line[i].set_visible(True)
             self.real_line[i].set_visible(False)
             self.real_tree[i].set_visible(False)
             if int(rospy.get_param('XZ_MODE')):
@@ -317,7 +326,7 @@ class a_plot:
             self.car3_obj.update(x_pro, y_pro, th_pro)
     
 
-
+        # print("plot time",tt1-tt0,tt2-tt1,time.time()-tt2)
 
 ARRAY_LAY2=40
 
@@ -340,6 +349,7 @@ def cb_landmark_z(data):
     ds.set("x_pro",0)
     ds.set("y_pro",0)
     ds.set("th_pro",0)
+    ds.set("z_time",time.time())
 
 
 
@@ -416,25 +426,27 @@ if __name__ == '__main__':
     print("Python version: ",sys.version)
     rospy.init_node("plot_node2", anonymous=True)
     landmark_z_sub=rospy.Subscriber("/landmark_z", Float64MultiArray,cb_landmark_z,buff_size=2**20,queue_size=1)
-    landmark_error_sub=rospy.Subscriber("/landmark_error", Float64MultiArray,cb_landmark_error,queue_size=1)
+    landmark_error_sub=rospy.Subscriber("/landmark_error", Float64MultiArray,cb_landmark_error, buff_size=2**20,queue_size=1)
     gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,buff_size=2**20,queue_size=1)
     # gps_sub=rospy.Subscriber("/filtered_utm", Twist,cb_gps,queue_size=1)
     lm_sub=rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1, buff_size=2**20)
     gps_offset_sub=rospy.Subscriber("/landmark_filtered_offset", Twist,cb_gps_offset,queue_size=1, buff_size=2**20)
     subTrunk = rospy.Subscriber("/wow/trunk_info", Trunkset, cbTrunk,buff_size=2**20,queue_size=1)
     subGoal = rospy.Subscriber("/wow_utm_waypoint", PoseStamped, cbGoal,buff_size=2**20,queue_size=1)
-    rate=rospy.Rate(10)
+    rate=rospy.Rate(5)
     a=a_plot()
 
     while not rospy.is_shutdown():
         t=time.time()
 
         try:
+            
             a.car_position(ds)
+            t2=time.time()
             plt.pause(0.001)
 
         except:
             pass
         # a.save_fig()
-        # print("plot time",time.time()-t)
+        # print("plot time",time.time()-t2,t2-t)
         rate.sleep()

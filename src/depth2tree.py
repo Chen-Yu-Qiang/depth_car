@@ -155,7 +155,7 @@ def cbDepth_2(data):
     centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
     centre_x_list,centre_z_list,radius_r_list = depth2map.circle_filter(centre_x_list,centre_z_list,radius_r_list)
 
-    if len(centre_x_list)>=0:
+    if len(centre_x_list)>0:
         list2ROSmsg_dthr_each(d_list,th_list,r_list,car_x,car_y,car_theta,AA,tree_data2_each_pub)
         list2ROSmsg_dthr(d_list,th_list,r_list,car_x,car_y,car_theta,AA,tree_data2_together_pub)
     # map=depth2map.circle_to_world(map,centre_x_list,centre_z_list,radius_r_list,car_x*1000,car_y*1000,car_theta)

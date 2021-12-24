@@ -53,5 +53,5 @@ if __name__ == '__main__':
     filtered_utm=rospy.Publisher("filtered_utm",Twist,queue_size=1)
     local_org_in_utm_pub=rospy.Publisher("local_org_in_utm",Twist,queue_size=1)
     rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix, cb_gps, buff_size=2**20,queue_size=1)
-    rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos)
+    rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos, buff_size=2**20,queue_size=1)
     rospy.spin()

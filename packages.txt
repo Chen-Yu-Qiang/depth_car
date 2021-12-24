@@ -9,13 +9,11 @@ backports-abc==0.5
 backports.entry-points-selectable==1.1.0
 backports.functools-lru-cache==1.6.4
 backports.shutil-get-terminal-size==1.0.0
-base-local-planner==1.16.7
 beautifulsoup4==4.6.0
 bondpy==1.8.5
 bzr==2.8.0.dev1
 camera-calibration==1.15.0
 camera-calibration-parsers==1.11.13
-camera-info-manager-py==0.2.3
 catkin==0.7.29
 catkin-pkg==0.4.24
 catkin-pkg-modules==0.4.24
@@ -40,7 +38,6 @@ diagnostic-common-diagnostics==1.9.7
 diagnostic-updater==1.9.7
 distlib==0.3.2
 docutils==0.14
-drone-wrapper==1.3.8
 dynamic-reconfigure==1.6.3
 empy==3.3.2
 enum34==1.1.10
@@ -82,7 +79,6 @@ llvmlite==0.31.0
 lxml==4.2.1
 lz4==0.10.1
 matplotlib==2.1.1
-mavros==1.9.0
 mercurial==4.5.3
 message-filters==1.14.12
 mpi4py==2.0.0
@@ -92,8 +88,8 @@ numba==0.47.0
 numpy==1.16.6
 oauth==1.0.1
 olefile==0.45.1
-opencv-contrib-python==3.4.0.12
-opencv-python==3.4.0.12
+opencv-contrib-python==3.4.0.14
+opencv-python==3.4.0.14
 PAM==0.4.2
 paramiko==2.0.0
 pathlib2==2.3.6
@@ -136,7 +132,6 @@ qt-dotgraph==0.4.2
 qt-gui==0.4.2
 qt-gui-cpp==0.4.2
 qt-gui-py-common==0.4.2
-resource-retriever==1.12.6
 roman==2.0.0
 rosbag==1.14.12
 rosboost-cfg==1.14.9
@@ -161,7 +156,6 @@ rosparam==1.14.12
 rospkg==1.3.0
 rospkg-modules==1.3.0
 rospy==1.14.12
-rosserial-python==0.8.0
 rosservice==1.14.12
 rostest==1.14.12
 rostopic==1.14.12
@@ -173,10 +167,8 @@ rqt-bag-plugins==0.5.1
 rqt-console==0.4.9
 rqt-controller-manager==0.18.4
 rqt-dep==0.4.9
-rqt-drone-teleop==1.3.8
 rqt-ez-publisher==0.5.0
 rqt-graph==0.4.11
-rqt-ground-robot-teleop==1.3.8
 rqt-gui==0.5.2
 rqt-gui-py==0.5.2
 rqt-image-view==0.4.16
@@ -210,7 +202,6 @@ rqt-top==0.4.8
 rqt-topic==0.4.11
 rqt-virtual-joy==0.1.2
 rqt-web==0.4.8
-rviz==1.13.21
 scandir==1.10.0
 scipy==1.2.3
 scour==0.36
@@ -242,7 +233,6 @@ typing==3.10.0.0
 u-msgpack-python==2.1
 unique-id==1.0.6
 urdfdom-py==0.4.6
-vboxapi==1.0
 vcstools==0.1.42
 virtualenv==20.7.2
 wadllib==1.3.2

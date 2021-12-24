@@ -4,9 +4,11 @@ import numpy as np
 import tf
 from pyproj import Proj
 import sys
+import time
 
 DELTA_T=0.2
 STATE_NUM=5
+WHITE_LIST=[48,49,50]
 def get_Gt(v,omg,theta):
     Gt=np.eye(STATE_NUM)
     if abs(omg)<10**(-1):
@@ -53,13 +55,13 @@ def get_ut(ut_1,v,omg):
         A[0][0]=-v*np.sin(theta)/omg+v*np.sin(theta+omg*DELTA_T)/omg
         A[1][0]=v*np.cos(theta)/omg-v*np.cos(theta+omg*DELTA_T)/omg
         A[2][0]=omg*DELTA_T
-    print("Delta theta",A[2][0])
+
     return ut_1+A
 
 def get_sigma(sigmat_1,gt,vt,mt):
     a=np.zeros((STATE_NUM,STATE_NUM))
-    a[3][3]=10**(-10)
-    a[4][4]=10**(-10)
+    a[3][3]=10**(-8)
+    a[4][4]=10**(-8)
 
     return np.dot(np.dot(gt,sigmat_1),gt.T)+np.dot(np.dot(vt,mt),vt.T)+a
 
@@ -351,7 +353,12 @@ class EKF_localization:
         max_j=0
         max_j_th=self.max_j_th
         for i in range(len(self.tree_data)):
+            if not i in WHITE_LIST:
 
+                z_hat.append(0)
+                H.append(0)
+                S.append(0)
+                continue
             mx=self.tree_data[i][0]
             my=self.tree_data[i][1]
             ms=self.tree_data[i][2]
@@ -386,7 +393,9 @@ class EKF_localization:
 
 
     def update_landmark_xz(self,Z):
+        tt=time.time()
         max_j_index,max_j,_,z_hat,_=self.update_landmark_xz_sim(Z)
+        # print(time.time()-tt)
         if max_j_index>0:
             _,_,_,_,delta=self.update_landmark_xz_know_cor(Z,max_j_index)
             return max_j_index,max_j,Z,z_hat,delta

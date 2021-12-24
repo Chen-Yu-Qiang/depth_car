@@ -439,5 +439,5 @@ if __name__ == '__main__':
         except:
             pass
         # a.save_fig()
-        # print("plot time",time.time()-t)
+        print("plot time",time.time()-t)
         rate.sleep()

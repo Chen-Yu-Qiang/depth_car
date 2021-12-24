@@ -16,7 +16,11 @@ import depth2map
 import EKF_localization 
 import TREEDATA
 
-u_init=EKF_localization.set_u_init(2767701,-352869,1.5)  # 1900 in utm
+print("Python version: ",sys.version)
+rospy.init_node("landmark_ekf", anonymous=True)
+gps_init=rospy.wait_for_message("gps_utm", Twist)
+print("Get GPS init ",gps_init.linear.x,gps_init.linear.y)
+u_init=EKF_localization.set_u_init(gps_init.linear.x,gps_init.linear.y,1.5)
 
 ekf=EKF_localization.EKF_localization(u_init)
 TREE_DATA=TREEDATA.TREE_DATA
@@ -39,6 +43,7 @@ def cb_array(data):
     #     for i in range(min(n,1)):
     for i in range(n):
 
+        # tt1=time.time()
         if int(rospy.get_param('XZ_MODE')):
             if n>=2 and (d[i*ARRAY_LAY1+11]>-1):
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz_know_cor(EKF_localization.list_2_landmark_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
@@ -53,6 +58,7 @@ def cb_array(data):
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark(EKF_localization.list_2_landmark_Z_together(data.data,i))
 
         # if j>0 and (j in[13,15,16,17,18,19,21,23]):
+        # tt2=time.time()
         if j>0:
             use_landmark=j
 
@@ -84,6 +90,7 @@ def cb_array(data):
             # print("no tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
         d_out[ARRAY_LAY2*i:ARRAY_LAY2*i+11]=l
         d_out[ARRAY_LAY2*i+20:ARRAY_LAY2*i+20+ARRAY_LAY1]=d[ARRAY_LAY1*i:ARRAY_LAY1*(i+1)]
+        # print(time.time()-tt2,tt2-tt1)
     
 
     # print("d_out---------------------")
@@ -95,7 +102,6 @@ def cb_array(data):
     ekf_out_landmark_error.publish(m)
     m=Float64MultiArray(data=d_out)
     ekf_out_landmark_z.publish(m) 
-
 t0=time.time()
 
 
@@ -138,9 +144,9 @@ def cb_pos(data):
     ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
 v=0
 omg=0
-ekf.Qt[0][0]=10**(-3)
-ekf.Qt[1][1]=0.2*10**(-3)
-ekf.Qt[2][2]=10**(-3)
+ekf.Qt[0][0]=10**(-4)
+ekf.Qt[1][1]=10**(-4)
+ekf.Qt[2][2]=10**(-4)
 ekf.max_j_th=0.45
 def cb_cmd(data):
     global v,omg
@@ -176,12 +182,10 @@ def cb_x0y0(data):
 
 
 if __name__=="__main__":
-    print("Python version: ",sys.version)
-    rospy.init_node("landmark_ekf", anonymous=True)
     rospy.Subscriber("/tree_data_together", Float64MultiArray,cb_array, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos, buff_size=2**20,queue_size=1)
-    rospy.Subscriber("gps_utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
+    # rospy.Subscriber("gps_utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
     rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0, buff_size=2**20,queue_size=1)
     # rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cb_imu, buff_size=2**20,queue_size=1)
     # if int(rospy.get_param("Enable_Fixed_Point_Strat",default=0))==0:
@@ -202,7 +206,8 @@ if __name__=="__main__":
     ekf_out_sigma=rospy.Publisher("landmark_sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("landmark_z",Float64MultiArray,queue_size=1)
     ekf_out_landmark_error=rospy.Publisher("landmark_error",Float64MultiArray,queue_size=1)
-    rate=rospy.Rate(5)
+    rate=rospy.Rate(20)
+    EKF_localization.DELTA_T=0.05
 
     
     while not rospy.is_shutdown():
