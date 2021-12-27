@@ -153,7 +153,7 @@ def cb_landmark_z(data):
     car_x_loc=car_x-MAP_OFFSET_X
     car_y_loc=car_y-MAP_OFFSET_Y
     centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
-    map=depth2map.circle_to_world(map,centre_x_list,centre_z_list,radius_r_list,car_x_loc*1000,car_y_loc*1000,car_theta)    
+    # map=depth2map.circle_to_world(map,centre_x_list,centre_z_list,radius_r_list,car_x_loc*1000,car_y_loc*1000,car_theta)    
 
 def cb_landmark_xz_z(data):
     global car_x,car_y,car_theta,map
@@ -165,14 +165,14 @@ def cb_landmark_xz_z(data):
     radius_r_list=[0.2*1000]
     car_x_loc=car_x-MAP_OFFSET_X
     car_y_loc=car_y-MAP_OFFSET_Y
-    map=depth2map.circle_to_world(map,centre_x_list,centre_z_list,radius_r_list,car_x_loc*1000,car_y_loc*1000,car_theta)    
+    # map=depth2map.circle_to_world(map,centre_x_list,centre_z_list,radius_r_list,car_x_loc*1000,car_y_loc*1000,car_theta)    
 
 if __name__=="__main__":
     print("Python version: ",sys.version)
     rospy.init_node("tree_to_map", anonymous=True)
     tree_data_sub=rospy.Subscriber("/tree_data2_each", Float64MultiArray,cb_tree_each,queue_size=1)
     tree_data_sub=rospy.Subscriber("/tree_data2_together", Float64MultiArray,cb_tree_together,queue_size=1)
-    landmark_z_sub=rospy.Subscriber("/landmark_z", Float64MultiArray,cb_landmark_z,queue_size=1)
+    # landmark_z_sub=rospy.Subscriber("/landmark_z", Float64MultiArray,cb_landmark_z,queue_size=1)
     tree_data_each_pub=rospy.Publisher("/tree_data_each", Float64MultiArray,queue_size=1)
     tree_data_together_pub=rospy.Publisher("/tree_data_together", Float64MultiArray,queue_size=1)
 
