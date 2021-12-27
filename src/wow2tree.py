@@ -19,9 +19,9 @@ from mapping_explorer.msg import Trunkset, Trunkinfo
 car_x=0
 car_y=0
 car_theta=0
-map=depth2map.cerate_map()
+# map=depth2map.cerate_map()
 
-car1=depth2map.trj()
+# car1=depth2map.trj()
 AA=0
 ARRAY_LAY1=20
 image=np.zeros((480,640))

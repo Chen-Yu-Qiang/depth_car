@@ -19,10 +19,10 @@ MAP_OFFSET_Y=-352874
 car_x2=0
 car_y2=0
 car_theta2=0
-map=depth2map.cerate_map()
+# map=depth2map.cerate_map()
 
-car1=depth2map.trj()
-car2=depth2map.trj()
+# car1=depth2map.trj()
+# car2=depth2map.trj()
 ARRAY_LAY1=20
 AA=0
 
