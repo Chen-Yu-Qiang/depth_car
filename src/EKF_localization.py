@@ -225,17 +225,16 @@ class EKF_localization:
         # print(self.sigma)
 
     def get_like(self,z_error):
-        w=np.zeros((3,3))
-        w[0][0]=0.1
-        w[1][1]=1.0
-        w[2][2]=1.0
-        if np.cos(z_error[1][0])<0:
-            return 0
-        j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
         j_k=np.exp((-0.5)*z_error[0][0]*z_error[0][0])+2.0*np.exp((-2.0)*z_error[1][0]*z_error[1][0])+1.7*np.exp((-1.5)*z_error[2][0]*z_error[2][0])
         return j_k     
 
-
+    def get_like_xz(self,z_error):
+        w=np.zeros((3,3))
+        w[0][0]=0.5
+        w[1][1]=0.5
+        w[2][2]=0.1
+        j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
+        return j_k    
     def update_landmark_sim(self,Z,lock_tree={}):
         z_hat=[]
         H=[]
@@ -325,19 +324,17 @@ class EKF_localization:
         z_error=Z-z_hat
         K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
         delta=np.dot(K,(Z-z_hat))
-        w=np.zeros((3,3))
-        w[0][0]=0.5
-        w[1][1]=0.5
-        w[2][2]=1.0
-        if i in [48,49,50]:
-            j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
-        else:
-            j_k=-100
+
+        j_k=self.get_like(z_error)
+        delta[2][0]=0
         if j_k<self.max_j_th:
-            print("likelihood too small")
+            print("likelihood too small",i,j_k)
             return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
-        elif abs(delta[0][0])>0.4 or abs(delta[1][0])>0.4 or abs(delta[2][0])>0.1:
-            print("Delta too big")
+        elif abs(delta[0][0])>1.0 or abs(delta[1][0])>1.0:
+            print("XY Delta too big",i,j_k,delta[0][0],delta[1][0])
+            return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
+        elif abs(delta[2][0])>0.1:
+            print("THETA Delta too big",delta[2][0])
             return i*(-1.0),j_k,Z,z_hat,np.ones((3,1))*(-1.0)
         else:        
             self.u=self.u+delta
@@ -374,7 +371,7 @@ class EKF_localization:
             w[1][1]=0.5
             w[2][2]=1.0
             if i in [48,49,50]:
-                j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
+                j_k=[[self.get_like(z_error)]]
             else:
                 j_k=-100
             # print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0])
@@ -397,7 +394,7 @@ class EKF_localization:
         max_j_index,max_j,_,z_hat,_=self.update_landmark_xz_sim(Z)
         # print(time.time()-tt)
         if max_j_index>0:
-            _,_,_,_,delta=self.update_landmark_xz_know_cor(Z,max_j_index)
+            max_j_index,_,_,_,delta=self.update_landmark_xz_know_cor(Z,max_j_index)
             return max_j_index,max_j,Z,z_hat,delta
         else:
             return max_j_index,max_j,Z,z_hat,-1

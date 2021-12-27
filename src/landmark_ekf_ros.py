@@ -147,7 +147,7 @@ omg=0
 ekf.Qt[0][0]=10**(-4)
 ekf.Qt[1][1]=10**(-4)
 ekf.Qt[2][2]=10**(-4)
-ekf.max_j_th=0.45
+ekf.max_j_th=1.5
 def cb_cmd(data):
     global v,omg
     v=data.linear.x
