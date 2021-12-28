@@ -110,6 +110,11 @@ class car_obj:
         if self.trj_en:
             self.ax_trj_obj.set_visible(v)
 
+    def change_visible_trj(self):
+        if self.trj_en:
+            self.ax_trj_obj.set_visible(not self.ax_trj_obj.get_visible())
+
+
 class a_plot:
     def __init__(self, mode=0):
         if sys.version[0]=='2':
@@ -118,7 +123,7 @@ class a_plot:
             self.fig, self.ax = plt.subplots(1, 1,dpi=120,figsize=(10,10))
         self.ax.set_aspect('equal')
         self.mode=mode
-
+        self.fig.canvas.mpl_connect('key_press_event', self.key_event)
         self.ax.set_title("Map")
         self.ax.set_xlabel("X (Weat--East) [m]")
         self.ax.set_ylabel("Y (South--North) [m]")
@@ -219,6 +224,17 @@ class a_plot:
         self.now_zone="b"
         self.ax.legend()
         plt.pause(0.1)
+
+    def key_event(self,e):
+        print("get",str(e.key))
+        sys.stdout.flush()
+        if e.key=='w':
+            self.car2_obj.change_visible_trj()
+        if e.key=='e':
+            self.car1_obj.change_visible_trj()
+        if e.key=='r':
+            self.car5_obj.change_visible_trj()
+        
 
     def save_fig(self):
 

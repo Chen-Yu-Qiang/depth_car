@@ -45,7 +45,7 @@ def cb_array(data):
 
         # tt1=time.time()
         if int(rospy.get_param('XZ_MODE')):
-            if n>=2 and (d[i*ARRAY_LAY1+11]>-1):
+            if n>=2 and (d[i*ARRAY_LAY1+11]>-1) and 0:
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz_know_cor(EKF_localization.list_2_landmark_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
                 print(d[i*ARRAY_LAY1+11]+1)
             else:
@@ -147,7 +147,7 @@ omg=0
 ekf.Qt[0][0]=10**(-4)
 ekf.Qt[1][1]=10**(-4)
 ekf.Qt[2][2]=10**(-4)
-ekf.max_j_th=1.5
+ekf.max_j_th=2.5
 def cb_cmd(data):
     global v,omg
     v=data.linear.x
@@ -206,8 +206,8 @@ if __name__=="__main__":
     ekf_out_sigma=rospy.Publisher("landmark_sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("landmark_z",Float64MultiArray,queue_size=1)
     ekf_out_landmark_error=rospy.Publisher("landmark_error",Float64MultiArray,queue_size=1)
-    rate=rospy.Rate(20)
-    EKF_localization.DELTA_T=0.05
+    rate=rospy.Rate(10)
+    EKF_localization.DELTA_T=0.1
 
     
     while not rospy.is_shutdown():

@@ -8,7 +8,7 @@ import time
 
 DELTA_T=0.2
 STATE_NUM=5
-WHITE_LIST=[48,49,50]
+WHITE_LIST=list(range(100))
 def get_Gt(v,omg,theta):
     Gt=np.eye(STATE_NUM)
     if abs(omg)<10**(-1):
@@ -315,7 +315,7 @@ class EKF_localization:
     def update_landmark_xz_know_cor(self,Z,i):
         if i<1:
             return i,0,Z,np.zeros((3,1))*(-1.0),np.ones((3,1))*(-1.0)
-        
+
         mx=self.tree_data[int(i-1)][0]
         my=self.tree_data[int(i-1)][1]
         ms=self.tree_data[int(i-1)][2]
@@ -370,7 +370,7 @@ class EKF_localization:
             w[0][0]=0.5
             w[1][1]=0.5
             w[2][2]=1.0
-            if i in [48,49,50]:
+            if i in WHITE_LIST:
                 j_k=[[self.get_like(z_error)]]
             else:
                 j_k=-100

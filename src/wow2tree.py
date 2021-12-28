@@ -39,8 +39,8 @@ def list2ROSmsg_dthr_with_cor(d_list,th_list,r_list,car_x,car_y,car_theta,AA,pub
         # a[i*ARRAY_LAY1+6]=car_y
         # a[i*ARRAY_LAY1+7]=car_theta
         a[i*ARRAY_LAY1+8]=AA
-        a[i*ARRAY_LAY1+9]=NnW[0,i]
-        a[i*ARRAY_LAY1+10]=NnW[1,i]
+        a[i*ARRAY_LAY1+9]=NnW[0,i]*0.001
+        a[i*ARRAY_LAY1+10]=NnW[1,i]*0.001
         a[i*ARRAY_LAY1+11]=cor_list[i]
     b=Float64MultiArray(data=a)
     
@@ -111,7 +111,10 @@ def cbTrunkset(data):
         if n<2:
             cor=-100
         else:
-            cor = int(data.match[i])
+            if i<len(data.match):
+                cor = int(data.match[i])
+            else:
+                cor=-100
 
         distance,theta=move30cm(distance,theta)
         d_list.append(distance)
@@ -169,7 +172,7 @@ if __name__=="__main__":
     tree_data2_together_pub=rospy.Publisher("/tree_data2_together", Float64MultiArray,queue_size=1)
 
 
-    subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom)
+    subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom,queue_size=1, buff_size=2**24)
     rospy.spin()
 
 

@@ -7,6 +7,7 @@ import cv2
 import time
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64MultiArray,MultiArrayDimension
+from geometry_msgs.msg import Twist
 import depth2map
 import max_like_tree
 
@@ -44,8 +45,8 @@ def cb_tree_each(data):
         a[5]=car_x
         a[6]=car_y
         a[7]=car_theta
-        a[9]=NnW[0,i]*0.001
-        a[10]=NnW[1,i]*0.001
+        a[12]=NnW[0,i]*0.001
+        a[13]=NnW[1,i]*0.001
         # like_max_i,like_max=max_like_tree.max_like(car_x,car_y,car_theta,tree_data,d_list[i]*0.001,th_list[i],radius_r_list[i]*0.001)
         # a[11]=like_max_i+1
         # a[12]=like_max
@@ -85,8 +86,8 @@ def cb_tree_together(data):
         data[ARRAY_LAY1*i+5]=car_x
         data[ARRAY_LAY1*i+6]=car_y
         data[ARRAY_LAY1*i+7]=car_theta
-        data[ARRAY_LAY1*i+9]=NnW[0,i]*0.001
-        data[ARRAY_LAY1*i+10]=NnW[1,i]*0.001
+        data[ARRAY_LAY1*i+12]=NnW[0,i]*0.001
+        data[ARRAY_LAY1*i+13]=NnW[1,i]*0.001
         # like_max_i,like_max=max_like_tree.max_like(car_x,car_y,car_theta,tree_data,d_list[i]*0.001,th_list[i],radius_r_list[i]*0.001)
         # a[11]=like_max_i+1
         # a[12]=like_max
@@ -119,6 +120,14 @@ def cbOdom(msg):
 
 
     # print("3",time.time()-t)
+
+
+def cbTwist(msg):
+    global car_x,car_y,car_theta,map,AA
+    # t=time.time()
+    car_x=msg.linear.x
+    car_y=msg.linear.y
+    car_theta=msg.angular.z
 
 def cbOdom2(msg):
     global car_x2,car_y2,car_theta2
@@ -176,7 +185,8 @@ if __name__=="__main__":
     tree_data_each_pub=rospy.Publisher("/tree_data_each", Float64MultiArray,queue_size=1)
     tree_data_together_pub=rospy.Publisher("/tree_data_together", Float64MultiArray,queue_size=1)
 
-    subOdom = rospy.Subscriber("/landmark_odom", Odometry, cbOdom)
+    # subOdom = rospy.Subscriber("/landmark_odom", Odometry, cbOdom)
+    subTwist = rospy.Subscriber("/landmark_filtered_offset_local", Twist, cbTwist)
     # subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom2)
 
     # rate=rospy.Rate(5)

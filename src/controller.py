@@ -70,7 +70,7 @@ if __name__ == '__main__':
                 cmd_msg.angular.z=max(omg_kp*ang,(-1.0)*omg_max)
 
 
-        elif s==2 and ((dis< 0.1) or (np.cos(ang)<=0)):
+        elif s==2 and ((dis< 0.3) or (np.cos(ang)<=0)):
             cmd_msg.linear.x=0
             cmd_msg.angular.z=0
             s=0
