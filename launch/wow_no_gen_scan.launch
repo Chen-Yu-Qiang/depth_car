@@ -24,6 +24,6 @@
 <!-- <node pkg="depth_car" type="tf2topic_local_org_in_utm_node.py" name="tf2topic_local_org_in_utm_node" output="screen"/> -->
 
 
-<node pkg="mapping_explorer" type="tf_transformer_map2.py" name="tf_transformer_map2" output="screen"/>
+<node pkg="mapping_explorer" type="tf_transformer_maptomap2.py" name="tf_transformer_maptomap2" output="screen"/>
 
 </launch>
