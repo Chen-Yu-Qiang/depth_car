@@ -206,8 +206,8 @@ if __name__=="__main__":
     ekf_out_sigma=rospy.Publisher("landmark_sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("landmark_z",Float64MultiArray,queue_size=1)
     ekf_out_landmark_error=rospy.Publisher("landmark_error",Float64MultiArray,queue_size=1)
-    rate=rospy.Rate(10)
-    EKF_localization.DELTA_T=0.1
+    rate=rospy.Rate(5)
+    EKF_localization.DELTA_T=0.2
 
     
     while not rospy.is_shutdown():
