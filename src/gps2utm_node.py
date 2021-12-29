@@ -55,14 +55,14 @@ def cb_pos(data):
 def cb_offset(data):
     global x0,y0,x_loc_now,y_loc_now,th
     lm_off_loc_pub_msg=Twist()
-    lm_off_loc_pub_msg.linear.x=data.linear.x+x_loc_now
-    lm_off_loc_pub_msg.linear.y=data.linear.y+y_loc_now
+    lm_off_loc_pub_msg.linear.x=x_loc_now-data.linear.x
+    lm_off_loc_pub_msg.linear.y=y_loc_now-data.linear.y
     lm_off_loc_pub_msg.angular.z=th
     lm_off_loc_pub.publish(lm_off_loc_pub_msg)
 
     lm_off_pub_msg=Twist()
-    lm_off_pub_msg.linear.x=data.linear.x+x_loc_now+x0
-    lm_off_pub_msg.linear.y=data.linear.y+y_loc_now+y0
+    lm_off_pub_msg.linear.x=x_loc_now-data.linear.x+x0
+    lm_off_pub_msg.linear.y=y_loc_now-data.linear.y+y0
     lm_off_pub_msg.angular.z=th
     lm_off_pub.publish(lm_off_pub_msg)
 
