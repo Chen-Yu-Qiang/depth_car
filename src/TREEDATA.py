@@ -5,7 +5,7 @@ try:
     if sys.version[0]=='2':
         file_path="/home/yuqiang/catkin_car/src/depth_car/center_list_all(1228).npy"
     if sys.version[0]=='3':
-        file_path="'/home/ncslaber/110-1/211229_test_build_immediate/shapefiles/neg1/center_3_all.npy'"
+        file_path="/home/ncslaber/110-1/211229_test_build_immediate/shapefiles/neg1/center_3_all.npy"
     
     print("[TREEDATA.py] The trunk map data at "+file_path)
     tree_data_wow=np.load(file_path)
