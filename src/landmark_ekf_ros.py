@@ -119,7 +119,7 @@ def cb_pos(data):
     #     y0_loc= data.pose.pose.position.y
     #     x0y0_finish=1
         pass
-    elif time.time()-t0<int(rospy.get_param("Use_GPS_time",default=10000)):
+    elif (time.time()-t0)<int(rospy.get_param("Use_GPS_time",default=10000)):
         z=EKF_localization.Odom_2_position_Z(data,x0,y0)
         ekf.update_positon(z)
         # ekf_out5_msg=Twist()

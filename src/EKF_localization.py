@@ -366,10 +366,6 @@ class EKF_localization:
             z_error=Z-z_hat_k
             # z_error[1][0]=z_error[1][0]*3
             # j_k=(np.linalg.det(2*np.pi*S_k)**(-0.5))*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
-            w=np.zeros((3,3))
-            w[0][0]=0.5
-            w[1][1]=0.5
-            w[2][2]=1.0
             if i in WHITE_LIST:
                 j_k=[[self.get_like(z_error)]]
             else:
