@@ -375,7 +375,7 @@ class EKF_localization:
             else:
                 j_k=-100
             # print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0])
-            if j_k>max_j:
+            if j_k[0][0]>max_j:
                 max_j=j_k[0][0]
                 max_j_index=i+1
         
