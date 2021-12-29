@@ -29,22 +29,42 @@ def cb_gps(data):
 
 x0_loc=-1000
 y0_loc=-1000
+x_loc_now=0
+y_loc_now=0
+th=0
 def cb_pos(data):
-    global x0_loc,y0_loc,x0,y0
+    global x0_loc,y0_loc,x0,y0,x_loc_now,y_loc_now,th
+    x_loc_now=data.pose.pose.position.x
+    y_loc_now=data.pose.pose.position.y
+    th=tf.transformations.euler_from_quaternion([0,0,data.pose.pose.orientation.z,data.pose.pose.orientation.w])[2]
     if x0_loc==-1000 and y0_loc==-1000:
-        x0_loc=data.pose.pose.position.x
-        y0_loc=data.pose.pose.position.y
+        x0_loc=x_loc_now
+        y0_loc=y_loc_now
     elif not(x0==0 and y0==0):
         filtered_utm_msg=Twist()
-        filtered_utm_msg.linear.x=data.pose.pose.position.x+x0
-        filtered_utm_msg.linear.y=data.pose.pose.position.y+y0
-        filtered_utm_msg.angular.z=tf.transformations.euler_from_quaternion([0,0,data.pose.pose.orientation.z,data.pose.pose.orientation.w])[2]
+        filtered_utm_msg.linear.x=x_loc_now+x0
+        filtered_utm_msg.linear.y=y_loc_now+y0
+        filtered_utm_msg.angular.z=th
         filtered_utm.publish(filtered_utm_msg)
 
         local_org_in_utm_msg=Twist()
         local_org_in_utm_msg.linear.x=x0
         local_org_in_utm_msg.linear.y=y0
         local_org_in_utm_pub.publish(local_org_in_utm_msg)
+
+def cb_offset(data):
+    global x0,y0,x_loc_now,y_loc_now,th
+    lm_off_loc_pub_msg=Twist()
+    lm_off_loc_pub_msg.linear.x=data.linear.x+x_loc_now
+    lm_off_loc_pub_msg.linear.y=data.linear.y+y_loc_now
+    lm_off_loc_pub_msg.angular.z=th
+    lm_off_loc_pub.publish(lm_off_loc_pub_msg)
+
+    lm_off_pub_msg=Twist()
+    lm_off_pub_msg.linear.x=data.linear.x+x_loc_now+x0
+    lm_off_pub_msg.linear.y=data.linear.y+y_loc_now+y0
+    lm_off_pub_msg.angular.z=th
+    lm_off_pub.publish(lm_off_pub_msg)
 
     
 if __name__ == '__main__':
@@ -54,4 +74,8 @@ if __name__ == '__main__':
     local_org_in_utm_pub=rospy.Publisher("local_org_in_utm",Twist,queue_size=1)
     rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix, cb_gps, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos, buff_size=2**20,queue_size=1)
+    rospy.Subscriber("gps_offset", Twist, cb_offset, buff_size=2**20,queue_size=1)
+    lm_off_loc_pub=rospy.Publisher("landmark_filtered_offset_local",Twist,queue_size=1)
+    lm_off_pub=rospy.Publisher("landmark_filtered_offset",Twist,queue_size=1)
+
     rospy.spin()
