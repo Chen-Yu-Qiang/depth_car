@@ -3,6 +3,7 @@
 import time
 import rospy
 from geometry_msgs.msg import Twist,PoseStamped
+from std_msgs.msg import UInt8
 import numpy as np
 s=0
 now_x,now_y,now_th=0,0,0
@@ -28,6 +29,7 @@ if __name__ == '__main__':
     cmd_pub=rospy.Publisher("/cmd_vel",Twist,queue_size=1)
 
     error_pub=rospy.Publisher("lm/d_t_error",Twist,queue_size=1)
+    achieveGoal_pub=rospy.Publisher('/wow/achieveGoal', UInt8,queue_size=1) 
     rate=rospy.Rate(10)
     
     while not rospy.is_shutdown():
@@ -70,9 +72,12 @@ if __name__ == '__main__':
                 cmd_msg.angular.z=max(omg_kp*ang,(-1.0)*omg_max)
 
 
-        elif s==2 and ((dis< 0.3) or (np.cos(ang)<=0)):
+        elif s==2 and ((dis< 0.1) or (np.cos(ang)<=0)):
             cmd_msg.linear.x=0
             cmd_msg.angular.z=0
+            achieveGoal_msg=UInt8()
+            achieveGoal_msg.data=1
+            achieveGoal_pub.publish(achieveGoal_msg)
             s=0
         else:
             cmd_msg.linear.x=0
