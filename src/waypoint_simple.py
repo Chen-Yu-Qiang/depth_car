@@ -48,7 +48,8 @@ if __name__ == '__main__':
     waypoint_data.pose.orientation.y = 0
     waypoint_data.pose.orientation.z = 0
     waypoint_data.pose.orientation.w = 1
-    pubGoal.publish(waypoint_data)
+    print(waypoint_data)
+    # pubGoal.publish(waypoint_data)
 
     waypoint_utm = PoseStamped()
     waypoint_utm.pose.position.x = utmFrame_set[0,index]
@@ -77,7 +78,7 @@ if __name__ == '__main__':
         waypoint_data.pose.orientation.y = 0
         waypoint_data.pose.orientation.z = 0
         waypoint_data.pose.orientation.w = 1
-        pubGoal.publish(waypoint_data)
+        # pubGoal.publish(waypoint_data)
 
         waypoint_utm = PoseStamped()
         waypoint_utm.pose.position.x = utmFrame_set[0,index]
@@ -91,7 +92,7 @@ if __name__ == '__main__':
 
         rospy.loginfo( "pub number_{}/{} waypoint x:{}, y:{}".format(index,eof-1,mapFrame_set[1,index],-mapFrame_set[0,index]))
 
-        # rospy.sleep(5)
+        rospy.sleep(5)
         index += 1
 
     rospy.loginfo('complete waypoints!!!!!!!!')

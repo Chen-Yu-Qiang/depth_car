@@ -118,7 +118,7 @@ class car_obj:
 class a_plot:
     def __init__(self, mode=0):
         if sys.version[0]=='2':
-            self.fig, self.ax = plt.subplots(1, 1,dpi=70,figsize=(15,15))
+            self.fig, self.ax = plt.subplots(1, 1,dpi=70,figsize=(10,10))
         elif sys.version[0]=='3':
             self.fig, self.ax = plt.subplots(1, 1,dpi=120,figsize=(10,10))
         self.ax.set_aspect('equal')
