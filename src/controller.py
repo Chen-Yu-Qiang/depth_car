@@ -25,7 +25,7 @@ def cb_goalPoint(data):
 
 if __name__ == '__main__':
     rospy.init_node('controller_node')
-    rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1, buff_size=2**20)
+    rospy.Subscriber("/landmark_filtered_offset", Twist,cb_lm,queue_size=1, buff_size=2**20)
     rospy.Subscriber("/wow_utm_waypoint", PoseStamped,cb_goalPoint,queue_size=1, buff_size=2**20)
     cmd_pub=rospy.Publisher("/cmd_vel",Twist,queue_size=1)
     pid_pub=rospy.Publisher("/wow/pid",PidState,queue_size=1)
@@ -36,10 +36,10 @@ if __name__ == '__main__':
     
     while not rospy.is_shutdown():
         v_kp=0.1
-        v_max=0.6
+        v_max=0.5
         v_min=0.3
-        omg_kp=1.0
-        omg_max=1
+        omg_kp=6
+        omg_max=0.5
         dis=np.sqrt((goal_y-now_y)**2+(goal_x-now_x)**2)
         ang=np.arctan2((goal_y-now_y),(goal_x-now_x))-now_th
         ang=(ang+np.pi)%(2.0*np.pi)-np.pi
@@ -60,7 +60,7 @@ if __name__ == '__main__':
             s=2
         
         elif s==2 and (dis > 0.1) and (np.cos(ang)>0):
-            if (v_kp*dis)>0.05:
+            if (v_kp*dis)>0.001:
                 cmd_msg.linear.x=max(min((v_kp*dis),v_max),v_min)
             else:
                 cmd_msg.linear.x=0
