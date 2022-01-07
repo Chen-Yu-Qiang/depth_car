@@ -198,7 +198,7 @@ if __name__=="__main__":
 
     ekf_out=rospy.Publisher("/lm_ekf/raw/utm",Twist,queue_size=1)
     # ekf_out2=rospy.Publisher("/lm_ekf/gps_w_offset/utm_odom",Odometry,queue_size=1)
-    ekf_out3=rospy.Publisher("/im_ekf/raw/local",Twist,queue_size=1)
+    ekf_out3=rospy.Publisher("/lm_ekf/raw/local",Twist,queue_size=1)
     # ekf_out5=rospy.Publisher("/lm_ekf/gps_w_offset/utm",Twist,queue_size=1)
     # ekf_out6=rospy.Publisher("/lm_ekf/gps_w_offset/local",Twist,queue_size=1)
     # filtered_utm=rospy.Publisher("/lm_ekf/filtered_map/utm",Twist,queue_size=1)

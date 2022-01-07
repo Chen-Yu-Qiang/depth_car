@@ -169,7 +169,7 @@ if __name__=="__main__":
     # rospy.Subscriber("/camera/depth/image_rect_raw", Image, cbDepth,queue_size=1, buff_size=2**24)
         
     tree_data2_each_pub=rospy.Publisher("/tree/data2/each", Float64MultiArray,queue_size=1)
-    /tree/data2/together_pub=rospy.Publisher("/tree_data2_together", Float64MultiArray,queue_size=1)
+    tree_data2_together_pub=rospy.Publisher("/tree/data2/together", Float64MultiArray,queue_size=1)
 
 
     subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom,queue_size=1, buff_size=2**24)

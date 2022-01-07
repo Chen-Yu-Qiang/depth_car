@@ -1,9 +1,10 @@
 import numpy as np
 import sys
+import rospy
 print("[TREEDATA.py] Start to get the trunk map data")
 try:
     if sys.version[0]=='2':
-        file_path="center_list_all(1229).npy"
+        file_path=rospy.get_param("Use_Map_File_Path",default="center_list_all(1229).npy")
     if sys.version[0]=='3':
         file_path="/home/ncslaber/110-1/211229_test_build_immediate/shapefiles/neg1/center_3_all.npy"
     

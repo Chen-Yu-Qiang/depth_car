@@ -4,8 +4,11 @@
 import curses
 import numpy as np
 import time
-
+import os
 from collections import deque
+
+
+
 stdscr = curses.initscr()
 print(stdscr.getmaxyx())
 curses.noecho()

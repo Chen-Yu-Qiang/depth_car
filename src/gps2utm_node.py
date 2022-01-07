@@ -72,14 +72,14 @@ def cb_offset(data):
     lm_off_pub_msg.angular.z=th
     lm_off_pub.publish(lm_off_pub_msg)
 
-    lm_off_odom_msg=Twist()
+    lm_off_odom_msg=Odometry()
     lm_off_odom_msg.pose.pose.position.x=x_loc_now-data.linear.x+x0
     lm_off_odom_msg.pose.pose.position.y=y_loc_now-data.linear.y+y0
     ang_0_2pi=((th+3.14159) % (6.28318))-3.14159
     ang_q=tf.transformations.quaternion_from_euler(0,0,ang_0_2pi)
     lm_off_odom_msg.pose.pose.orientation.z=ang_q[2]
     lm_off_odom_msg.pose.pose.orientation.w=ang_q[3]
-    lm_off_odom_pub.publish(lm_off_pub_msg)
+    lm_off_odom_pub.publish(lm_off_odom_msg)
 
 if __name__ == '__main__':
     rospy.init_node('tf2topic_gps_in_utm_node')
