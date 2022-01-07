@@ -11,7 +11,7 @@ from geometry_msgs.msg import Twist
 if __name__ == '__main__':
     rospy.init_node('tf2topic_gps_in_utm_node')
     listener = tf.TransformListener()
-    b=rospy.Publisher("gps_utm",Twist,queue_size=1)
+    b=rospy.Publisher("/lm_ekf/gps/utm",Twist,queue_size=1)
     rate=rospy.Rate(10)
     listener.waitForTransform("utm", "base_link", rospy.Time(), rospy.Duration(10.0))
     while not rospy.is_shutdown():

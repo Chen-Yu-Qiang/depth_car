@@ -1,5 +1,6 @@
 #!/usr/bin/wowpython
 '''ros utils'''
+import time
 import rospy
 from sensor_msgs.msg import NavSatFix
 
@@ -16,10 +17,11 @@ import os
 
 if __name__ == '__main__':
     rospy.init_node("waypoint_follower", anonymous=True)
-    pubGoal = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1)
-    pubGoal_utm = rospy.Publisher("/wow_utm_waypoint", PoseStamped, queue_size=1)
+    # pubGoal = rospy.Publisher("/ctrl/wp/loacl", PoseStamped, queue_size=1)
+    pubGoal = rospy.Publisher("/wow_local_waypoint", PoseStamped, queue_size=1)
+    pubGoal_utm = rospy.Publisher("/ctrl/wp/utm", PoseStamped, queue_size=1)
     '''get start GPS point and set datum'''
-    x0y0_msg = rospy.wait_for_message('/local_org_in_utm', Twist)
+    x0y0_msg = rospy.wait_for_message('/lm_ekf/local_org/utm', Twist)
 
     utm_y_init=x0y0_msg.linear.x
     utm_x_init=x0y0_msg.linear.y*(-1.0)
@@ -49,7 +51,7 @@ if __name__ == '__main__':
     waypoint_data.pose.orientation.z = 0
     waypoint_data.pose.orientation.w = 1
     print(waypoint_data)
-    # pubGoal.publish(waypoint_data)
+    pubGoal.publish(waypoint_data)
 
     waypoint_utm = PoseStamped()
     waypoint_utm.pose.position.x = utmFrame_set[0,index]
@@ -67,8 +69,8 @@ if __name__ == '__main__':
     index += 1
 
     while (index < eof) and ( not rospy.is_shutdown() ):
-        nouse = rospy.wait_for_message('/wow/achieveGoal', UInt8) 
-
+        nouse = rospy.wait_for_message('/ctrl/achieve', UInt8) 
+        time.sleep(1)
         waypoint_data = PoseStamped()
         waypoint_data.header.frame_id = 'map'
         waypoint_data.pose.position.x = mapFrame_set[1,index]
@@ -78,7 +80,7 @@ if __name__ == '__main__':
         waypoint_data.pose.orientation.y = 0
         waypoint_data.pose.orientation.z = 0
         waypoint_data.pose.orientation.w = 1
-        # pubGoal.publish(waypoint_data)
+        pubGoal.publish(waypoint_data)
 
         waypoint_utm = PoseStamped()
         waypoint_utm.pose.position.x = utmFrame_set[0,index]

@@ -18,7 +18,7 @@ import TREEDATA
 
 print("Python version: ",sys.version)
 rospy.init_node("landmark_ekf", anonymous=True)
-gps_init=rospy.wait_for_message("gps_utm", Twist)
+gps_init=rospy.wait_for_message("/lm_ekf/gps/utm", Twist)
 print("Get GPS init ",gps_init.linear.x,gps_init.linear.y)
 u_init=EKF_localization.set_u_init(gps_init.linear.x,gps_init.linear.y,1.5)
 
@@ -182,30 +182,30 @@ def cb_x0y0(data):
 
 
 if __name__=="__main__":
-    rospy.Subscriber("/tree_data_together", Float64MultiArray,cb_array, buff_size=2**20,queue_size=1)
+    rospy.Subscriber("/tree/data/together", Float64MultiArray,cb_array, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos, buff_size=2**20,queue_size=1)
-    # rospy.Subscriber("gps_utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
-    rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0, buff_size=2**20,queue_size=1)
+    # rospy.Subscriber("/lm_ekf/gps/utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
+    rospy.Subscriber("/lm_ekf/local_org/utm", Twist,cb_x0y0, buff_size=2**20,queue_size=1)
     # rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cb_imu, buff_size=2**20,queue_size=1)
     # if int(rospy.get_param("Enable_Fixed_Point_Strat",default=0))==0:
-    # #     rospy.Subscriber("local_org_in_utm", Twist,cb_x0y0)
+    # #     rospy.Subscriber("/lm_ekf/local_org/utm", Twist,cb_x0y0)
     #     x0=0
     #     y0=0
     # else:
     #     x0=2767671.53
     #     y0=-352851.478-1.0
 
-    ekf_out=rospy.Publisher("landmark",Twist,queue_size=1)
-    ekf_out2=rospy.Publisher("landmark_odom",Odometry,queue_size=1)
-    ekf_out3=rospy.Publisher("landmark_local",Twist,queue_size=1)
-    # ekf_out5=rospy.Publisher("landmark_filtered_offset",Twist,queue_size=1)
-    # ekf_out6=rospy.Publisher("landmark_filtered_offset_local",Twist,queue_size=1)
-    # filtered_utm=rospy.Publisher("filtered_utm",Twist,queue_size=1)
-    ekf_out4=rospy.Publisher("gps_offset",Twist,queue_size=1)
-    ekf_out_sigma=rospy.Publisher("landmark_sigma",Twist,queue_size=1)
-    ekf_out_landmark_z=rospy.Publisher("landmark_z",Float64MultiArray,queue_size=1)
-    ekf_out_landmark_error=rospy.Publisher("landmark_error",Float64MultiArray,queue_size=1)
+    ekf_out=rospy.Publisher("/lm_ekf/raw/utm",Twist,queue_size=1)
+    # ekf_out2=rospy.Publisher("/lm_ekf/gps_w_offset/utm_odom",Odometry,queue_size=1)
+    ekf_out3=rospy.Publisher("/im_ekf/raw/local",Twist,queue_size=1)
+    # ekf_out5=rospy.Publisher("/lm_ekf/gps_w_offset/utm",Twist,queue_size=1)
+    # ekf_out6=rospy.Publisher("/lm_ekf/gps_w_offset/local",Twist,queue_size=1)
+    # filtered_utm=rospy.Publisher("/lm_ekf/filtered_map/utm",Twist,queue_size=1)
+    ekf_out4=rospy.Publisher("/lm_ekf/offset",Twist,queue_size=1)
+    ekf_out_sigma=rospy.Publisher("/lm_ekf/sigma",Twist,queue_size=1)
+    ekf_out_landmark_z=rospy.Publisher("/lm_ekf/z",Float64MultiArray,queue_size=1)
+    ekf_out_landmark_error=rospy.Publisher("/lm_ekf/error",Float64MultiArray,queue_size=1)
     rate=rospy.Rate(5)
     EKF_localization.DELTA_T=0.2
 
@@ -220,14 +220,14 @@ if __name__=="__main__":
         ekf_out_msg.angular.z=ekf.u[2][0]
         ekf_out.publish(ekf_out_msg)
 
-        ekf_out2_msg=Odometry()
-        ekf_out2_msg.pose.pose.position.x=ekf.u[0][0]
-        ekf_out2_msg.pose.pose.position.y=ekf.u[1][0]
-        ang_0_2pi=((ekf.u[2][0]+3.14159) % (6.28318))-3.14159
-        ang_q=tf.transformations.quaternion_from_euler(0,0,ang_0_2pi)
-        ekf_out2_msg.pose.pose.orientation.z=ang_q[2]
-        ekf_out2_msg.pose.pose.orientation.w=ang_q[3]
-        ekf_out2.publish(ekf_out2_msg)
+        # ekf_out2_msg=Odometry()
+        # ekf_out2_msg.pose.pose.position.x=ekf.u[0][0]
+        # ekf_out2_msg.pose.pose.position.y=ekf.u[1][0]
+        # ang_0_2pi=((ekf.u[2][0]+3.14159) % (6.28318))-3.14159
+        # ang_q=tf.transformations.quaternion_from_euler(0,0,ang_0_2pi)
+        # ekf_out2_msg.pose.pose.orientation.z=ang_q[2]
+        # ekf_out2_msg.pose.pose.orientation.w=ang_q[3]
+        # ekf_out2.publish(ekf_out2_msg)
 
         if x0==0 and y0==0:
             pass

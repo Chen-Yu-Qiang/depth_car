@@ -118,7 +118,7 @@ class a_plot:
             self.fig, self.ax = plt.subplots(1, 1,dpi=120,figsize=(10,10))
         self.ax.set_aspect('equal')
         self.mode=mode
-        gps_init=rospy.wait_for_message("/gps_utm", Twist)
+        gps_init=rospy.wait_for_message("/lm_ekf/gps/utm", Twist)
         # print("!!!!!!!!!!!!!!!!!!1")
         if (gps_init.linear.x)>2767690:
             # for H
@@ -422,12 +422,12 @@ if __name__ == '__main__':
 
     print("Python version: ",sys.version)
     rospy.init_node("plot_node", anonymous=True)
-    landmark_z_sub=rospy.Subscriber("/landmark_z", Float64MultiArray,cb_landmark_z,queue_size=1)
-    landmark_error_sub=rospy.Subscriber("/landmark_error", Float64MultiArray,cb_landmark_error,queue_size=1)
-    gps_sub=rospy.Subscriber("/gps_utm", Twist,cb_gps,queue_size=1)
-    lm_sub=rospy.Subscriber("/landmark", Twist,cb_lm,queue_size=1)
-    subTrunk = rospy.Subscriber("/wow/trunk_info", Trunkset, cbTrunk,queue_size=1)
-    subGoal = rospy.Subscriber("/wow_utm_waypoint", PoseStamped, cbGoal,queue_size=1)
+    landmark_z_sub=rospy.Subscriber("/lm_ekf/z", Float64MultiArray,cb_landmark_z,queue_size=1)
+    landmark_error_sub=rospy.Subscriber("/lm_ekf/error", Float64MultiArray,cb_landmark_error,queue_size=1)
+    gps_sub=rospy.Subscriber("/lm_ekf/gps/utm", Twist,cb_gps,queue_size=1)
+    lm_sub=rospy.Subscriber("/lm_ekf/raw/utm", Twist,cb_lm,queue_size=1)
+    subTrunk = rospy.Subscriber("/tree/trunk_info", Trunkset, cbTrunk,queue_size=1)
+    subGoal = rospy.Subscriber("/ctrl/wp/utm", PoseStamped, cbGoal,queue_size=1)
     rate=rospy.Rate(10)
     a=a_plot()
 

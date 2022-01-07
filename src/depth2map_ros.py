@@ -227,7 +227,7 @@ if __name__=="__main__":
 
     # subIMU = rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cbIMU)
     # subOdom = rospy.Subscriber("/my_filtered_map", Odometry, cbOdom)
-    subOdom = rospy.Subscriber("/landmark_odom", Odometry, cbOdom)
+    subOdom = rospy.Subscriber("/lm_ekf/gps_w_offset/utm_odom", Odometry, cbOdom)
 
     
     # subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom)

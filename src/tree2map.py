@@ -179,14 +179,14 @@ def cb_landmark_xz_z(data):
 if __name__=="__main__":
     print("Python version: ",sys.version)
     rospy.init_node("tree_to_map", anonymous=True)
-    tree_data_sub=rospy.Subscriber("/tree_data2_each", Float64MultiArray,cb_tree_each,queue_size=1)
-    tree_data_sub=rospy.Subscriber("/tree_data2_together", Float64MultiArray,cb_tree_together,queue_size=1)
-    # landmark_z_sub=rospy.Subscriber("/landmark_z", Float64MultiArray,cb_landmark_z,queue_size=1)
-    tree_data_each_pub=rospy.Publisher("/tree_data_each", Float64MultiArray,queue_size=1)
-    tree_data_together_pub=rospy.Publisher("/tree_data_together", Float64MultiArray,queue_size=1)
+    tree_data_sub=rospy.Subscriber("/tree/data2/each", Float64MultiArray,cb_tree_each,queue_size=1)
+    tree_data_sub=rospy.Subscriber("/tree/data2/together", Float64MultiArray,cb_tree_together,queue_size=1)
+    # landmark_z_sub=rospy.Subscriber("/lm_ekf/z", Float64MultiArray,cb_landmark_z,queue_size=1)
+    tree_data_each_pub=rospy.Publisher("/tree/data/each", Float64MultiArray,queue_size=1)
+    tree_data_together_pub=rospy.Publisher("/tree/data/together", Float64MultiArray,queue_size=1)
 
-    # subOdom = rospy.Subscriber("/landmark_odom", Odometry, cbOdom)
-    subTwist = rospy.Subscriber("/landmark_filtered_offset_local", Twist, cbTwist)
+    # subOdom = rospy.Subscriber("/lm_ekf/gps_w_offset/utm_odom", Odometry, cbOdom)
+    subTwist = rospy.Subscriber("/lm_ekf/gps_w_offset/local", Twist, cbTwist)
     # subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom2)
 
     # rate=rospy.Rate(5)

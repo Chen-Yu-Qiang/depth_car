@@ -188,8 +188,8 @@ if __name__=="__main__":
     subDepth = rospy.Subscriber("/camera/depth/image_rect_raw", Image, cbDepth_2,queue_size=1, buff_size=2**24)
     tree_depth_pub=rospy.Publisher("/camera_only_tree/depth/image_rect_raw", Image,queue_size=1)
     # tree_data_pub=rospy.Publisher("/tree_data", Float64MultiArray,queue_size=1)
-    tree_data2_each_pub=rospy.Publisher("/tree_data2_each", Float64MultiArray,queue_size=1)
-    tree_data2_together_pub=rospy.Publisher("/tree_data2_together", Float64MultiArray,queue_size=1)
+    tree_data2_each_pub=rospy.Publisher("/tree/data2/each", Float64MultiArray,queue_size=1)
+    tree_data2_together_pub=rospy.Publisher("/tree/data2/together", Float64MultiArray,queue_size=1)
     tree_data_image_pub=rospy.Publisher("/tree_image_data", Float64MultiArray,queue_size=1)
 
 
@@ -197,7 +197,7 @@ if __name__=="__main__":
 
     # subIMU = rospy.Subscriber("/imu_filter/rpy/filtered", Vector3Stamped, cbIMU)
     # subOdom = rospy.Subscriber("/my_filtered_map", Odometry, cbOdom)
-    # subOdom = rospy.Subscriber("/landmark_odom", Odometry, cbOdom)
+    # subOdom = rospy.Subscriber("/lm_ekf/gps_w_offset/utm_odom", Odometry, cbOdom)
     subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom)
     rospy.spin()
 

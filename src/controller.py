@@ -26,11 +26,11 @@ def cb_goalPoint(data):
 
 if __name__ == '__main__':
     rospy.init_node('controller_node')
-    rospy.Subscriber("/landmark_filtered_offset", Twist,cb_lm,queue_size=1, buff_size=2**20)
-    rospy.Subscriber("/wow_utm_waypoint", PoseStamped,cb_goalPoint,queue_size=1, buff_size=2**20)
+    rospy.Subscriber("/lm_ekf/gps_w_offset/utm", Twist,cb_lm,queue_size=1, buff_size=2**20)
+    rospy.Subscriber("/ctrl/wp/utm", PoseStamped,cb_goalPoint,queue_size=1, buff_size=2**20)
     cmd_pub=rospy.Publisher("/cmd_vel",Twist,queue_size=1)
-    pid_v_pub=rospy.Publisher("/wow/pid_v",PidState,queue_size=1)
-    pid_omg_pub=rospy.Publisher("/wow/pid_omg",PidState,queue_size=1)
+    pid_v_pub=rospy.Publisher("/ctrl/pid_v",PidState,queue_size=1)
+    pid_omg_pub=rospy.Publisher("/ctrl/pid_omg",PidState,queue_size=1)
 
     pid_v=pid_class.pid_controller()
     pid_omg=pid_class.pid_controller()
@@ -41,8 +41,8 @@ if __name__ == '__main__':
     pid_v.output_zero=0.15
 
 
-    error_pub=rospy.Publisher("lm/d_t_error",Twist,queue_size=1)
-    achieveGoal_pub=rospy.Publisher('/wow/achieveGoal', UInt8,queue_size=1) 
+    error_pub=rospy.Publisher("/ctrl/error",Twist,queue_size=1)
+    achieveGoal_pub=rospy.Publisher('/ctrl/achieve', UInt8,queue_size=1) 
     rate=rospy.Rate(10)
     
     while not rospy.is_shutdown():
@@ -66,7 +66,7 @@ if __name__ == '__main__':
             pid_v.setpid(0,0,0)
             s=2
         elif s==2 and (dis > 0.1) and (np.cos(ang)>0):
-            pid_omg.setpid(6,0,20)
+            pid_omg.setpid(6,0.05,20)
             pid_v.setpid(0.1,0,0)
         elif s==2 and ((dis< 0.1) or (np.cos(ang)<=0)):
             pid_omg.setpid(0,0,0)
