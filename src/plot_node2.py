@@ -157,8 +157,12 @@ class a_plot:
         # self.ax.set_xlim(352840,352865)
         # self.ax.set_ylim(2767665,2767700)
 
-        self.ax.set_xlim(359190,359220)
-        self.ax.set_ylim(2774760,2774780)
+        # self.ax.set_xlim(359190,359220)
+        # self.ax.set_ylim(2774760,2774780)
+
+
+        self.ax.set_xlim(352840,352875)
+        self.ax.set_ylim(2767700,2767735)
         self.now_zone="i"
    
         x, y, th= 352910,2767650,0
