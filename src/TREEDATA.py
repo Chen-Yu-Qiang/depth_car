@@ -4,9 +4,9 @@ import rospy
 print("[TREEDATA.py] Start to get the trunk map data")
 try:
     if sys.version[0]=='2':
-        file_path=rospy.get_param("Use_Map_File_Path",default="center_list_all(1229).npy")
+        file_path=rospy.get_param("date_time_folder",default="20220110_17-32-20")+"/shapefiles/neg/center_all.npy"
     if sys.version[0]=='3':
-        file_path="/home/ncslaber/20220110_17-32-20/shapefiles/neg/center_all.npy"
+        file_path=rospy.get_param("date_time_folder",default="20220110_17-32-20")+"/shapefiles/neg/center_all.npy"
     
     print("[TREEDATA.py] The trunk map data at "+file_path)
     tree_data_wow=np.load(file_path)

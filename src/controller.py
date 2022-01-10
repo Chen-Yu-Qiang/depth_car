@@ -20,12 +20,15 @@ goal_y=-352852.9162779033
 
 def cb_goalPoint(data):
     global goal_x,goal_y,s
-    goal_x=data.pose.position.y
-    goal_y=data.pose.position.x*(-1.0)
+    goal_x=data.pose.position.x
+    goal_y=data.pose.position.y
     s=1
 
 if __name__ == '__main__':
     rospy.init_node('controller_node')
+    if int(rospy.get_param('Use_WOW_controller'))==0:
+        print("NO use WOW controller")
+        rospy.signal_shutdown("NO use WOW controller")
     rospy.Subscriber("/lm_ekf/gps_w_offset/utm", Twist,cb_lm,queue_size=1, buff_size=2**20)
     rospy.Subscriber("/ctrl/wp/utm", PoseStamped,cb_goalPoint,queue_size=1, buff_size=2**20)
     cmd_pub=rospy.Publisher("/cmd_vel",Twist,queue_size=1)
@@ -50,6 +53,8 @@ if __name__ == '__main__':
         dis=np.sqrt((goal_y-now_y)**2+(goal_x-now_x)**2)
         ang=np.arctan2((goal_y-now_y),(goal_x-now_x))-now_th
         ang=(ang+np.pi)%(2.0*np.pi)-np.pi
+        if (np.cos(ang)<=0):
+            dis=dis*(-1.0)
 
 
         # s=0  Standby
@@ -66,7 +71,7 @@ if __name__ == '__main__':
             pid_v.setpid(0,0,0)
             s=2
         elif s==2 and (dis > 0.1) and (np.cos(ang)>0):
-            pid_omg.setpid(6,0.05,20)
+            pid_omg.setpid(6,0.01,10)
             pid_v.setpid(0.1,0,0)
         elif s==2 and ((dis< 0.1) or (np.cos(ang)<=0)):
             pid_omg.setpid(0,0,0)
@@ -97,11 +102,11 @@ if __name__ == '__main__':
         cmd_msg.linear.x=pid_v_msg.output
 
         cmd_pub.publish(cmd_msg)
-        print(round(goal_y,3),round(now_y,3),round(goal_x,3),round(now_x,3),round(dis,3),ang,3),round(cmd_msg.linear.x,3),round(cmd_msg.angular.z)
+        # print(round(goal_y,3),round(now_y,3),round(goal_x,3),round(now_x,3),round(dis,3),ang,3),round(cmd_msg.linear.x,3),round(cmd_msg.angular.z)
 
         rate.sleep()
 
-        
+    cmd_msg=Twist()    
     cmd_msg.linear.x=0
     cmd_msg.angular.z=0
     cmd_pub.publish(cmd_msg)
