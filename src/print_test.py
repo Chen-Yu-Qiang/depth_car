@@ -8,7 +8,6 @@ import os
 from collections import deque
 
 
-
 stdscr = curses.initscr()
 print(stdscr.getmaxyx())
 curses.noecho()

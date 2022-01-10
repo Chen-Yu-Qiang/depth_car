@@ -74,8 +74,8 @@ def cb_tree_together(data):
     d_list=[]
     for i in range(n):
         r_list.append(data[ARRAY_LAY1*i+2])
-        th_list.append(data[ARRAY_LAY1*i+4])
         d_list.append(data[ARRAY_LAY1*i+3]*1000)
+        th_list.append(data[ARRAY_LAY1*i+4])
     centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
     # print(centre_x_list,centre_z_list,radius_r_list)
     NnW=depth2map.fromCar2World(centre_x_list,centre_z_list,car_x*1000,car_y*1000,car_theta)

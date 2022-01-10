@@ -44,16 +44,26 @@ def cb_array(data):
     for i in range(n):
 
         # tt1=time.time()
-        if int(rospy.get_param('XZ_MODE')):
+        if int(rospy.get_param('XZ_MODE'))==1:
             if n>=2 and (d[i*ARRAY_LAY1+11]>-1) and 0:
-                j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz_know_cor(EKF_localization.list_2_landmark_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
-                print(d[i*ARRAY_LAY1+11]+1)
+                j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz_know_cor(EKF_localization.list_2_landmark_xz_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
             else:
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz(EKF_localization.list_2_landmark_xz_Z_together(data.data,i))
+
+
+        elif int(rospy.get_param('XZ_MODE'))==2:
+            if d[i*ARRAY_LAY1+3]>6:
+                j,max_j,Z,z_hat,delta_z=ekf.update_landmark(EKF_localization.list_2_landmark_Z_together(data.data,i))
+            else:
+                if n>=2 and (d[i*ARRAY_LAY1+11]>-1) and 0:
+                    j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz_know_cor(EKF_localization.list_2_landmark_xz_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
+                else:
+                    j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz(EKF_localization.list_2_landmark_xz_Z_together(data.data,i))       
+                    
+                             
         else:
             if n>=2 and (d[i*ARRAY_LAY1+11]>-1):
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark_know_cor(EKF_localization.list_2_landmark_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
-                print(d[i*ARRAY_LAY1+11]+1)
             else:
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark(EKF_localization.list_2_landmark_Z_together(data.data,i))
 
