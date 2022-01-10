@@ -38,7 +38,7 @@ if __name__ == '__main__':
     pid_omg.output_min=-1.0
     pid_v.output_max=0.6
     pid_v.output_min=0.3
-    pid_v.output_zero=0.15
+    pid_v.output_zero=0.05
 
 
     error_pub=rospy.Publisher("/ctrl/error",Twist,queue_size=1)

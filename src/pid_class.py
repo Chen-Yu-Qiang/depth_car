@@ -3,7 +3,7 @@ from control_msgs.msg import PidState
 
 
 class pid_controller:
-    def __inif__(self):
+    def __init__(self):
         self.kp=0
         self.ki=0
         self.kd=0
