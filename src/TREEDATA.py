@@ -6,7 +6,7 @@ try:
     if sys.version[0]=='2':
         file_path=rospy.get_param("Use_Map_File_Path",default="center_list_all(1229).npy")
     if sys.version[0]=='3':
-        file_path="/home/ncslaber/110-1/211229_test_build_immediate/shapefiles/neg1/center_3_all.npy"
+        file_path="/home/ncslaber/20220110-/shapefiles/neg/center_all.npy"
     
     print("[TREEDATA.py] The trunk map data at "+file_path)
     tree_data_wow=np.load(file_path)
