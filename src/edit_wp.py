@@ -27,7 +27,7 @@ sel=[1 for i in range(len(wp_x))]
 plt.plot(wp_x,wp_y)
 plt.title("Press the right button to delete, press the left button to restore\n Red: exists, Black: does not exist\n Press x to save and exit")
 
-def add_or_remove_point2(event):
+def add_or_remove_point(event):
     if event.xdata is None or event.ydata is None:
         return
     xdata_click = event.xdata
@@ -46,7 +46,7 @@ def add_or_remove_point2(event):
 def save_wp(event):
     if not event.key == 'x':
         return 
-    print("save_wp")
+    print("save waypoint")
     for i in range(len(wp_x)):
         if sel[i]==1:
             with open(file_new_name,"a") as f:
@@ -54,6 +54,6 @@ def save_wp(event):
     plt.close('all')
     
 
-fig.canvas.mpl_connect('button_press_event',add_or_remove_point2)
+fig.canvas.mpl_connect('button_press_event',add_or_remove_point)
 fig.canvas.mpl_connect('key_press_event',save_wp)
 plt.show()
