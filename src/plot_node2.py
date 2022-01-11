@@ -435,8 +435,8 @@ def cb_landmark_error(msg):
     
 
 def cbGoal(msg):
-    ds.set("waypoint_utm_x",msg.pose.position.x)
-    ds.set("waypoint_utm_y",msg.pose.position.y)
+    ds.set("waypoint_utm_x",msg.pose.position.y*(-1.0))
+    ds.set("waypoint_utm_y",msg.pose.position.x)
 
 def cb_gps_offset(data):
 

@@ -83,6 +83,7 @@ def cb_offset(data):
 
 if __name__ == '__main__':
     rospy.init_node('tf2topic_gps_in_utm_node')
+    time.sleep(5)
     gps_utm_pub=rospy.Publisher("/lm_ekf/gps/utm",Twist,queue_size=1)
     gps_utm_local_pub=rospy.Publisher("/lm_ekf/gps/local",Twist,queue_size=1)
     filtered_utm=rospy.Publisher("/lm_ekf/filtered_map/utm",Twist,queue_size=1)
