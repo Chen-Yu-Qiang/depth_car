@@ -31,3 +31,10 @@ export Built_In_Topic="/camera/color/camera_info /camera/color/image_raw/compres
 rosbag play 2021-12-20-09-00-54.bag --topic $Built_In_Topic  --clock
 rosbag record -a -x "/camera(.*)"
 ```
+
+
+'2022-01-12-12-44-58.bag map1 no div in con
+2022-01-12-12-58-12.bag map1 no div in con
+2022-01-12-13-15-22.bag map1
+
+2022-01-12-14-22-51.bag my con  no div
