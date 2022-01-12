@@ -22,7 +22,7 @@
 <node pkg="depth_car" type="print_node.py" name="print_node" output="screen" launch-prefix="xterm -fa 'Monospace' -fs 10 -geometry 150x20+450+60 -e"/>
 
 <param name="Use_WOW_controller" value="1" />
-<node pkg="depth_car" type="controller.py" name="controller" output="screen"/>
+<!-- <node pkg="depth_car" type="controller.py" name="controller" output="screen"/> -->
 
 <!-- <node pkg="depth_car" type="tf2topic_gps_in_utm_node.py" name="tf2topic_gps_in_utm_node" output="screen"/> -->
 <!-- <node pkg="depth_car" type="tf2topic_local_org_in_utm_node.py" name="tf2topic_local_org_in_utm_node" output="screen"/> -->

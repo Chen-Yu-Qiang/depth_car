@@ -2,7 +2,7 @@
 
 
 
-<node pkg="mapping_explorer" type="follow_waypoints_lib.py" name="follow_waypoints_lib" output="screen"/>
+<node pkg="depth_car" type="follow_waypoints_lib.py" name="follow_waypoints_lib" output="screen"/>
 
 <include file="$(find depth_car)/launch/wow_no_gen_scan.launch"></include>
 

@@ -16,11 +16,11 @@ def cb_offset(data):
 
 if __name__ == '__main__':
     rospy.init_node('map2_tf_pub_node')
-    rospy.Subscriber("/gps_offset",Twist,cb_offset,queue_size=1)
+    rospy.Subscriber("/lm_ekf/offset",Twist,cb_offset,queue_size=1)
     while not rospy.is_shutdown():
 
 
         br = tf.TransformBroadcaster()
         br.sendTransform(( x, y, 0), tf.transformations.quaternion_from_euler(0, 0, yaw), rospy.Time.now(), child="map", parent="map2")
-        # print(x,y)
+        print(x,y)
         rospy.sleep(0.02)
