@@ -17,6 +17,7 @@
 <!-- <param name="date_time_folder" value="/home/yuqiang/20210714_18-37-26" /> -->
 <node pkg="depth_car" type="landmark_ekf_ros.py" name="landmark_ekf_ros"  output="screen" launch-prefix="xterm -fa 'Monospace' -fs 10 -geometry 150x20+450+0 -e"/>
 <node pkg="depth_car" type="plot_node2.py" name="plot_node2" output="screen"/>
+<node pkg="depth_car" type="plot_scan.py" name="plot_scan" output="screen"/>
 <node pkg="depth_car" type="gps2utm_node.py" name="gps2utm_node" output="screen"/>
 <!-- <node pkg="depth_car" type="print_test.py" name="print_test" output="screen"/> -->
 <node pkg="depth_car" type="print_node.py" name="print_node" output="screen" launch-prefix="xterm -fa 'Monospace' -fs 10 -geometry 150x20+450+60 -e"/>
