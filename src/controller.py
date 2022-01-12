@@ -41,12 +41,12 @@ if __name__ == '__main__':
     pid_omg.output_min=-1.0
     pid_v.output_max=0.6
     pid_v.output_min=0.3
-    pid_v.output_zero=0.05
+    pid_v.output_zero=0.01
 
 
     error_pub=rospy.Publisher("/ctrl/error",Twist,queue_size=1)
     achieveGoal_pub=rospy.Publisher('/ctrl/achieve', UInt8,queue_size=1) 
-    rate=rospy.Rate(10)
+    rate=rospy.Rate(5)
     
     while not rospy.is_shutdown():
 
@@ -64,14 +64,14 @@ if __name__ == '__main__':
         
 
         if s==1 and abs(ang)>0.1:
-            pid_omg.setpid(6,0,0)
+            pid_omg.setpid(2,0,0)
             pid_v.setpid(0,0,0)
         elif s==1 and abs(ang)<=0.1:
             pid_omg.setpid(0,0,0)
             pid_v.setpid(0,0,0)
             s=2
         elif s==2 and (dis > 0.1) and (np.cos(ang)>0):
-            pid_omg.setpid(6,0.01,10)
+            pid_omg.setpid(1,0,0)
             pid_v.setpid(0.1,0,0)
         elif s==2 and ((dis< 0.1) or (np.cos(ang)<=0)):
             pid_omg.setpid(0,0,0)
