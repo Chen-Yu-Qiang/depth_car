@@ -28,7 +28,8 @@
 <!-- <node pkg="depth_car" type="tf2topic_local_org_in_utm_node.py" name="tf2topic_local_org_in_utm_node" output="screen"/> -->
 
 
-<node pkg="mapping_explorer" type="tf_transformer_maptomap2.py" name="tf_transformer_maptomap2" output="screen"/>
+<!-- <node pkg="mapping_explorer" type="tf_transformer_maptomap2.py" name="tf_transformer_maptomap2" output="screen"/> -->
+<node pkg="depth_car" type="map2_tf_pub.py" name="map2_tf_pub" output="screen"/>
 <!-- <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock'" /> -->
 
 </launch>

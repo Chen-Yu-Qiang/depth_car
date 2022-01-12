@@ -21,6 +21,6 @@ if __name__ == '__main__':
 
 
         br = tf.TransformBroadcaster()
-        br.sendTransform(( x, y, 0), tf.transformations.quaternion_from_euler(0, 0, yaw), rospy.Time.now(), child="map2", parent="map3")
+        br.sendTransform(( x, y, 0), tf.transformations.quaternion_from_euler(0, 0, yaw), rospy.Time.now(), child="map", parent="map2")
         print(x,y)
         rospy.sleep(0.01)
