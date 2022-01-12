@@ -1,5 +1,5 @@
 <launch>
 
 <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock'" />
-
+<!-- rosbag record  -e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock' '/camera/color/camera_info' '/camera/color/image_raw/compressed' '/camera/depth/camera_info' '/camera/depth/image_rect_raw' '/camera/extrinsics/depth_to_color' '/camera/realsense2_camera_manager/bond /camera/rgb_camera/auto_exposure_roi/parameter_descriptions' '/camera/rgb_camera/auto_exposure_roi/parameter_updates' '/camera/rgb_camera/parameter_descriptions' '/camera/rgb_camera/parameter_updates' '/camera/stereo_module/auto_exposure_roi/parameter_descriptions' '/camera/stereo_module/auto_exposure_roi/parameter_updates' '/camera/stereo_module/parameter_descriptions' '/camera/stereo_module/parameter_updates'-->
 </launch>
