@@ -1,6 +1,6 @@
 <launch>
 
-<param name="Use_WOW_controller" value="0" />
+<param name="Use_WOW_controller" value="1" />
 <node pkg="depth_car" type="controller.py" name="controller" output="screen"/>
 
 </launch>
