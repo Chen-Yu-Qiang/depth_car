@@ -161,10 +161,13 @@ class a_plot:
         # self.ax.set_ylim(2774760,2774780)
 
 
-        self.ax.set_xlim(352840,352875)
-        self.ax.set_ylim(2767700,2767735)
+        # self.ax.set_xlim(352840,352875)
+        # self.ax.set_ylim(2767700,2767735)
         self.now_zone="h"
    
+        # da hu 1 zone
+        self.ax.set_xlim(359220,359240)
+        self.ax.set_ylim(2774760,2774775)
         x, y, th= 352910,2767650,0
         
         self.ax.plot(TREE_DATA[:,0], TREE_DATA[:,1], 'x', color='g', markersize=5, label='Tree')[0]

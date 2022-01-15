@@ -63,7 +63,11 @@ if __name__=="__main__":
     '''get start GPS point and set datum'''
     navsat_data = rospy.wait_for_message('/outdoor_waypoint_nav/gps/filtered', NavSatFix)
     utm_x_init, utm_y_init, zone, R = setDatum(navsat_data)
-    
+    time.sleep(10)
+    x0y0_msg = rospy.wait_for_message('/lm_ekf/local_org/utm', Twist)
+
+    utm_y_init=x0y0_msg.linear.x
+    utm_x_init=x0y0_msg.linear.y*(-1.0)    
     '''load waypoint.txt -> if exist: do not calculate again'''
     file_name_gps=date_time_folder+"/shapefiles/waypoint/waypoint.txt"
     file_name =file_name_gps[0:-4]+"_utm.txt"
@@ -120,7 +124,7 @@ if __name__=="__main__":
 
     print("Wait for /lm_ekf/gps_w_offset/utm")
     nouse= rospy.wait_for_message("/lm_ekf/gps_w_offset/utm",Twist)
-    time.sleep(10)
+    time.sleep(5)
     print("successfully initialized!")
     
     '''sequentially publish waypoint while receiving achieve signal'''
