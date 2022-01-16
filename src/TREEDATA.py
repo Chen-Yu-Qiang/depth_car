@@ -2,20 +2,31 @@ import numpy as np
 import sys
 import rospy
 print("[TREEDATA.py] Start to get the trunk map data")
+X_MIN,X_MAX,Y_MIN,Y_MAX=0,1,0,1
 try:
-    if sys.version[0]=='2':
-        file_path=rospy.get_param("date_time_folder",default="20220110_17-32-20")+"/shapefiles/neg/center_all.npy"
-    if sys.version[0]=='3':
-        file_path=rospy.get_param("date_time_folder",default="20220110_17-32-20")+"/shapefiles/neg/center_all.npy"
+    file_path=rospy.get_param("date_time_folder",default="20220110_17-32-20")+"/shapefiles/neg/center_all.npy"
     
     print("[TREEDATA.py] The trunk map data at "+file_path)
     tree_data_wow=np.load(file_path)
+    X_MIN=tree_data_wow[0][1]
+    X_MAX=tree_data_wow[0][1]
+    Y_MIN=tree_data_wow[0][0]*(-1.0)
+    Y_MAX=tree_data_wow[0][0]*(-1.0)
     TREE_DATA=[]
     for i in tree_data_wow:
         TREE_DATA.append([i[1],i[0]*(-1.0),i[2]])
         print("[TREEDATA.py] get a tree "+str([i[1],i[0]*(-1.0),i[2]]))
+        X_MIN=min(X_MIN,i[1])
+        X_MAX=max(X_MAX,i[1])
+        Y_MIN=min(Y_MIN,i[0]*(-1.0))
+        Y_MAX=max(Y_MAX,i[0]*(-1.0))
 
+    X_MIN=X_MIN-(X_MAX-X_MIN)*0.2
+    X_MAX=X_MAX+(X_MAX-X_MIN)*0.2
+    Y_MIN=Y_MIN-(Y_MAX-Y_MIN)*0.2
+    Y_MAX=Y_MAX+(Y_MAX-Y_MIN)*0.2
 
+    print("[TREEDATA.py] Get X_MIN={}, X_MAX={}, Y_MIN={}, Y_MAX={}".format(X_MIN,X_MAX,Y_MIN,Y_MAX))
     
 except:
 

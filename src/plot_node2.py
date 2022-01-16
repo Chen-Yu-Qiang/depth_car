@@ -166,8 +166,14 @@ class a_plot:
         self.now_zone="h"
    
         # da hu 1 zone
-        self.ax.set_xlim(359220,359240)
-        self.ax.set_ylim(2774760,2774775)
+        # self.ax.set_xlim(359220,359240)
+        # self.ax.set_ylim(2774760,2774775)
+
+
+        self.ax.set_xlim(TREEDATA.Y_MAX*(-1.0),TREEDATA.Y_MIN*(-1.0))
+        self.ax.set_ylim(TREEDATA.X_MIN,TREEDATA.X_MAX)
+
+
         x, y, th= 352910,2767650,0
         
         self.ax.plot(TREE_DATA[:,0], TREE_DATA[:,1], 'x', color='g', markersize=5, label='Tree')[0]
@@ -459,7 +465,10 @@ if __name__ == '__main__':
     gps_offset_sub=rospy.Subscriber("/lm_ekf/gps_w_offset/utm", Twist,cb_gps_offset,queue_size=1, buff_size=2**20)
     subTrunk = rospy.Subscriber("/tree/trunk_info", Trunkset, cbTrunk,buff_size=2**20,queue_size=1)
     subGoal = rospy.Subscriber("/ctrl/wp/utm", PoseStamped, cbGoal,buff_size=2**20,queue_size=1)
-    rate=rospy.Rate(5)
+    if rospy.get_param("Good_Computer",default="0")=='1':
+        rate=rospy.Rate(20)
+    else:
+        rate=rospy.Rate(5)
     a=a_plot()
 
     while not rospy.is_shutdown():

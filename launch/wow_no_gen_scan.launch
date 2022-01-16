@@ -10,6 +10,7 @@
 <node pkg="mapping_explorer" type="trunk_center_from_ls.py" name="trunk_center_from_ls" output="screen"/>
 <node pkg="depth_car" type="wow2tree.py" name="wow2tree"/>
 <node pkg="depth_car" type="tree2map.py" name="tree2map"/>
+<param name="Good_Computer" value="0" />
 
 <param name="XZ_MODE" value="1" />
 <param name="Enable_Fixed_Point_Strat" value="0" />
