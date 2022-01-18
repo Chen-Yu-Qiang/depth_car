@@ -15,14 +15,21 @@ import os
 import cv2
 
 ck=0.0
+ck_system=time.time()
 is_paused=1
-
+bag_rate=None
 def ck_cb(data):
-    global ck,is_paused
+    global ck,is_paused,ck_system,bag_rate
+
     if ck==data.clock.secs+data.clock.nsecs*(10**-9):
         is_paused=1
     else:
+        ck_old=ck
         ck=data.clock.secs+data.clock.nsecs*(10**-9)
+        bag_rate=(ck-ck_old)/(time.time()-ck_system)
+
+        ck_system=time.time()
+
         is_paused=0
 if __name__=='__main__':
     
@@ -37,14 +44,21 @@ if __name__=='__main__':
 
     cap = cv2.VideoCapture(file_path)
     fps=cap.get(cv2.CAP_PROP_FPS)
+
     print("FPS = ",fps)
 
     rospy.init_node("show_video", anonymous=True)
     rospy.Subscriber("clock",Clock,ck_cb,queue_size=1)
-    rate=rospy.Rate(fps)
+    no_use=rospy.wait_for_message("clock",Clock)
+    time.sleep(5)
+    rate=rospy.Rate(fps*bag_rate)
 
+    print("bag_rate = ",bag_rate)
     print("wait for clock")
     no_use=rospy.wait_for_message("clock",Clock)
+    while (ck-start_time)<0:
+        print("Wait for start time ",start_time," Now is ",ck)
+        time.sleep(1)
     cap.set(cv2.CAP_PROP_POS_MSEC,(ck-start_time)*1000.0)
 
     while not rospy.is_shutdown():
