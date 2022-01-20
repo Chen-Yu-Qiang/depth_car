@@ -1,0 +1,37 @@
+<launch>
+
+
+<!-- <node pkg="depth_car" type="ls_ang.py" name="ls_ang"/>
+<node pkg="depth_car" type="kf_ang.py" name="kf_ang"/>
+<node pkg="depth_car" type="gps2ang.py" name="gps2ang"/>
+<node pkg="depth_car" type="add2filtered_map.py" name="add2filtered_map"/>-->
+
+
+<!-- <node pkg="mapping_explorer" type="trunk_center_from_ls.py" name="trunk_center_from_ls" output="screen"/> -->
+<node pkg="depth_car" type="depth2tree.py" name="depth2tree" output="screen"/>
+<node pkg="depth_car" type="tree2map.py" name="tree2map"/>
+<param name="Good_Computer" value="1" />
+
+<param name="XZ_MODE" value="1" />
+<param name="Enable_Fixed_Point_Strat" value="0" />
+<param name="Use_GPS_time" value="10000" />
+<!-- <param name="date_time_folder" value="/home/yuqiang/20210714_18-37-26" /> -->
+<node pkg="depth_car" type="landmark_ekf_ros.py" name="landmark_ekf_ros"  output="screen" launch-prefix="xterm -fa 'Monospace' -fs 10 -geometry 150x20+450+0 -e"/>
+<node pkg="depth_car" type="plot_node2.py" name="plot_node2" output="screen"/>
+<!-- <node pkg="depth_car" type="plot_scan.py" name="plot_scan" output="screen"/> -->
+<node pkg="depth_car" type="gps2utm_node.py" name="gps2utm_node" output="screen"/>
+<!-- <node pkg="depth_car" type="print_test.py" name="print_test" output="screen"/> -->
+<node pkg="depth_car" type="print_node.py" name="print_node" output="screen" launch-prefix="xterm -fa 'Monospace' -fs 10 -geometry 150x20+450+60 -e"/>
+
+<param name="Use_WOW_controller" value="0" />
+<!-- <node pkg="depth_car" type="controller.py" name="controller" output="screen"/> -->
+
+<!-- <node pkg="depth_car" type="tf2topic_gps_in_utm_node.py" name="tf2topic_gps_in_utm_node" output="screen"/> -->
+<!-- <node pkg="depth_car" type="tf2topic_local_org_in_utm_node.py" name="tf2topic_local_org_in_utm_node" output="screen"/> -->
+
+
+<!-- <node pkg="mapping_explorer" type="tf_transformer_maptomap2.py" name="tf_transformer_maptomap2" output="screen"/> -->
+<node pkg="depth_car" type="map2_tf_pub.py" name="map2_tf_pub" output="screen"/>
+<!-- <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock'" /> -->
+
+</launch>

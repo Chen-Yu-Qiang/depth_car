@@ -379,9 +379,9 @@ def circle_filter(centre_x_list,centre_y_list,radius_r_list):
 
     mask=np.ones((n,))
 
-    mask[centre_x_list<500]=0
+    mask[centre_y_list<500]=0
     mask[radius_r_list>2000]=0
-    mask[radius_r_list<100]=0
+    mask[radius_r_list<50]=0
     centre_x_list=centre_x_list[~(mask==0)]
     centre_y_list=centre_y_list[~(mask==0)]    
     radius_r_list=radius_r_list[~(mask==0)]    

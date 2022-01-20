@@ -15,6 +15,7 @@ from std_msgs.msg import Float64MultiArray,MultiArrayDimension
 import depth2map
 import numpy as np
 from mapping_explorer.msg import Trunkset, Trunkinfo
+import TREEDATA
 
 car_x=0
 car_y=0
@@ -108,6 +109,7 @@ def cbTrunkset(data):
         distance = inAframe.d*1000.0
         theta = inAframe.t
         radius = inAframe.r*1000.0
+        radius = min(TREEDATA.R_MAX*1000.0, max(TREEDATA.R_MIN*1000.0,radius))
         if n<2:
             cor=-100
         else:

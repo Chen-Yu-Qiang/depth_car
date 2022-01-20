@@ -11,6 +11,7 @@ import cv2
 import tf
 from geometry_msgs.msg import Vector3Stamped
 from nav_msgs.msg import Odometry
+from mapping_explorer.msg import Trunkset, Trunkinfo
 from std_msgs.msg import Float64MultiArray,MultiArrayDimension
 import depth2map
 import max_like_tree
@@ -53,6 +54,7 @@ def list2ROSmsg_dthr(d_list,th_list,r_list,car_x,car_y,car_theta,AA,puber):
     centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
     NnW=depth2map.fromCar2World(centre_x_list,centre_z_list,car_x*1000,car_y*1000,car_theta)
     a=[0 for i in range(len(centre_x_list)*ARRAY_LAY1)]
+    msg=Trunkset()
     for i in range(len(centre_x_list)):
         a[i*ARRAY_LAY1]=centre_x_list[i]*0.001
         a[i*ARRAY_LAY1+1]=centre_z_list[i]*0.001
@@ -66,6 +68,13 @@ def list2ROSmsg_dthr(d_list,th_list,r_list,car_x,car_y,car_theta,AA,puber):
         a[i*ARRAY_LAY1+9]=NnW[0,i]
         a[i*ARRAY_LAY1+10]=NnW[1,i]
         a[i*ARRAY_LAY1+11]=-100
+
+        msg_one=Trunkinfo()
+        msg_one.t=th_list[i]
+        msg_one.r=radius_r_list[i]*0.001
+        msg_one.d=d_list[i]*0.001
+
+        msg.aframe.append(msg_one)
     b=Float64MultiArray(data=a)
     
     b.layout.dim=[MultiArrayDimension()]
@@ -75,6 +84,9 @@ def list2ROSmsg_dthr(d_list,th_list,r_list,car_x,car_y,car_theta,AA,puber):
     b.layout.dim[0].label="A_Tree"
 
     puber.publish(b)
+    print(msg)
+    pubTrunk.publish(msg)
+
 
 def list2ROSmsg_dthr_each(d_list,th_list,r_list,car_x,car_y,car_theta,AA,puber):
     centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
@@ -104,6 +116,9 @@ def list2ROSmsg_dthr_each(d_list,th_list,r_list,car_x,car_y,car_theta,AA,puber):
 
         b.layout.dim[0].label="A_Tree_each"
         puber.publish(b)
+
+
+
 
 
 
@@ -153,7 +168,11 @@ def cbDepth_2(data):
         cv2.putText(image,str(int(d_list[i]))+","+str(int((th_list[i])*57.3))+","+str(int(r_list[i])),(0,400+i*30), cv2.FONT_HERSHEY_SIMPLEX,1, 60000, 1, cv2.LINE_AA)
     cv2.imshow("rth",image)
     centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
+    # print(centre_x_list,centre_z_list,radius_r_list)
+
     centre_x_list,centre_z_list,radius_r_list = depth2map.circle_filter(centre_x_list,centre_z_list,radius_r_list)
+
+    # print(centre_x_list,centre_z_list,radius_r_list)
 
     if len(centre_x_list)>0:
         list2ROSmsg_dthr_each(d_list,th_list,r_list,car_x,car_y,car_theta,AA,tree_data2_each_pub)
@@ -168,8 +187,7 @@ def cbDepth_2(data):
     cv2.waitKey(1)
 
     
-    AA+=1
-
+    AA+=1 
 
 
     
@@ -190,7 +208,8 @@ if __name__=="__main__":
     # tree_data_pub=rospy.Publisher("/tree_data", Float64MultiArray,queue_size=1)
     tree_data2_each_pub=rospy.Publisher("/tree/data2/each", Float64MultiArray,queue_size=1)
     tree_data2_together_pub=rospy.Publisher("/tree/data2/together", Float64MultiArray,queue_size=1)
-    tree_data_image_pub=rospy.Publisher("/tree_image_data", Float64MultiArray,queue_size=1)
+    tree_data_image_pub=rospy.Publisher("/tree/image_data", Float64MultiArray,queue_size=1)
+    pubTrunk = rospy.Publisher("/tree/trunk_info", Trunkset, queue_size=1)
 
 
 
