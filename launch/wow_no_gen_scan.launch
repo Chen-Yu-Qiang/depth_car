@@ -34,5 +34,5 @@
 <!-- <node pkg="mapping_explorer" type="tf_transformer_maptomap2.py" name="tf_transformer_maptomap2" output="screen"/> -->
 <node pkg="depth_car" type="map2_tf_pub.py" name="map2_tf_pub" output="screen"/>
 <!-- <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock'" /> -->
-
+<node pkg="mapping_explorer" type="check_utm_init_service.py" name="check_utm_init_service" output="screen"/>
 </launch>
