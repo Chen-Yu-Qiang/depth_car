@@ -4,12 +4,16 @@ import sys
 from datetime import datetime
 import rospy
 from sensor_msgs.msg import NavSatFix
-if sys.version[0]=='2':
-    a=raw_input("Please enter the date-time folder of the waypoint: ~/202201")
-elif sys.version[0]=='3':
+
+
+a=rospy.get_param("date_time_folder")
+b=input("The datetime folder is: {} \nPlease press Enter to agree or any key to reset".format(a))
+if not b=='':
     a=input("Please enter the date-time folder of the waypoint: ~/202201")
-a=os.path.expanduser('~')+"/202201"+a
-rospy.set_param("date_time_folder",a)
+    a=os.path.expanduser('~')+"/202201"+a
+    rospy.set_param("date_time_folder",a)
+
+
 import TREEDATA
 rospy.set_param("RADIUS_MAX",float(TREEDATA.R_MAX))
 rospy.set_param("RADIUS_MIN",float(TREEDATA.R_MIN))
@@ -19,7 +23,7 @@ rospy.set_param("Init_tree_num",Init_tree_num)
 
 
 while 1:
-    mode=input("1: Create positive boundaries \n 2: Walking waypoints \n choose a mode => ")
+    mode=input("1: Create positive boundaries \n2: Walking waypoints \nchoose a mode => ")
     if mode=="1":
         os.system("roslaunch depth_car wow_no_gen_scan.launch")
         break

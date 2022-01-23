@@ -1,0 +1,9 @@
+<launch>
+
+
+<arg name="startDate_arg" default="2022-01-01_00-00-00"/>
+<node pkg="rosbag" type="record" name="myposDBbag"  output="screen" args="-O $(arg startDate_arg)_posBDs.bag /outdoor_waypoint_nav/gps/filtered /lm_ekf/gps_w_offset/utm"/>
+
+<include file="$(find depth_car)/launch/wow_no_gen_scan.launch"></include>
+
+</launch>
