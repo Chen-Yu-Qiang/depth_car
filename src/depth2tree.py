@@ -84,7 +84,7 @@ def list2ROSmsg_dthr(d_list,th_list,r_list,car_x,car_y,car_theta,AA,puber):
     b.layout.dim[0].label="A_Tree"
 
     puber.publish(b)
-    print(msg)
+    # print(msg)
     pubTrunk.publish(msg)
 
 

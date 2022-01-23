@@ -166,34 +166,15 @@ def get_dis(ax,ay,bx,by):
     return np.sqrt((ax-bx)**2+(ay-by)**2)
 
 
-def set_u_init(x,y,theta):
+def set_u_init(x,y,theta,x_offset,y_offset):
     u=np.zeros((STATE_NUM,1))
     u[0][0]=x
     u[1][0]=y
     u[2][0]=theta
+    u[3][0]=x_offset
+    u[4][0]=y_offset
 
-    # Here read x_offset file
-    if sys.version[0]=='3':
-        u[3][0]=0
-        u[4][0]=0
-    elif sys.version[0]=='3':
 
-        import csv
-        with open('/home/ncslaber/init_offset_RTK_camera.csv', 'r') as csvfile:
-            lines = csvfile.readlines()
-            last_line = lines[-1]
-            last_line = last_line.split(",")
-            print(type(last_line))
-            print(last_line[0]) # x in East
-            print(last_line[1]) # y in North
-
-            offset_x = float(last_line[0])
-            offset_y = float(last_line[1])
-
-        print("Get WOW offset!!! ",offset_x,offset_y)
-
-        u[3][0]=offset_y
-        u[4][0]=offset_x*(-1.0)
     return u
 
 

@@ -102,13 +102,13 @@ def fun(file_path):
                 T_ground[0:3,3]=tt_ground
                 T_ground[3,3]=1
 
-            # board_offset=np.array([-0.1,-0.05,0],dtype=np.float32)
-            # board_corners = [np.array([[0,0.18,0],[0.18,0.18,0],[0.18,0,0],[0,0,0]],dtype=np.float32)+board_offset]
+            board_offset=np.array([-0.1,-0.05,0],dtype=np.float32)
+            board_corners = [np.array([[0,0.18,0],[0.18,0.18,0],[0.18,0,0],[0,0,0]],dtype=np.float32)+board_offset]
 
 
 
-            board_offset=np.array([-0.08,0.37,0],dtype=np.float32)
-            board_corners = [np.array([[0,0,0.18],[0.18,0,0.18],[0.18,0,0],[0,0,0]],dtype=np.float32)+board_offset]
+            # board_offset=np.array([-0.08,0.37,0],dtype=np.float32)
+            # board_corners = [np.array([[0,0,0.18],[0.18,0,0.18],[0.18,0,0],[0,0,0]],dtype=np.float32)+board_offset]
             aruco_marker_length_meters=0.5
             board_ids = np.array([[51]], dtype=np.int32)
             board = aruco.Board_create(board_corners,
@@ -156,6 +156,15 @@ def fun(file_path):
 
 if __name__=='__main__':
     
-    file_path="/media/yuqiang/2CFC30D1FC309754/research data/1110121/aruco_v/PXL_20220119_083950346.mp4"
+    file_path="/media/yuqiang/2CFC30D1FC309754/research data/1110121/aruco/PXL_20220118_092246821.mp4"
     fun(file_path)
-
+    file_path="/media/yuqiang/2CFC30D1FC309754/research data/1110121/aruco/PXL_20220118_092527147.mp4"
+    fun(file_path)
+    file_path="/media/yuqiang/2CFC30D1FC309754/research data/1110121/aruco/PXL_20220118_092811891.mp4"
+    fun(file_path)
+    file_path="/media/yuqiang/2CFC30D1FC309754/research data/1110121/aruco/PXL_20220118_092916642.mp4"
+    fun(file_path)
+    file_path="/media/yuqiang/2CFC30D1FC309754/research data/1110121/aruco/PXL_20220118_093008492.mp4"
+    fun(file_path)
+    file_path="/media/yuqiang/2CFC30D1FC309754/research data/1110121/aruco/PXL_20220118_093111377.mp4"
+    fun(file_path)

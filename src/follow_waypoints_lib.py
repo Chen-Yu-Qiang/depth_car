@@ -62,7 +62,7 @@ if __name__=="__main__":
 
     '''get start GPS point and set datum'''
     navsat_data = rospy.wait_for_message('/outdoor_waypoint_nav/gps/filtered', NavSatFix)
-    utm_x_init, utm_y_init, zone, R = setDatum(navsat_data)
+    # utm_x_init, utm_y_init, zone, R = setDatum(navsat_data)
     time.sleep(10)
     x0y0_msg = rospy.wait_for_message('/lm_ekf/local_org/utm', Twist)
 

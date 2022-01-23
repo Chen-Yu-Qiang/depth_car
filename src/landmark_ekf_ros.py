@@ -15,12 +15,27 @@ from geometry_msgs.msg import Vector3Stamped
 import depth2map
 import EKF_localization 
 import TREEDATA
+from mapping_explorer.srv import InitOffset, InitOffsetResponse
 
-print("Python version: ",sys.version)
+print("[landmark_ekf_ros.py] Python version: "+str(sys.version))
 rospy.init_node("landmark_ekf", anonymous=True)
+print("[landmark_ekf_ros.py] wait for message /lm_ekf/gps/utm ")
 gps_init=rospy.wait_for_message("/lm_ekf/gps/utm", Twist)
-print("Get GPS init ",gps_init.linear.x,gps_init.linear.y)
-u_init=EKF_localization.set_u_init(gps_init.linear.x,gps_init.linear.y,1.5)
+print("[landmark_ekf_ros.py] Get GPS init x = {} ,y = {}".format(gps_init.linear.x,gps_init.linear.y))
+
+
+print("[landmark_ekf_ros.py] wait for service get_init_offset_in_map ")
+rospy.wait_for_service('get_init_offset_in_map')
+try:
+    get_init_offset_in_map = rospy.ServiceProxy('get_init_offset_in_map',InitOffset)
+    resp = get_init_offset_in_map(int(rospy.get_param('Init_tree_num',default=0))) #identity: matched trunk index in the map
+except rospy.ServiceException as e:
+    print("[landmark_ekf_ros.py] Service call failed: %s" % e)
+
+print("[landmark_ekf_ros.py] Get GPS offset init x = {} ,y = {}".format(resp.offset_y,resp.offset_x*(-1.0)))
+
+
+u_init=EKF_localization.set_u_init(gps_init.linear.x,gps_init.linear.y,1.5,resp.offset_y,resp.offset_x*(-1.0))
 
 ekf=EKF_localization.EKF_localization(u_init)
 TREE_DATA=TREEDATA.TREE_DATA
