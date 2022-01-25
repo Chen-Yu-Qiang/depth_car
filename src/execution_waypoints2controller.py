@@ -21,14 +21,5 @@ rospy.set_param("RADIUS_MIN",float(TREEDATA.R_MIN))
 Init_tree_num=input("Please enter the trunk number to initialize the GPS offset")
 rospy.set_param("Init_tree_num",Init_tree_num)
 
-
-while 1:
-    mode=input("1: Create positive boundaries \n2: Walking waypoints \nchoose a mode => ")
-    if mode=="1":
-        os.system("roslaunch depth_car wow_no_gen_scan.launch")
-        break
-    elif mode=="2":
-        os.system("roslaunch depth_car wow_waypoint.launch")
-        break
-    else:
-        print("I do not know what you're talking about")
+print("GOGO WayPoints !")
+os.system("roslaunch depth_car wow_waypoint.launch")

@@ -97,6 +97,9 @@ if __name__=="__main__":
                 lng.append(float(s[1])) 
 
         '''project to UTM and transform to /map frame'''
+
+        _, _, zone, R = utm.from_latlon(lat[0], lng[0])
+
         proj = Proj(proj='utm', zone=zone, ellps='WGS84', preserve_units=False)
         utm_x_waypoints, utm_y_waypoints = proj(lng, lat)
         utm_x_waypoints = np.asarray(utm_x_waypoints)
