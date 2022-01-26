@@ -60,8 +60,8 @@ def get_ut(ut_1,v,omg):
 
 def get_sigma(sigmat_1,gt,vt,mt):
     a=np.zeros((STATE_NUM,STATE_NUM))
-    a[3][3]=10**(-8)
-    a[4][4]=10**(-8)
+    a[3][3]=10**(-5)
+    a[4][4]=10**(-5)
 
     return np.dot(np.dot(gt,sigmat_1),gt.T)+np.dot(np.dot(vt,mt),vt.T)+a
 
@@ -188,6 +188,8 @@ class EKF_localization:
         self.Qt[1][1]=10**(2)
         self.Qt[2][2]=10**(2)
         self.Qt_pos=np.eye(3)
+        self.Qt_pos[0][0]=10.0**(-1)
+        self.Qt_pos[1][1]=10.0**(-1)
         self.Qt_pos[2][2]=10.0**(-2)
         self.Qt_ang=10**(-5)
         self.Qt_utm=np.eye(2)*10**(-1)
