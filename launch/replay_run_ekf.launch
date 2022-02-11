@@ -1,6 +1,8 @@
 <launch>
 
 
+<node pkg="rosbag" type="play" name="myrosbag" args="/media/yuqiang/2CFC30D1FC309754/BAG/220127_DaHu/bag/2022-01-27-14-24-06_in.bag -s 50" />
+<node pkg="rosbag" type="record" name="myrosbag2" args="-a" />
 
 <param name="XZ_MODE" value="1" />
 <param name="Enable_Fixed_Point_Strat" value="0" />
@@ -9,9 +11,7 @@
 <param name="Use_WOW_controller" value="1" />
 <param name="Good_Computer" value="1" />
 
-<node pkg="depth_car" type="plot_node2.py" name="plot_node2" output="screen"/>
-<node pkg="depth_car" type="show_3th_part_video.py" name="show_3th_part_video" output="screen"/>
-<node pkg="depth_car" type="print_node.py" name="print_node" output="screen" launch-prefix="xterm -fa 'Monospace' -fs 10 -geometry 150x20+450+0 -e"/>
 
+<include file="$(find depth_car)/launch/wow_no_gen_scan.launch"></include>
 
 </launch>

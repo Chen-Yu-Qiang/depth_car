@@ -25,12 +25,17 @@ print("[landmark_ekf_ros.py] Get GPS init x = {} ,y = {}".format(gps_init.linear
 
 
 print("[landmark_ekf_ros.py] wait for service get_init_offset_in_map ")
-rospy.wait_for_service('get_init_offset_in_map')
-try:
-    get_init_offset_in_map = rospy.ServiceProxy('get_init_offset_in_map',InitOffset)
-    resp = get_init_offset_in_map(int(rospy.get_param('Init_tree_num',default=0))) #identity: matched trunk index in the map
-except rospy.ServiceException as e:
-    print("[landmark_ekf_ros.py] Service call failed: %s" % e)
+if sys.version[0]=='3':
+    rospy.wait_for_service('get_init_offset_in_map')
+    try:
+        get_init_offset_in_map = rospy.ServiceProxy('get_init_offset_in_map',InitOffset)
+        resp = get_init_offset_in_map(int(rospy.get_param('Init_tree_num',default=0))) #identity: matched trunk index in the map
+    except rospy.ServiceException as e:
+        print("[landmark_ekf_ros.py] Service call failed: %s" % e)
+else:
+    resp=InitOffset()
+    resp.offset_x=0
+    resp.offset_y=0
 
 print("[landmark_ekf_ros.py] Get GPS offset init x = {} ,y = {}".format(resp.offset_y,resp.offset_x*(-1.0)))
 
@@ -169,10 +174,11 @@ def cb_pos(data):
     ekf.update_angle(EKF_localization.Odom_2_angle_Z(data))
 v=0
 omg=0
-ekf.Qt[0][0]=10**(-4)
-ekf.Qt[1][1]=10**(-4)
-ekf.Qt[2][2]=10**(-4)
-ekf.max_j_th=2.5
+ekf.Qt[0][0]=10**(-1)
+ekf.Qt[1][1]=10**(-1)
+ekf.Qt[2][2]=10**(-1)
+ekf.max_j_th=0.8
+
 def cb_cmd(data):
     global v,omg
     v=data.linear.x
@@ -231,8 +237,8 @@ if __name__=="__main__":
     ekf_out_sigma=rospy.Publisher("/lm_ekf/sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("/lm_ekf/z",Float64MultiArray,queue_size=1)
     ekf_out_landmark_error=rospy.Publisher("/lm_ekf/error",Float64MultiArray,queue_size=1)
-    rate=rospy.Rate(5)
-    EKF_localization.DELTA_T=0.2
+    rate=rospy.Rate(10)
+    EKF_localization.DELTA_T=0.1
 
     
     while not rospy.is_shutdown():

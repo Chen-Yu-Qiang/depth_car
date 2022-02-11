@@ -209,6 +209,7 @@ class EKF_localization:
 
     def get_like(self,z_error):
         j_k=np.exp((-0.5)*z_error[0][0]*z_error[0][0])+2.0*np.exp((-2.0)*z_error[1][0]*z_error[1][0])+1.7*np.exp((-1.5)*z_error[2][0]*z_error[2][0])
+
         return j_k     
 
     def get_like_xz(self,z_error):
@@ -216,7 +217,8 @@ class EKF_localization:
         w[0][0]=0.5
         w[1][1]=0.5
         w[2][2]=0.1
-        j_k=np.exp((-0.5)*np.dot(z_error.T,np.dot(w,z_error)))
+        j_k=np.exp((-0.1)*np.dot(z_error.T,np.dot(w,z_error)))[0][0]
+
         return j_k    
     def update_landmark_sim(self,Z,lock_tree={}):
         z_hat=[]
@@ -308,7 +310,7 @@ class EKF_localization:
         K=np.dot(np.dot(self.sigma,H.T),np.linalg.inv(S))
         delta=np.dot(K,(Z-z_hat))
 
-        j_k=self.get_like(z_error)
+        j_k=self.get_like_xz(z_error)
         delta[2][0]=0
         if j_k<self.max_j_th:
             print("likelihood too small",i,j_k)
@@ -350,7 +352,7 @@ class EKF_localization:
             # z_error[1][0]=z_error[1][0]*3
             # j_k=(np.linalg.det(2*np.pi*S_k)**(-0.5))*np.exp((-0.5)*np.dot(np.dot(z_error.T,np.linalg.inv(S_k)),z_error))
             if i in WHITE_LIST:
-                j_k=[[self.get_like(z_error)]]
+                j_k=[[self.get_like_xz(z_error)]]
             else:
                 j_k=-100
             # print(i+1,j_k,z_hat_k[0][0],z_hat_k[1][0])

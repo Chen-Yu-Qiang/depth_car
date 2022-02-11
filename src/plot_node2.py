@@ -5,7 +5,7 @@ import numpy as np
 import time
 import random
 import matplotlib
-matplotlib.use('TKAgg')
+# matplotlib.use('TKAgg')
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from datetime import datetime
@@ -64,8 +64,8 @@ class data_set:
 
 class car_obj:
     def __init__(self,plot_obj,r=1,ms=10,c="red",ec="k",trj_en=1,theta_en=1,car_name=""):
-        self.x=0
-        self.y=0
+        self.x=359159.089156
+        self.y=2774786.94243
         self.th=0
         self.trj_data_x=deque([], maxlen=2500)
         self.trj_data_y=deque([], maxlen=2500)
@@ -75,7 +75,7 @@ class car_obj:
         self.r=r
         self.trj_en=trj_en
         self.theta_en=theta_en
-        self.ax_obj=plot_obj.ax.plot([], [], 'o',markersize=ms, color=c, markeredgecolor=ec,label=car_name)[0]
+        self.ax_obj=plot_obj.ax.plot([359159.089156], [2774786], 'o',markersize=ms, color=c, markeredgecolor=ec,label=car_name)[0]
 
         if self.theta_en:        
             self.ax_th_obj=plot_obj.ax.plot([],[], '-',linewidth=5, color=c)[0]
@@ -451,6 +451,7 @@ def cb_gps_offset(data):
 
     ds.set("x_gps_offset",data.linear.y*(-1.0))
     ds.set("y_gps_offset",data.linear.x)
+    
 
 
 if __name__ == '__main__':
