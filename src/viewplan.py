@@ -10,7 +10,7 @@ ALPHA_V=0.75
 Z_T=0.2
 Z_B=7
 THETA_A=np.pi/6
-RHO=2.0
+RHO=0.5
 
 
 def cameraFrame2WorldFrame(cpk,ci):
@@ -62,7 +62,7 @@ def C_s(pk,ci):
     th=1
 
     if d_v(pk,ci)>th:
-        return np.exp((-1.0)*RHO*th*th)*0
+        return 0
     else:
         # return (-1.0)*RHO*d_v(pk,ci)*d_v(pk,ci)
         return np.exp((-1.0)*RHO*d_v(pk,ci)*d_v(pk,ci))
@@ -171,8 +171,8 @@ def gradient(pk,ci,it_num,it_length):
     return ci,all_delta
 
 def plot_contourf(taskPoint,z=0,th=0,x_min=0,x_max=10,y_min=0,y_max=10):
-    x_list=np.linspace(x_min,x_max,41)
-    y_list=np.linspace(y_min,y_max,41)
+    x_list=np.linspace(x_min,x_max,101)
+    y_list=np.linspace(y_min,y_max,101)
 
     def f(x,y):
         C_s_sum=0
@@ -190,7 +190,7 @@ def plot_contourf(taskPoint,z=0,th=0,x_min=0,x_max=10,y_min=0,y_max=10):
              Z[j][i]=f(x_list[i],y_list[j])
 
 
-    plt.contourf(x_list, y_list, Z,100,cmap='jet',vmin=0, vmax=5)
+    plt.contourf(x_list, y_list, Z,100,cmap='jet',vmin=0, vmax=3)
     plt.colorbar()    
     # plt.contour(x_list, y_list, Z, [np.exp((-1.0)*RHO)])
 
@@ -201,13 +201,13 @@ def plot_contourf(taskPoint,z=0,th=0,x_min=0,x_max=10,y_min=0,y_max=10):
 
     plt.xlabel("X (m)")
     plt.ylabel("Y (m)")
-    plt.title("th="+str(round(th*57.3,3)))
+    plt.title("th="+str(round(th*57.3,3)+90)+" deg")
     # plt.show()
 
 
 def plot_contourf_allmax(taskPoint,z=0,x_min=0,x_max=10,y_min=0,y_max=10):
-    x_list=np.linspace(x_min,x_max,41)
-    y_list=np.linspace(y_min,y_max,41)
+    x_list=np.linspace(x_min,x_max,101)
+    y_list=np.linspace(y_min,y_max,101)
 
     def f(x,y,th):
         C_s_sum=0
@@ -258,6 +258,18 @@ def treedata2taskPoint(td):
     for i in td:
         tk.append([i[0],i[1],0,0])
     return tk
+
+def line_C_s(tk,p1,p2,ang):
+    x_delta=p1[0]-p2[0]
+    y_delta=p1[1]-p2[1]
+    dis=np.sqrt(x_delta**2+y_delta**2)
+    n=max(2,int(dis))
+    C=0
+    for i in range(n):
+        x=p1[0]-x_delta/(n)*(i+1)
+        y=p1[1]-y_delta/(n)*(i+1)
+        C=C+C_s_all(tk,[x,y,0,ang])
+    return C/n
 
 class viewPanner:
     def __init__(self):
@@ -405,7 +417,8 @@ if __name__=="__main__":
     for i in range(0,36):
         ii=i*np.pi/18.0
         plot_contourf(tk,z=0,th=ii,x_min=TREEDATA.X_MIN,x_max=TREEDATA.X_MAX,y_min=TREEDATA.Y_MIN,y_max=TREEDATA.Y_MAX)
-        plt.savefig("20220127_12-11-38-"+str(ii)+".png",dpi=600)
+        plt.show()
+        # plt.savefig("20220127_12-11-38-"+str(ii)+".png",dpi=600)
         plt.clf()
 
     plot_contourf_allmax(tk,z=0,x_min=TREEDATA.X_MIN,x_max=TREEDATA.X_MAX,y_min=TREEDATA.Y_MIN,y_max=TREEDATA.Y_MAX)

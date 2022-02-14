@@ -25,10 +25,12 @@ try:
         R_MAX=max(R_MAX,i[2])
         R_MIN=min(R_MIN,i[2])
 
-    X_MIN=X_MIN-max(2,(X_MAX-X_MIN)*0.3)
-    X_MAX=X_MAX+max(2,(X_MAX-X_MIN)*0.3)
-    Y_MIN=Y_MIN-max(2,(Y_MAX-Y_MIN)*0.3)
-    Y_MAX=Y_MAX+max(2,(Y_MAX-Y_MIN)*0.3)
+    X_MIN1=X_MIN-max(2,(X_MAX-X_MIN)*0.6)
+    X_MAX=X_MAX+max(2,(X_MAX-X_MIN)*0.6)
+    X_MIN=X_MIN1
+    Y_MIN1=Y_MIN-max(2,(Y_MAX-Y_MIN)*0.6)
+    Y_MAX=Y_MAX+max(2,(Y_MAX-Y_MIN)*0.6)
+    Y_MIN=Y_MIN1
 
     print("[TREEDATA.py] Get X_MIN={}, X_MAX={}, Y_MIN={}, Y_MAX={}".format(X_MIN,X_MAX,Y_MIN,Y_MAX))
     print("[TREEDATA.py] Get R_MAX={}, R_MIN={}".format(R_MAX,R_MIN))

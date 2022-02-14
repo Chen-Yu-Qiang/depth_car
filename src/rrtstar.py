@@ -1,6 +1,9 @@
 import numpy as np
-import matplotlib.pyplot as plt
-
+import matplotlib
+matplotlib.use('TKAgg')
+from matplotlib import pyplot as plt
+import viewplan
+import TREEDATA
 
 
 def plot_scene(obstacle_list, start, goal):
@@ -8,7 +11,7 @@ def plot_scene(obstacle_list, start, goal):
     for o in obstacle_list:
         circle = plt.Circle((o[0], o[1]), o[2], color='k')
         ax.add_artist(circle)
-    plt.axis([bounds[0]-0.5, bounds[1]+0.5, bounds[0]-0.5, bounds[1]+0.5])
+    plt.axis([bounds[0]-0.5, bounds[1]+0.5, bounds[2]-0.5, bounds[3]+0.5])
     plt.plot(start[0], start[1], "xr", markersize=10)
     plt.plot(goal[0], goal[1], "xb", markersize=10)
     plt.legend(('start', 'goal'), loc='upper left')
@@ -19,11 +22,13 @@ class RRT:
     class Node:
         def __init__(self, p):
             self.p = np.array(p)
+            self.ang=np.pi*0.3
             self.parent = None
+            self.ind=0
 
     def __init__(self, start, goal, obstacle_list, bounds, 
-                 max_extend_length=3.0, path_resolution=0.5, 
-                 goal_sample_rate=0.05, max_iter=100):
+                 max_extend_length=0.5, path_resolution=0.5, 
+                 goal_sample_rate=0.05, max_iter=500, treedata=[]):
         self.start = self.Node(start)
         self.goal = self.Node(goal)
         self.bounds = bounds
@@ -33,6 +38,8 @@ class RRT:
         self.max_iter = max_iter
         self.obstacle_list = obstacle_list
         self.node_list = []
+        self.max_ang=np.pi*0.3
+        self.treedata=treedata
 
     def plan(self):
         """Plans the path from start to goal while avoiding obstacles"""
@@ -42,6 +49,7 @@ class RRT:
             # 1) Create a random node (rnd_node) inside 
             # the bounded environment
             rnd_node=self.get_random_node()
+
 
             # 2) Find nearest node (nearest_node)
             nearest_node=self.get_nearest_node(self.node_list,rnd_node)
@@ -87,15 +95,18 @@ class RRT:
         """Sample random node inside bounds or sample goal point"""
         if np.random.rand() > self.goal_sample_rate:
             # Sample random point inside boundaries
-            rnd = self.Node(np.random.rand(2)*(self.bounds[1]-self.bounds[0]) + self.bounds[0])
+            x=np.random.rand()*(self.bounds[1]-self.bounds[0]) + self.bounds[0]
+            y=np.random.rand()*(self.bounds[3]-self.bounds[2]) + self.bounds[2]
+            rnd = self.Node(np.array([x,y]))
         else:  
             # Select goal point
             rnd = self.Node(self.goal.p)
         return rnd
     
-    @staticmethod
-    def get_nearest_node(node_list, node):
+    
+    def get_nearest_node(self,node_list, node):
         """Find the nearest node in node_list to node"""
+
         dlist = [np.sum(np.square((node.p - n.p))) for n in node_list]
         minind = dlist.index(min(dlist))
         return node_list[minind]
@@ -123,21 +134,102 @@ class RRT:
             if is_collide:
                 return True # is in collision
         return False # is not in collision
-    
+
+
+    def out_ang_constraint(self,node, new_node):
+        ang=self.ang_between_parent(node, new_node)
+        # print(ang)
+        if ang<self.max_ang:
+            return False
+        else:
+            return True
+
+
+    def ang_between_parent(self, node, new_node):
+        ang_new=self.ang_nodeA_2_nodeB(node,new_node)
+        ang_old=node.ang
+        ang=abs(ang_new-ang_old)
+        ang=np.arccos(np.cos(ang))
+        # print(ang)
+        return ang
+                
+    @staticmethod
+    def ang_nodeA_2_nodeB(nodeA,nodeB):
+      
+        p1 = nodeB.p[0]
+        p2 = nodeB.p[1]
+        p3 = nodeA.p[0]
+        p4 = nodeA.p[1]
+        return np.arctan2(p2-p4,p1-p3) 
+
+    @staticmethod
+    def ang_from_parent(node1):
+        p1 = node1.p[0]
+        p2 = node1.p[1]
+        if node1.parent is None:
+            return np.pi
+        else:
+            p3 = node1.parent.p[0]
+            p4 = node1.parent.p[1]
+            return np.arctan2(p2-p4,p1-p3) 
+
+
     def final_path(self, goal_ind):
         """Compute the final path from the goal node to the start node"""
-        path = [self.goal.p]
+        self.goal.parent=self.node_list[goal_ind]
+        self.goal.ang=self.ang_from_parent(self.goal)
         node = self.node_list[goal_ind]
+        path = [self.goal.p]
         path.append(node.p)
+        
+        path_node=[self.goal]
+        path_node.append(node)
+
+        print("final_path----------")
+        i=0
         while not node==self.start:
             node = node.parent
             path.append(node.p)
+            path_node.append(node)
 
-        # path.append(self.start.p)
-        
-        print(path)
+        print("final_path---------- len= "+str(len(path_node)))        
+        path_node.reverse()
+
+        for i in range(1,len(path_node)):
+            to_node=path_node[i]
+            from_node=path_node[i].parent
+            viewplan.plot_contourf(self.treedata,z=0,th=to_node.ang-0.5*np.pi,x_min=TREEDATA.X_MIN,x_max=TREEDATA.X_MAX,y_min=TREEDATA.Y_MIN,y_max=TREEDATA.Y_MAX)
+
+            for j in range(1,len(path_node)):
+                if j==i:
+                    plt.plot([path_node[j].p[0], path_node[j].parent.p[0]], [path_node[j].p[1], path_node[j].parent.p[1]], "-r")
+                else:
+                    plt.plot([path_node[j].p[0], path_node[j].parent.p[0]], [path_node[j].p[1], path_node[j].parent.p[1]], "-g")
+            
+            
+            d_s=np.linalg.norm(from_node.p - to_node.p)
+
+            ang_forward=self.ang_between_parent(from_node,to_node)
+            # ang_backward=np.pi-ang_forward
+            # ang_s = min(ang_forward,ang_backward)*10
+            ang_s = ang_forward
+
+            vp_s_ = viewplan.line_C_s(self.treedata, from_node.p, to_node.p, to_node.ang-0.5*np.pi)
+            vp_s=20/(0.01+vp_s_)
+            t="Dis= "+str(round(d_s,3))+" m\nAngle= "+str(int(ang_s*57.3))+" deg\nView= "+str(round(vp_s,3))
+            plt.text(self.bounds[0],self.bounds[3]-10,t,color="r")        
+            plt.plot(self.start.p[0], self.start.p[1], "xr", markersize=10)
+            plt.plot(self.goal.p[0], self.goal.p[1], "xb", markersize=10)
+            plt.savefig("rrt_20220127_12-11-38-"+str(i)+".png",dpi=600)
+
+            plt.clf()
+            print("save "+"rrt_20220127_12-11-38-"+str(i)+".png")
+
+
+        print("PLAN END----------")
         # modify here: Generate the final path from the goal node to the start node.
         # We will check that path[0] == goal and path[-1] == start
+        
         return path
 
     def draw_graph(self):
@@ -157,12 +249,12 @@ class RRTStar(RRT):
     def __init__(self, start, goal, obstacle_list, bounds,
                  max_extend_length=5.0,
                  path_resolution=0.5,
-                 goal_sample_rate=0.0,
+                 goal_sample_rate=0.001,
                  max_iter=500,
-                 connect_circle_dist=50.0
-                 ):
+                 connect_circle_dist=20.0,
+                 treedata=[]):
         RRT.__init__(self,start, goal, obstacle_list, bounds, max_extend_length,
-                         path_resolution, goal_sample_rate, max_iter)
+                         path_resolution, goal_sample_rate, max_iter,treedata)
         self.connect_circle_dist = connect_circle_dist
         self.goal = self.Node(goal)
 
@@ -171,33 +263,37 @@ class RRTStar(RRT):
         self.node_list = [self.start]
         for i in range(self.max_iter):
             # Create a random node inside the bounded environment
+            print(i)
             rnd = self.get_random_node()
             # Find nearest node
             nearest_node = self.get_nearest_node(self.node_list, rnd)
             # Get new node by connecting rnd_node and nearest_node
             new_node = self.steer(nearest_node, rnd, self.max_extend_length)
             # If path between new_node and nearest node is not in collision:
-            if not self.collision(new_node, nearest_node, self.obstacle_list):
+            if self.collision(new_node, nearest_node, self.obstacle_list):
+                print(i,"collision")
+                pass
+                # elif self.out_ang_constraint(nearest_node,new_node):
+                #     print(i,"ang")
+                #     pass
+                # if 0:
+                #     pass
+            else:
                 near_inds = self.near_nodes_inds(new_node)
+                last_i=self.node_list[-1].ind+1
+                new_node.ind=last_i
                 # Connect the new node to the best parent in near_inds
                 new_node = self.choose_parent(new_node, near_inds)
-                self.node_list.append(new_node)
-                # Rewire the nodes in the proximity of new_node if it improves their costs
-                self.rewire(new_node, near_inds)
+                if new_node.cost<np.inf:
+                    
+                    self.node_list.append(new_node)
+                    # Rewire the nodes in the proximity of new_node if it improves their costs
+                    self.rewire(new_node, near_inds)
+
         last_index, min_cost = self.best_goal_node_index()
         if last_index:
             return self.final_path(last_index), min_cost
         return None, min_cost
-
-
-
-    def cost2root(self,end_node):
-        c=0
-        node = end_node
-        while not node==self.start:
-            c=c+self.new_cost(node,node.parent)
-            node = node.parent
-        return c
 
 
 
@@ -215,9 +311,12 @@ class RRTStar(RRT):
         for i in near_inds:
             if self.collision(new_node,self.node_list[i],self.obstacle_list):
                 pass
+            elif self.out_ang_constraint(self.node_list[i],new_node):
+                pass
             else:
-                if self.new_cost(self.node_list[i],new_node)<min_cost:
-                    min_cost=self.new_cost(self.node_list[i],new_node)
+                n_c=self.new_cost(self.node_list[i],new_node)
+                if n_c<min_cost:
+                    min_cost=n_c
                     best_near_node=self.node_list[i]
 
 
@@ -225,6 +324,7 @@ class RRTStar(RRT):
         # Don't need to modify beyond here
         new_node.cost = min_cost
         new_node.parent = best_near_node
+        new_node.ang=self.ang_from_parent(new_node)
         return new_node
     
     def rewire(self, new_node, near_inds):
@@ -239,10 +339,14 @@ class RRTStar(RRT):
         for i in near_inds:
             if self.collision(self.node_list[i],new_node,self.obstacle_list):
                 pass
+            elif self.out_ang_constraint(new_node,self.node_list[i]):
+                pass
             else:
-                if self.new_cost(new_node,self.node_list[i])<self.node_list[i].cost:
+                n_c=self.new_cost(new_node,self.node_list[i])
+                if n_c<self.node_list[i].cost:
                     self.node_list[i].parent=new_node
-                    self.node_list[i].cost=self.new_cost(new_node,self.node_list[i])
+                    self.node_list[i].cost=n_c
+                    self.node_list[i].ang=self.ang_from_parent(self.node_list[i])
 
 
         # Don't need to modify beyond here
@@ -257,29 +361,63 @@ class RRTStar(RRT):
             # Has to be in close proximity to the goal
             if self.dist_to_goal(node.p) <= self.max_extend_length:
                 # Connection between node and goal needs to be collision free
-                if not self.collision(self.goal, node, self.obstacle_list):
+                if self.collision(self.goal, node, self.obstacle_list):
+                    pass
+                elif self.out_ang_constraint(node,self.goal):
+                    pass
+                else:
                     # The final path length
                     cost = node.cost + self.dist_to_goal(node.p) 
                     if node.cost + self.dist_to_goal(node.p) < min_cost:
                         # Found better goal node!
                         min_cost = cost
                         best_goal_node_idx = i
-                print(i,node.p)
+                print(i,node.p,node.ang)
         print(best_goal_node_idx, min_cost)
         return best_goal_node_idx, min_cost
+
+    def get_nearest_cost_node(self,node_list, node):
+        """Find the nearest node in node_list to node"""
+        dlist=[]
+        for n in node_list:
+            dlist.append(self.delta_cost(node, n))
+        # dlist = [np.sum(np.square((node.p - n.p)))+self.ang_between_parent(n,node) for n in node_list]
+        minind = dlist.index(min(dlist))
+        return node_list[minind]
+
 
     def near_nodes_inds(self, new_node):
         """Find the nodes in close proximity to new_node"""
         nnode = len(self.node_list) + 1
         r = self.connect_circle_dist * np.sqrt((np.log(nnode) / nnode))
         dlist = [np.sum(np.square((node.p - new_node.p))) for node in self.node_list]
-        near_inds = [dlist.index(i) for i in dlist if i <= r ** 2]
+        near_inds=[]
+        for i in range(len(dlist)):
+            if dlist[i]<=r ** 2:
+                near_inds.append(i)
+        # near_inds = [dlist.index(i) for i in dlist if i <= r ** 2]
         return near_inds
-
-    def new_cost(self, from_node, to_node):
+    def delta_cost(self, from_node, to_node):
         """to_node's new cost if from_node were the parent"""
-        d = np.linalg.norm(from_node.p - to_node.p)
-        return from_node.cost + d
+
+        d_s=np.linalg.norm(from_node.p - to_node.p)
+
+        ang_forward=self.ang_between_parent(from_node,to_node)
+        ang_backward=np.pi-ang_forward
+        ang_s = min(ang_forward,ang_backward)*10
+        ang_s = ang_forward*10
+
+        vp_s_ = viewplan.line_C_s(self.treedata, from_node.p, to_node.p, to_node.ang-0.5*np.pi)
+        vp_s=20/(0.01+vp_s_)
+        print("from",from_node.ind,"To",to_node.ind,"d= ",d_s," , ang= ",ang_s,", vp= ",vp_s)
+        d=0
+        d = d + d_s
+        d = d + ang_s
+        d = d + vp_s
+        return d        
+    def new_cost(self, from_node, to_node):
+
+        return from_node.cost + self.delta_cost(from_node, to_node)
 
     def propagate_cost_to_leaves(self, parent_node):
         """Recursively update the cost of the nodes"""
@@ -290,19 +428,27 @@ class RRTStar(RRT):
 
 
 
-start = np.array([11, 0]) # Start location
-goal = np.array([6, 8]) # Goal location
+def treedata2BoundsAndObstacles():
+    obstacles=[]
+    for i in TREEDATA.TREE_DATA:
+        obstacles.append(np.array([i[0], i[1], i[2]+1.3]))
+    return obstacles,[TREEDATA.X_MIN, TREEDATA.X_MAX,TREEDATA.Y_MIN, TREEDATA.Y_MAX]
+
+start = np.array([2774765, -359155]) # Start location
+goal = np.array([2774795, -359140]) # Goal location
 
 obstacles = [ # circles parametrized by [x, y, radius]
-        np.array([9, 6, 2]),
-        np.array([9, 8, 1]),
-        np.array([9, 10, 2]),
-        np.array([4, 5, 2]),
-        np.array([7, 5, 2]),
-        np.array([4, 10, 1])
+        np.array([8.5, 6, 1]),
+        np.array([8.5, 8, 1]),
+        np.array([8.5, 10, 1]),
+        np.array([5.5, 6, 1]),
+        np.array([5.5, 8, 1]),
+        np.array([5.5, 10, 1]),
+        np.array([7, 6, 1])
 ] 
 
 bounds = np.array([-2, 15]) # Bounds in both x and y
+bounds = [-2, 15,-2, 15] # x_min x_max y_min y_max
 # plt.figure()
 # plot_scene(obstacles, start, goal)
 # plt.show()
@@ -324,11 +470,18 @@ bounds = np.array([-2, 15]) # Bounds in both x and y
 # plt.show()
 
 
-np.random.seed(8)
+obstacles,bounds=treedata2BoundsAndObstacles()
+
+treedata=viewplan.treedata2taskPoint(TREEDATA.TREE_DATA)
+
+
+# plt.show()
+np.random.seed(7)
 rrt_star = RRTStar(start=start,
           goal=goal,
           bounds=bounds,
-          obstacle_list=obstacles)
+          obstacle_list=obstacles,
+          treedata=treedata)
 path_rrt_star, min_cost = rrt_star.plan()
 print('Minimum cost: {}'.format(min_cost))
 
@@ -346,4 +499,7 @@ if path_rrt_star is None:
     print("No viable path found")
 else:
     plt.plot([x for (x, y) in path_rrt_star], [y for (x, y) in path_rrt_star], '-r')
-plt.show()
+
+# plt.show()
+
+plt.savefig("rrt_20220127_12-11-38-all"+".png",dpi=600)
