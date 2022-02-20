@@ -4,6 +4,13 @@ matplotlib.use('TKAgg')
 from matplotlib import pyplot as plt
 import viewplan
 import TREEDATA
+import matplotlib.cm as cm
+
+WEIGH_DIS=1
+WEIGH_TH=0
+WEIGH_VP=10
+File_NAME="rrt_20220127_12-11-38"
+TEST_NAME=File_NAME+"-("+str(WEIGH_DIS)+","+str(WEIGH_TH)+","+str(WEIGH_VP)+")"
 
 
 def plot_scene(obstacle_list, start, goal):
@@ -11,10 +18,10 @@ def plot_scene(obstacle_list, start, goal):
     for o in obstacle_list:
         circle = plt.Circle((o[0], o[1]), o[2], color='k')
         ax.add_artist(circle)
-    plt.axis([bounds[0]-0.5, bounds[1]+0.5, bounds[2]-0.5, bounds[3]+0.5])
+    plt.axis([bounds[0], bounds[1], bounds[2], bounds[3]])
     plt.plot(start[0], start[1], "xr", markersize=10)
     plt.plot(goal[0], goal[1], "xb", markersize=10)
-    plt.legend(('start', 'goal'), loc='upper left')
+    plt.legend(('Start', 'Goal'),loc='lower right')
     plt.gca().set_aspect('equal')
     
 class RRT:
@@ -38,8 +45,9 @@ class RRT:
         self.max_iter = max_iter
         self.obstacle_list = obstacle_list
         self.node_list = []
-        self.max_ang=np.pi*0.3
+        self.max_ang=np.pi*0.5
         self.treedata=treedata
+        self.final_path_list=[]
 
     def plan(self):
         """Plans the path from start to goal while avoiding obstacles"""
@@ -194,11 +202,56 @@ class RRT:
 
         print("final_path---------- len= "+str(len(path_node)))        
         path_node.reverse()
+        self.final_path_list=path_node
+        # for i in range(1,len(path_node)):
+        #     to_node=path_node[i]
+        #     from_node=path_node[i].parent
+        #     # viewplan.plot_contourf(self.treedata,z=0,th=to_node.ang-0.5*np.pi,x_min=TREEDATA.X_MIN,x_max=TREEDATA.X_MAX,y_min=TREEDATA.Y_MIN,y_max=TREEDATA.Y_MAX)
 
+        #     for j in range(1,len(path_node)):
+        #         if j==i:
+        #             plt.plot([path_node[j].p[0], path_node[j].parent.p[0]], [path_node[j].p[1], path_node[j].parent.p[1]], "-r")
+        #         else:
+        #             plt.plot([path_node[j].p[0], path_node[j].parent.p[0]], [path_node[j].p[1], path_node[j].parent.p[1]], "-g")
+            
+            
+        #     d_s=np.linalg.norm(from_node.p - to_node.p)
+
+        #     ang_forward=self.ang_between_parent(from_node,to_node)
+        #     # ang_backward=np.pi-ang_forward
+        #     # ang_s = min(ang_forward,ang_backward)*10
+        #     ang_s = ang_forward
+
+        #     vp_s_ = viewplan.line_C_s(self.treedata, from_node.p, to_node.p, to_node.ang-0.5*np.pi)
+        #     vp_s=1/(0.01+vp_s_)
+        #     t="Dis= "+str(round(d_s,3))+" m\nAngle= "+str(int(ang_s*57.3))+" deg\nView= "+str(round(vp_s,3))
+        #     plt.text(self.bounds[0],self.bounds[3]-10,t,color="r")        
+        #     plt.plot(self.start.p[0], self.start.p[1], "xr", markersize=10)
+        #     plt.plot(self.goal.p[0], self.goal.p[1], "xb", markersize=10)
+        #     plt.savefig("rrt_20220127_12-11-38-"+str(i)+".png",dpi=600)
+
+        #     plt.clf()
+        #     print("save "+"rrt_20220127_12-11-38-"+str(i)+".png")
+
+
+        print("PLAN END----------")
+        # modify here: Generate the final path from the goal node to the start node.
+        # We will check that path[0] == goal and path[-1] == start
+        
+        return path
+
+    def draw_graph(self):
+        for node in self.node_list:
+            if node.parent:
+                plt.plot([node.p[0], node.parent.p[0]], [node.p[1], node.parent.p[1]], "-g")
+
+    def draw_each(self):
+
+        path_node=self.final_path_list
         for i in range(1,len(path_node)):
             to_node=path_node[i]
             from_node=path_node[i].parent
-            viewplan.plot_contourf(self.treedata,z=0,th=to_node.ang-0.5*np.pi,x_min=TREEDATA.X_MIN,x_max=TREEDATA.X_MAX,y_min=TREEDATA.Y_MIN,y_max=TREEDATA.Y_MAX)
+            viewplan.plot_contourf(self.treedata,z=0,th=to_node.ang-0.5*np.pi,x_min=self.bounds[0],x_max=self.bounds[1],y_min=self.bounds[2],y_max=self.bounds[3])
 
             for j in range(1,len(path_node)):
                 if j==i:
@@ -215,27 +268,18 @@ class RRT:
             ang_s = ang_forward
 
             vp_s_ = viewplan.line_C_s(self.treedata, from_node.p, to_node.p, to_node.ang-0.5*np.pi)
-            vp_s=20/(0.01+vp_s_)
-            t="Dis= "+str(round(d_s,3))+" m\nAngle= "+str(int(ang_s*57.3))+" deg\nView= "+str(round(vp_s,3))
+            vp_s=1/(1+vp_s_)
+            t="Dis= "+str(round(d_s,3))+" m\nAngle= "+str(round(ang_s,3))+" rad\nView= "+str(round(vp_s,3))
             plt.text(self.bounds[0],self.bounds[3]-10,t,color="r")        
             plt.plot(self.start.p[0], self.start.p[1], "xr", markersize=10)
             plt.plot(self.goal.p[0], self.goal.p[1], "xb", markersize=10)
-            plt.savefig("rrt_20220127_12-11-38-"+str(i)+".png",dpi=600)
+            # plt.show()
+            plt.savefig(TEST_NAME+"("+str(i)+").png",dpi=600)
 
             plt.clf()
-            print("save "+"rrt_20220127_12-11-38-"+str(i)+".png")
+            print("save "+TEST_NAME+"("+str(i)+").png")
 
 
-        print("PLAN END----------")
-        # modify here: Generate the final path from the goal node to the start node.
-        # We will check that path[0] == goal and path[-1] == start
-        
-        return path
-
-    def draw_graph(self):
-        for node in self.node_list:
-            if node.parent:
-                plt.plot([node.p[0], node.parent.p[0]], [node.p[1], node.parent.p[1]], "-g")
 
 
 
@@ -247,11 +291,11 @@ class RRTStar(RRT):
             self.cost = 0.0
 
     def __init__(self, start, goal, obstacle_list, bounds,
-                 max_extend_length=5.0,
+                 max_extend_length=10.0,
                  path_resolution=0.5,
-                 goal_sample_rate=0.001,
-                 max_iter=500,
-                 connect_circle_dist=20.0,
+                 goal_sample_rate=0.1,
+                 max_iter=1000,
+                 connect_circle_dist=50.0,
                  treedata=[]):
         RRT.__init__(self,start, goal, obstacle_list, bounds, max_extend_length,
                          path_resolution, goal_sample_rate, max_iter,treedata)
@@ -397,23 +441,35 @@ class RRTStar(RRT):
                 near_inds.append(i)
         # near_inds = [dlist.index(i) for i in dlist if i <= r ** 2]
         return near_inds
-    def delta_cost(self, from_node, to_node):
+    def delta_cost_div(self, from_node, to_node):
         """to_node's new cost if from_node were the parent"""
+        if not WEIGH_DIS==0:
+            d_s=np.linalg.norm(from_node.p - to_node.p)
+        else:
+            d_s=0
+        if not WEIGH_TH==0:
+            ang_forward=self.ang_between_parent(from_node,to_node)
+            # ang_backward=np.pi-ang_forward
+            # ang_s = min(ang_forward,ang_backward)
+            ang_s = ang_forward
+        else:
+            ang_s=0
+        if not WEIGH_VP==0:
+            vp_s_ = viewplan.line_C_s(self.treedata, from_node.p, to_node.p, to_node.ang-0.5*np.pi)
+            vp_s=1/(1+vp_s_)
+        else:
+            vp_s=0
+        # print("from",from_node.ind,"To",to_node.ind,"d= ",d_s," , ang= ",ang_s,", vp= ",vp_s)
+        return d_s,ang_s,vp_s
 
-        d_s=np.linalg.norm(from_node.p - to_node.p)
-
-        ang_forward=self.ang_between_parent(from_node,to_node)
-        ang_backward=np.pi-ang_forward
-        ang_s = min(ang_forward,ang_backward)*10
-        ang_s = ang_forward*10
-
-        vp_s_ = viewplan.line_C_s(self.treedata, from_node.p, to_node.p, to_node.ang-0.5*np.pi)
-        vp_s=20/(0.01+vp_s_)
-        print("from",from_node.ind,"To",to_node.ind,"d= ",d_s," , ang= ",ang_s,", vp= ",vp_s)
+    def delta_cost(self, from_node, to_node):
+        d_s,ang_s,vp_s=self.delta_cost_div(from_node, to_node)
+        if vp_s<0.5:
+            vp_s=0
         d=0
-        d = d + d_s
-        d = d + ang_s
-        d = d + vp_s
+        d = d + d_s*WEIGH_DIS
+        d = d + ang_s*WEIGH_TH
+        d = d + vp_s*d_s*vp_s*d_s*WEIGH_VP
         return d        
     def new_cost(self, from_node, to_node):
 
@@ -426,6 +482,38 @@ class RRTStar(RRT):
                 node.cost = self.new_cost(parent_node, node)
                 self.propagate_cost_to_leaves(node)
 
+    def draw_all_cost(self):
+        x_list=[]
+        y_list=[]
+        z_list=[]
+        for i in self.node_list:
+            x_list.append(i.p[0])
+            y_list.append(i.p[1])
+            z_list.append(i.cost)
+
+        plt.scatter(x_list,y_list,c=z_list)
+        plt.colorbar()
+
+    def get_cost(self):
+        import csv
+
+        with open(TEST_NAME+".csv", 'w') as csvfile:
+            writer = csv.writer(csvfile)
+
+            for i in range(1,len(self.final_path_list)):
+                from_node=self.final_path_list[i-1]
+                to_node=self.final_path_list[i]
+
+                d_s,ang_s,vp_s=self.delta_cost_div(from_node, to_node)
+                print(d_s,ang_s,vp_s)
+                write_data=[d_s,ang_s,vp_s,WEIGH_DIS,WEIGH_TH,WEIGH_VP,\
+                                from_node.p[0],from_node.p[1],from_node.ang,from_node.ind,from_node.cost,\
+                                to_node.p[0],to_node.p[1],to_node.ang,to_node.ind,to_node.cost,\
+                                self.max_extend_length,self.goal_sample_rate,self.max_iter,self.connect_circle_dist\
+                                    ]
+                for i in range(len(write_data)):
+                    write_data[i]=round(write_data[i],3)
+                writer.writerow(write_data)
 
 
 def treedata2BoundsAndObstacles():
@@ -434,63 +522,60 @@ def treedata2BoundsAndObstacles():
         obstacles.append(np.array([i[0], i[1], i[2]+1.3]))
     return obstacles,[TREEDATA.X_MIN, TREEDATA.X_MAX,TREEDATA.Y_MIN, TREEDATA.Y_MAX]
 
-start = np.array([2774765, -359155]) # Start location
+start = np.array([2774765, -359160]) # Start location
 goal = np.array([2774795, -359140]) # Goal location
-
-obstacles = [ # circles parametrized by [x, y, radius]
-        np.array([8.5, 6, 1]),
-        np.array([8.5, 8, 1]),
-        np.array([8.5, 10, 1]),
-        np.array([5.5, 6, 1]),
-        np.array([5.5, 8, 1]),
-        np.array([5.5, 10, 1]),
-        np.array([7, 6, 1])
-] 
-
-bounds = np.array([-2, 15]) # Bounds in both x and y
-bounds = [-2, 15,-2, 15] # x_min x_max y_min y_max
-# plt.figure()
-# plot_scene(obstacles, start, goal)
-# plt.show()
-
-# np.random.seed(7)
-# rrt = RRT(start=start,
-#           goal=goal,
-#           bounds=bounds,
-#           obstacle_list=obstacles)
-# path_rrt = rrt.plan()
-
-# plt.figure(figsize=(6,6))
-# plot_scene(obstacles, start, goal)
-# rrt.draw_graph()
-# if path_rrt is None:
-#     print("No viable path found")
-# else:
-#     plt.plot([x for (x, y) in path_rrt], [y for (x, y) in path_rrt], '-r')
-# plt.show()
-
 
 obstacles,bounds=treedata2BoundsAndObstacles()
 
-treedata=viewplan.treedata2taskPoint(TREEDATA.TREE_DATA)
+# obstacles = [ # circles parametrized by [x, y, radius]
+#         np.array([3, 3, 1]),
+#         np.array([3, 5, 1]),
+#         np.array([3, 7, 1]),
+#         np.array([3, 9, 1]),
+#         np.array([3, 11, 1]),
+#         np.array([3, 13, 1]),
+#         np.array([5, 13, 1]),
+#         np.array([7, 13, 1]),
+#         np.array([9, 13, 1]),
+#         np.array([11, 13, 1]),
+#         np.array([13, 13, 1])
+# ] 
 
+# bounds = [0, 16,0, 16] # x_min x_max y_min y_max
+
+# start = np.array([1,1]) # Start location
+# goal = np.array([15,15]) # Goal location
+
+treedata=viewplan.treedata2taskPoint(TREEDATA.TREE_DATA)
+treedata=[]
+for i in obstacles:
+    treedata.append([i[0],i[1],0,0])
 
 # plt.show()
-np.random.seed(7)
+np.random.seed(13)
 rrt_star = RRTStar(start=start,
           goal=goal,
           bounds=bounds,
           obstacle_list=obstacles,
-          treedata=treedata)
+          treedata=treedata,
+          max_iter=150)
 path_rrt_star, min_cost = rrt_star.plan()
+rrt_star.get_cost()
+plot_scene(obstacles, start, goal)
+rrt_star.draw_graph()
+rrt_star.draw_all_cost()
+plt.savefig(TEST_NAME+"all2.png",dpi=600)
 print('Minimum cost: {}'.format(min_cost))
 
-# Check the cost
-def path_cost(path):
-    return sum(np.linalg.norm(path[i] - path[i + 1]) for i in range(len(path) - 1))
+# # Check the cost
+# def path_cost(path):
+#     return sum(np.linalg.norm(path[i] - path[i + 1]) for i in range(len(path) - 1))
 
-if path_rrt_star:
-    print('Length of the found path: {}'.format(path_cost(path_rrt_star)))
+# if path_rrt_star:
+#     print('Length of the found path: {}'.format(path_cost(path_rrt_star)))
+
+
+
 
 plt.figure(figsize=(6,6))
 plot_scene(obstacles, start, goal)
@@ -500,6 +585,9 @@ if path_rrt_star is None:
 else:
     plt.plot([x for (x, y) in path_rrt_star], [y for (x, y) in path_rrt_star], '-r')
 
-# plt.show()
 
-plt.savefig("rrt_20220127_12-11-38-all"+".png",dpi=600)
+plt.savefig(TEST_NAME+"all.png",dpi=600)
+print("Total node "+str(len(rrt_star.node_list)))
+
+plt.figure(figsize=(6,6))
+rrt_star.draw_each()

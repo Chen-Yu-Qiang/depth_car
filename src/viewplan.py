@@ -191,17 +191,19 @@ def plot_contourf(taskPoint,z=0,th=0,x_min=0,x_max=10,y_min=0,y_max=10):
 
 
     plt.contourf(x_list, y_list, Z,100,cmap='jet',vmin=0, vmax=3)
-    plt.colorbar()    
     # plt.contour(x_list, y_list, Z, [np.exp((-1.0)*RHO)])
 
 
     for i in range(len(taskPoint)):
         plt.plot(taskPoint[i][0],taskPoint[i][1], 'o',markersize=5,color="k")
+    plt.colorbar()  
     plt.axis([x_min,x_max,y_min,y_max])
 
     plt.xlabel("X (m)")
     plt.ylabel("Y (m)")
     plt.title("th="+str(round(th*57.3,3)+90)+" deg")
+    plt.gca().set_aspect('equal')
+  
     # plt.show()
 
 
@@ -263,7 +265,7 @@ def line_C_s(tk,p1,p2,ang):
     x_delta=p1[0]-p2[0]
     y_delta=p1[1]-p2[1]
     dis=np.sqrt(x_delta**2+y_delta**2)
-    n=max(2,int(dis))
+    n=max(2,int(dis*3))
     C=0
     for i in range(n):
         x=p1[0]-x_delta/(n)*(i+1)
@@ -417,8 +419,8 @@ if __name__=="__main__":
     for i in range(0,36):
         ii=i*np.pi/18.0
         plot_contourf(tk,z=0,th=ii,x_min=TREEDATA.X_MIN,x_max=TREEDATA.X_MAX,y_min=TREEDATA.Y_MIN,y_max=TREEDATA.Y_MAX)
-        plt.show()
-        # plt.savefig("20220127_12-11-38-"+str(ii)+".png",dpi=600)
+        # plt.show()
+        plt.savefig("20220127_12-11-38-"+str(ii)+".png",dpi=600)
         plt.clf()
 
     plot_contourf_allmax(tk,z=0,x_min=TREEDATA.X_MIN,x_max=TREEDATA.X_MAX,y_min=TREEDATA.Y_MIN,y_max=TREEDATA.Y_MAX)
