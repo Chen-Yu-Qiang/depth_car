@@ -34,6 +34,7 @@ def cbTrunkset(msg):
     global trunk_msg
     trunk_msg=msg
 
+
 if __name__=='__main__':
         
     rospy.init_node("laser_ploter", anonymous=True)
@@ -48,9 +49,9 @@ if __name__=='__main__':
 
     ax.set_xlim(-10,10)
     ax.set_ylim(-1,10)
-    ls_plot_obj=ax.plot([2],[1], 'o', color='r', markersize=0.5, label='Laser')[0]
     tree_plot_list=[ax.plot([2],[2], 'o', color='k', markersize=3)[0] for i in range(10)]
     tree_text_list=[ax.text(0,0,'',fontsize=14, color='k') for i in range(10)]
+    ls_plot_obj=ax.plot([2],[1], 'o', color='r', markersize=2.5, label='Laser')[0]
 
     xminorLocator = MultipleLocator(1)
     yminorLocator = MultipleLocator(1)
