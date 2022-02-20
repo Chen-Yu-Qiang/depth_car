@@ -53,6 +53,8 @@ if __name__=="__main__":
     Use_WOW_controller=int(rospy.get_param('Use_WOW_controller',default=0))
 
     date_time_folder=rospy.get_param('date_time_folder',default="")
+    if date_time_folder=="":
+        rospy.logerr("You forgot to set rosparam date_time_folder ")
 
     if Use_WOW_controller==0:
         pubGoal = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1)
