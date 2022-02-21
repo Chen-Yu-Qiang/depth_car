@@ -265,7 +265,7 @@ def line_C_s(tk,p1,p2,ang):
     x_delta=p1[0]-p2[0]
     y_delta=p1[1]-p2[1]
     dis=np.sqrt(x_delta**2+y_delta**2)
-    n=max(2,int(dis*3))
+    n=max(2,int(dis*5))
     C=0
     for i in range(n):
         x=p1[0]-x_delta/(n)*(i+1)

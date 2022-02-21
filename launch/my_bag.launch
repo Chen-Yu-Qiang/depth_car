@@ -2,7 +2,7 @@
 
 <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' 
 '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' 
-'/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock'
+'/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock' '/gazebo(.*)'
 /" />
 
 

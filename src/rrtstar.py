@@ -245,39 +245,6 @@ class RRT:
             if node.parent:
                 plt.plot([node.p[0], node.parent.p[0]], [node.p[1], node.parent.p[1]], "-g")
 
-    def draw_each(self):
-
-        path_node=self.final_path_list
-        for i in range(1,len(path_node)):
-            to_node=path_node[i]
-            from_node=path_node[i].parent
-            viewplan.plot_contourf(self.treedata,z=0,th=to_node.ang-0.5*np.pi,x_min=self.bounds[0],x_max=self.bounds[1],y_min=self.bounds[2],y_max=self.bounds[3])
-
-            for j in range(1,len(path_node)):
-                if j==i:
-                    plt.plot([path_node[j].p[0], path_node[j].parent.p[0]], [path_node[j].p[1], path_node[j].parent.p[1]], "-r")
-                else:
-                    plt.plot([path_node[j].p[0], path_node[j].parent.p[0]], [path_node[j].p[1], path_node[j].parent.p[1]], "-g")
-            
-            
-            d_s=np.linalg.norm(from_node.p - to_node.p)
-
-            ang_forward=self.ang_between_parent(from_node,to_node)
-            # ang_backward=np.pi-ang_forward
-            # ang_s = min(ang_forward,ang_backward)*10
-            ang_s = ang_forward
-
-            vp_s_ = viewplan.line_C_s(self.treedata, from_node.p, to_node.p, to_node.ang-0.5*np.pi)
-            vp_s=1/(1+vp_s_)
-            t="Dis= "+str(round(d_s,3))+" m\nAngle= "+str(round(ang_s,3))+" rad\nView= "+str(round(vp_s,3))
-            plt.text(self.bounds[0],self.bounds[3]-10,t,color="r")        
-            plt.plot(self.start.p[0], self.start.p[1], "xr", markersize=10)
-            plt.plot(self.goal.p[0], self.goal.p[1], "xb", markersize=10)
-            # plt.show()
-            plt.savefig(TEST_NAME+"("+str(i)+").png",dpi=600)
-
-            plt.clf()
-            print("save "+TEST_NAME+"("+str(i)+").png")
 
 
 
@@ -441,22 +408,22 @@ class RRTStar(RRT):
                 near_inds.append(i)
         # near_inds = [dlist.index(i) for i in dlist if i <= r ** 2]
         return near_inds
-    def delta_cost_div(self, from_node, to_node):
+    def delta_cost_div(self, from_node, to_node,all_cal=0):
         """to_node's new cost if from_node were the parent"""
-        if not WEIGH_DIS==0:
+        if (not WEIGH_DIS==0) or all_cal==1 :
             d_s=np.linalg.norm(from_node.p - to_node.p)
         else:
             d_s=0
-        if not WEIGH_TH==0:
+        if (not WEIGH_TH==0) or all_cal==1 :
             ang_forward=self.ang_between_parent(from_node,to_node)
             # ang_backward=np.pi-ang_forward
             # ang_s = min(ang_forward,ang_backward)
             ang_s = ang_forward
         else:
             ang_s=0
-        if not WEIGH_VP==0:
+        if (not WEIGH_VP==0) or all_cal==1 :
             vp_s_ = viewplan.line_C_s(self.treedata, from_node.p, to_node.p, to_node.ang-0.5*np.pi)
-            vp_s=1/(1+vp_s_)
+            vp_s=1/(0.5+vp_s_)
         else:
             vp_s=0
         # print("from",from_node.ind,"To",to_node.ind,"d= ",d_s," , ang= ",ang_s,", vp= ",vp_s)
@@ -464,12 +431,12 @@ class RRTStar(RRT):
 
     def delta_cost(self, from_node, to_node):
         d_s,ang_s,vp_s=self.delta_cost_div(from_node, to_node)
-        if vp_s<0.5:
-            vp_s=0
+
+        vp_s=vp_s
         d=0
         d = d + d_s*WEIGH_DIS
         d = d + ang_s*WEIGH_TH
-        d = d + vp_s*d_s*vp_s*d_s*WEIGH_VP
+        d = d + vp_s*d_s*WEIGH_VP
         return d        
     def new_cost(self, from_node, to_node):
 
@@ -494,6 +461,32 @@ class RRTStar(RRT):
         plt.scatter(x_list,y_list,c=z_list)
         plt.colorbar()
 
+    def draw_each(self):
+
+        path_node=self.final_path_list
+        for i in range(1,len(path_node)):
+            to_node=path_node[i]
+            from_node=path_node[i].parent
+            viewplan.plot_contourf(self.treedata,z=0,th=to_node.ang-0.5*np.pi,x_min=self.bounds[0],x_max=self.bounds[1],y_min=self.bounds[2],y_max=self.bounds[3])
+
+            for j in range(1,len(path_node)):
+                if j==i:
+                    plt.plot([path_node[j].p[0], path_node[j].parent.p[0]], [path_node[j].p[1], path_node[j].parent.p[1]], "-r")
+                else:
+                    plt.plot([path_node[j].p[0], path_node[j].parent.p[0]], [path_node[j].p[1], path_node[j].parent.p[1]], "-g")
+            
+            d_s,ang_s,vp_s=self.delta_cost_div(from_node, to_node,all_cal=1)
+
+            t="Dis= "+str(round(d_s,3))+" m\nAngle= "+str(round(ang_s,3))+" rad\nView= "+str(round(vp_s,3))
+            plt.text(self.bounds[0],self.bounds[3]-10,t,color="r")        
+            plt.plot(self.start.p[0], self.start.p[1], "xr", markersize=10)
+            plt.plot(self.goal.p[0], self.goal.p[1], "xb", markersize=10)
+            # plt.show()
+            plt.savefig(TEST_NAME+"("+str(i)+").png",dpi=600)
+
+            plt.clf()
+            print("save "+TEST_NAME+"("+str(i)+").png")
+
     def get_cost(self):
         import csv
 
@@ -504,7 +497,7 @@ class RRTStar(RRT):
                 from_node=self.final_path_list[i-1]
                 to_node=self.final_path_list[i]
 
-                d_s,ang_s,vp_s=self.delta_cost_div(from_node, to_node)
+                d_s,ang_s,vp_s=self.delta_cost_div(from_node, to_node,all_cal=1)
                 print(d_s,ang_s,vp_s)
                 write_data=[d_s,ang_s,vp_s,WEIGH_DIS,WEIGH_TH,WEIGH_VP,\
                                 from_node.p[0],from_node.p[1],from_node.ang,from_node.ind,from_node.cost,\
@@ -558,7 +551,7 @@ rrt_star = RRTStar(start=start,
           bounds=bounds,
           obstacle_list=obstacles,
           treedata=treedata,
-          max_iter=150)
+          max_iter=500)
 path_rrt_star, min_cost = rrt_star.plan()
 rrt_star.get_cost()
 plot_scene(obstacles, start, goal)
