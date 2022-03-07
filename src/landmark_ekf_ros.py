@@ -144,7 +144,7 @@ x0_loc,y0_loc=0,0
 x0y0_finish=0
 def cb_pos(data):
     global x0,y0,t0
-    if x0==0 and y0==0:
+    if x0==0 and y0==0 and (not USING_GAZEBO==1):
     #     x0_loc= data.pose.pose.position.x
     #     y0_loc= data.pose.pose.position.y
     #     x0y0_finish=1
@@ -211,10 +211,11 @@ def cb_x0y0(data):
     y0=data.linear.y
 
 
+USING_GAZEBO=int(rospy.get_param("Using_Gazebo"))
 
 if __name__=="__main__":
     rospy.Subscriber("/tree/data/together", Float64MultiArray,cb_array, buff_size=2**20,queue_size=1)
-    rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd, buff_size=2**20,queue_size=1)
+    rospy.Subscriber("/cmd_vel", Twist,cb_cmd, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos, buff_size=2**20,queue_size=1)
     # rospy.Subscriber("/lm_ekf/gps/utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/lm_ekf/local_org/utm", Twist,cb_x0y0, buff_size=2**20,queue_size=1)
@@ -259,8 +260,7 @@ if __name__=="__main__":
         # ekf_out2_msg.pose.pose.orientation.z=ang_q[2]
         # ekf_out2_msg.pose.pose.orientation.w=ang_q[3]
         # ekf_out2.publish(ekf_out2_msg)
-
-        if x0==0 and y0==0:
+        if x0==0 and y0==0 and (not USING_GAZEBO==1):
             pass
         else:
             ekf_out3_msg=Twist()

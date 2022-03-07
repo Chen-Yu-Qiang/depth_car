@@ -5,9 +5,10 @@ from matplotlib import pyplot as plt
 import viewplan
 import TREEDATA
 import matplotlib.cm as cm
+from geometry_msgs.msg import PoseArray,Pose
 
 WEIGH_DIS=1
-WEIGH_TH=0
+WEIGH_TH=10
 WEIGH_VP=10
 File_NAME="rrt_20220127_12-11-38"
 TEST_NAME=File_NAME+"-("+str(WEIGH_DIS)+","+str(WEIGH_TH)+","+str(WEIGH_VP)+")"
@@ -246,7 +247,19 @@ class RRT:
                 plt.plot([node.p[0], node.parent.p[0]], [node.p[1], node.parent.p[1]], "-g")
 
 
-
+    def plot_scene(self):
+        obstacle_list=self.obstacle_list
+        start=self.start
+        goal=self.goal
+        ax = plt.gca()
+        for o in obstacle_list:
+            circle = plt.Circle((o[0], o[1]), o[2], color='k')
+            ax.add_artist(circle)
+        plt.axis([self.bounds[0], self.bounds[1], self.bounds[2], self.bounds[3]])
+        plt.plot(start.p[0], start.p[1], "xr", markersize=10)
+        plt.plot(goal.p[0], goal.p[1], "xb", markersize=10)
+        plt.legend(('Start', 'Goal'),loc='lower right')
+        plt.gca().set_aspect('equal')
 
 
 
@@ -262,7 +275,7 @@ class RRTStar(RRT):
                  path_resolution=0.5,
                  goal_sample_rate=0.1,
                  max_iter=1000,
-                 connect_circle_dist=50.0,
+                 connect_circle_dist=10.0,
                  treedata=[]):
         RRT.__init__(self,start, goal, obstacle_list, bounds, max_extend_length,
                          path_resolution, goal_sample_rate, max_iter,treedata)
@@ -400,7 +413,7 @@ class RRTStar(RRT):
     def near_nodes_inds(self, new_node):
         """Find the nodes in close proximity to new_node"""
         nnode = len(self.node_list) + 1
-        r = self.connect_circle_dist * np.sqrt((np.log(nnode) / nnode))
+        r = self.connect_circle_dist # * np.sqrt((np.log(nnode) / nnode))
         dlist = [np.sum(np.square((node.p - new_node.p))) for node in self.node_list]
         near_inds=[]
         for i in range(len(dlist)):
@@ -487,10 +500,10 @@ class RRTStar(RRT):
             plt.clf()
             print("save "+TEST_NAME+"("+str(i)+").png")
 
-    def get_cost(self):
+    def get_cost(self,filename):
         import csv
 
-        with open(TEST_NAME+".csv", 'w') as csvfile:
+        with open(filename+".csv", 'w') as csvfile:
             writer = csv.writer(csvfile)
 
             for i in range(1,len(self.final_path_list)):
@@ -512,75 +525,88 @@ class RRTStar(RRT):
 def treedata2BoundsAndObstacles():
     obstacles=[]
     for i in TREEDATA.TREE_DATA:
-        obstacles.append(np.array([i[0], i[1], i[2]+1.3]))
+        obstacles.append(np.array([i[0], i[1], i[2]+0.3]))
     return obstacles,[TREEDATA.X_MIN, TREEDATA.X_MAX,TREEDATA.Y_MIN, TREEDATA.Y_MAX]
 
-start = np.array([2774765, -359160]) # Start location
-goal = np.array([2774795, -359140]) # Goal location
+def path2poseArray(path):
+    a=PoseArray()
+    for i in path:
+        b=Pose()
+        b.position.x=i[0]
+        b.position.y=i[1]
+        a.poses.append(b)
 
-obstacles,bounds=treedata2BoundsAndObstacles()
-
-# obstacles = [ # circles parametrized by [x, y, radius]
-#         np.array([3, 3, 1]),
-#         np.array([3, 5, 1]),
-#         np.array([3, 7, 1]),
-#         np.array([3, 9, 1]),
-#         np.array([3, 11, 1]),
-#         np.array([3, 13, 1]),
-#         np.array([5, 13, 1]),
-#         np.array([7, 13, 1]),
-#         np.array([9, 13, 1]),
-#         np.array([11, 13, 1]),
-#         np.array([13, 13, 1])
-# ] 
-
-# bounds = [0, 16,0, 16] # x_min x_max y_min y_max
-
-# start = np.array([1,1]) # Start location
-# goal = np.array([15,15]) # Goal location
-
-treedata=viewplan.treedata2taskPoint(TREEDATA.TREE_DATA)
-treedata=[]
-for i in obstacles:
-    treedata.append([i[0],i[1],0,0])
-
-# plt.show()
-np.random.seed(13)
-rrt_star = RRTStar(start=start,
-          goal=goal,
-          bounds=bounds,
-          obstacle_list=obstacles,
-          treedata=treedata,
-          max_iter=500)
-path_rrt_star, min_cost = rrt_star.plan()
-rrt_star.get_cost()
-plot_scene(obstacles, start, goal)
-rrt_star.draw_graph()
-rrt_star.draw_all_cost()
-plt.savefig(TEST_NAME+"all2.png",dpi=600)
-print('Minimum cost: {}'.format(min_cost))
-
-# # Check the cost
-# def path_cost(path):
-#     return sum(np.linalg.norm(path[i] - path[i + 1]) for i in range(len(path) - 1))
-
-# if path_rrt_star:
-#     print('Length of the found path: {}'.format(path_cost(path_rrt_star)))
+    a.poses.reverse()
+    return a
 
 
+if __name__ == '__main__':
+    # start = np.array([2774765, -359160]) # Start location
+    # goal = np.array([2774795, -359140]) # Goal location
+
+    # obstacles,bounds=treedata2BoundsAndObstacles()
+
+    obstacles = [ # circles parametrized by [x, y, radius]
+            np.array([3, 3, 1]),
+            np.array([3, 5, 1]),
+            np.array([3, 7, 1]),
+            np.array([3, 9, 1]),
+            np.array([3, 11, 1]),
+            np.array([3, 13, 1]),
+            np.array([5, 13, 1]),
+            np.array([7, 13, 1]),
+            np.array([9, 13, 1]),
+            np.array([11, 13, 1]),
+            np.array([13, 13, 1])
+    ] 
+
+    bounds = [0, 16,0, 16] # x_min x_max y_min y_max
+
+    start = np.array([1,1]) # Start location
+    goal = np.array([15,15]) # Goal location
+
+    treedata=viewplan.treedata2taskPoint(TREEDATA.TREE_DATA)
+    treedata=[]
+    for i in obstacles:
+        treedata.append([i[0],i[1],0,0])
+
+    # plt.show()
+    np.random.seed(13)
+    rrt_star = RRTStar(start=start,
+            goal=goal,
+            bounds=bounds,
+            obstacle_list=obstacles,
+            treedata=treedata,
+            max_iter=500)
+    path_rrt_star, min_cost = rrt_star.plan()
+    rrt_star.get_cost(TEST_NAME)
+    plot_scene(obstacles, start, goal)
+    rrt_star.draw_graph()
+    rrt_star.draw_all_cost()
+    plt.savefig(TEST_NAME+"all2.png",dpi=600)
+    print('Minimum cost: {}'.format(min_cost))
+
+    # # Check the cost
+    # def path_cost(path):
+    #     return sum(np.linalg.norm(path[i] - path[i + 1]) for i in range(len(path) - 1))
+
+    # if path_rrt_star:
+    #     print('Length of the found path: {}'.format(path_cost(path_rrt_star)))
 
 
-plt.figure(figsize=(6,6))
-plot_scene(obstacles, start, goal)
-rrt_star.draw_graph()
-if path_rrt_star is None:
-    print("No viable path found")
-else:
-    plt.plot([x for (x, y) in path_rrt_star], [y for (x, y) in path_rrt_star], '-r')
 
 
-plt.savefig(TEST_NAME+"all.png",dpi=600)
-print("Total node "+str(len(rrt_star.node_list)))
+    plt.figure(figsize=(6,6))
+    plot_scene(obstacles, start, goal)
+    rrt_star.draw_graph()
+    if path_rrt_star is None:
+        print("No viable path found")
+    else:
+        plt.plot([x for (x, y) in path_rrt_star], [y for (x, y) in path_rrt_star], '-r')
 
-plt.figure(figsize=(6,6))
-rrt_star.draw_each()
+
+    plt.savefig(TEST_NAME+"all.png",dpi=600)
+    print("Total node "+str(len(rrt_star.node_list)))
+
+    plt.figure(figsize=(6,6))
+    rrt_star.draw_each()

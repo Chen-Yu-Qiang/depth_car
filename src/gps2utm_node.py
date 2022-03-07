@@ -13,6 +13,8 @@ import tf
 
 x0=0
 y0=0
+
+USING_GAZEBO=int(rospy.get_param("Using_Gazebo"))
 def cb_gps(data):
     global x0,y0,x0_loc,y0_loc
     # t0=time.time()
@@ -46,7 +48,7 @@ def cb_pos(data):
     if x0_loc==-1000 and y0_loc==-1000:
         x0_loc=x_loc_now
         y0_loc=y_loc_now
-    elif not(x0==0 and y0==0):
+    elif not(x0==0 and y0==0) or USING_GAZEBO==1:
         filtered_utm_msg=Twist()
         filtered_utm_msg.linear.x=x_loc_now+x0
         filtered_utm_msg.linear.y=y_loc_now+y0
@@ -88,7 +90,8 @@ if __name__ == '__main__':
     gps_utm_local_pub=rospy.Publisher("/lm_ekf/gps/local",Twist,queue_size=1)
     filtered_utm=rospy.Publisher("/lm_ekf/filtered_map/utm",Twist,queue_size=1)
     local_org_in_utm_pub=rospy.Publisher("/lm_ekf/local_org/utm",Twist,queue_size=1)
-    rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix, cb_gps, buff_size=2**20,queue_size=1)
+    if not (USING_GAZEBO==1):
+        rospy.Subscriber("/outdoor_waypoint_nav/gps/filtered", NavSatFix, cb_gps, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/lm_ekf/offset", Twist, cb_offset, buff_size=2**20,queue_size=1)
     lm_off_loc_pub=rospy.Publisher("/lm_ekf/gps_w_offset/local",Twist,queue_size=1)

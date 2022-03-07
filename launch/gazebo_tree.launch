@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include>
+  <arg name="model" default="waffle_pi"/>
+  <arg name="x_pos" default="0.0"/>
+  <arg name="y_pos" default="0.0"/>
+  <arg name="z_pos" default="0.0"/>
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" launch-prefix="gnome-terminal -x" />
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+  <node pkg="depth_car" type="gazebo_make_many_tree_in.py" name="gazebo_make_many_tree_in"  output="screen"/>
+
+  <node pkg="depth_car" type="gazebo_state.py" name="gazebo_state"  output="screen">
+    <param name="Sampling_frequency" value="20"/>
+    <param name="Object_name" value="turtlebot3_waffle_pi"/>
+    <param name="Output_name" value="/sim/robot"/>
+  </node>
+
+
+  <node pkg="depth_car" type="gazebo_controller.py" name="gazebo_controller"  output="screen"/>
+  <node pkg="depth_car" type="gazebo_waypoint2path.py" name="gazebo_waypoint2path"  output="screen"/>
+  <node pkg="depth_car" type="gazebo_sim_gps.py" name="gazebo_sim_gps"  output="screen"/>
+  <node pkg="depth_car" type="rrt_ROS.py" name="rrt_ROS"  output="screen"/>
+  <node pkg="depth_car" type="plot_scan.py" name="plot_scan"  output="screen"/>
+  <node pkg="depth_car" type="wps_manager.py" name="wps_manager"  output="screen"/>
+  <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' 
+  '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' 
+  '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock' '/sim(.*)' '/plan(.*)'
+  /" />
+
+
+
+  <param name="date_time_folder" value="/home/yuqiang/GA_MAP" />
+
+  <param name="XZ_MODE" value="1" />
+  <param name="Enable_Fixed_Point_Strat" value="0" />
+  <param name="Use_GPS_time" value="10000" />
+  <param name="Use_WOW_controller" value="1" />
+  <param name="Good_Computer" value="1" />
+  <param name="Using_Gazebo" value="1" />
+  <include file="$(find depth_car)/launch/wow.launch">
+    </include>
+</launch>
