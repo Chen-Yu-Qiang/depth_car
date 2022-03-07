@@ -354,8 +354,8 @@ class a_plot:
         if len(z_hat_d)==0:
             self.car3_obj.set_visible(False)
         else:
-            self.car3_obj.set_visible(True)
-            self.car3_obj.update(x_pro, y_pro, th_pro)
+            self.car3_obj.set_visible(False)
+            # self.car3_obj.update(x_pro, y_pro, th_pro)
     
 
         # print("plot time",tt1-tt0,tt2-tt1,time.time()-tt2)

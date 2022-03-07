@@ -38,7 +38,7 @@ def cbTrunkset(msg):
 if __name__=='__main__':
         
     rospy.init_node("laser_ploter", anonymous=True)
-    rospy.Subscriber("/scan", LaserScan, cbLaser, buff_size=2**20, queue_size=1)
+    rospy.Subscriber("/scan_filtered", LaserScan, cbLaser, buff_size=2**20, queue_size=1)
     rospy.Subscriber("/tree/trunk_info", Trunkset, cbTrunkset, buff_size=2**20, queue_size=1)
     rate=rospy.Rate(15)
 

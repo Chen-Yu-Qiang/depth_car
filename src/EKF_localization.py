@@ -11,7 +11,7 @@ STATE_NUM=5
 WHITE_LIST=list(range(100))
 def get_Gt(v,omg,theta):
     Gt=np.eye(STATE_NUM)
-    if abs(omg)<10**(-1):
+    if abs(omg)<10**(-2):
         Gt[0][2]=-v*np.sin(theta)*DELTA_T
         Gt[1][2]=v*np.cos(theta)*DELTA_T
     else:
@@ -21,7 +21,7 @@ def get_Gt(v,omg,theta):
 
 def get_Vt(v,omg,theta):
     Vt=np.zeros((STATE_NUM,2))
-    if abs(omg)<10**(-1):
+    if abs(omg)<10**(-2):
         Vt[0][0]=np.cos(theta)*DELTA_T
         Vt[1][0]=np.sin(theta)*DELTA_T
         Vt[0][1]=-v*np.sin(theta)*DELTA_T*DELTA_T*0.5
@@ -47,7 +47,7 @@ def get_Mt(v,omg):
 def get_ut(ut_1,v,omg):
     theta=ut_1[2][0]
     A=np.zeros((STATE_NUM,1))
-    if abs(omg)<10**(-1):
+    if abs(omg)<10**(-2):
         A[0][0]=v*np.cos(theta)*DELTA_T
         A[1][0]=v*np.sin(theta)*DELTA_T
         A[2][0]=0
