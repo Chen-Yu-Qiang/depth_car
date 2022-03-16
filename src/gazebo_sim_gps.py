@@ -27,8 +27,8 @@ if __name__=='__main__':
         y=gt.position.y
         th=tf.transformations.euler_from_quaternion([0,0,gt.orientation.z,gt.orientation.w])[2] 
         gps1_msg=Odometry()
-        gps1_msg.pose.pose.position.x=x+1
-        gps1_msg.pose.pose.position.y=y+1
+        gps1_msg.pose.pose.position.x=x
+        gps1_msg.pose.pose.position.y=y
         gps1_msg.pose.pose.orientation=gt.orientation
 
         gps1_pub.publish(gps1_msg)

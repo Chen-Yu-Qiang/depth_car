@@ -4,7 +4,7 @@ import rospy
 from gazebo_msgs.srv import SpawnModel, SpawnModelRequest
 from geometry_msgs.msg import Pose
 import TREEDATA
-
+import time
 
 def get_sdf_green(r):
 
@@ -65,6 +65,7 @@ def get_sdf_green(r):
 
     return ans
 j=0
+time.sleep(5)
 for i in TREEDATA.TREE_DATA:
 
     pose = Pose()

@@ -75,10 +75,10 @@ if __name__ == '__main__':
             pid_omg.setpid(0,0,0)
             pid_v.setpid(0,0,0)
             s=2
-        elif s==2 and (dis > 0.1) and (np.cos(ang)>0):
-            pid_omg.setpid(0.5,0,0)
+        elif s==2 and (dis > 0.05) and (np.cos(ang)>0):
+            pid_omg.setpid(0.8,0,0)
             pid_v.setpid(1,0,0)
-        elif s==2 and ((dis< 0.1) or (np.cos(ang)<=0)):
+        elif s==2 and ((dis< 0.05) or (np.cos(ang)<=0)):
             pid_omg.setpid(0,0,0)
             pid_v.setpid(0,0,0)
             s=0
