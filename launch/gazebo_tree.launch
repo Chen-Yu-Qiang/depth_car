@@ -20,7 +20,8 @@
   <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" launch-prefix="gnome-terminal -x" />
   <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
     <arg name="model" value="$(arg model)" />
-  </include>
+  </include> 
+  <param name="date_time_folder" value="/home/yuqiang/GA_MAP" />
   <node pkg="depth_car" type="gazebo_make_many_tree_in.py" name="gazebo_make_many_tree_in"  output="screen"/>
 
   <node pkg="depth_car" type="gazebo_state.py" name="gazebo_state"  output="screen">
@@ -30,20 +31,20 @@
   </node>
 
 
-  <node pkg="depth_car" type="gazebo_controller.py" name="gazebo_controller"  output="screen"/>
-  <node pkg="depth_car" type="gazebo_waypoint2path.py" name="gazebo_waypoint2path"  output="screen"/>
+  <!-- <node pkg="depth_car" type="gazebo_controller.py" name="gazebo_controller"  output="screen"/>
+  <node pkg="depth_car" type="gazebo_waypoint2path.py" name="gazebo_waypoint2path"  output="screen"/> -->
   <node pkg="depth_car" type="gazebo_sim_gps.py" name="gazebo_sim_gps"  output="screen"/>
   <node pkg="depth_car" type="rrt_ROS.py" name="rrt_ROS"  output="screen"/>
-  <!-- <node pkg="depth_car" type="plot_scan.py" name="plot_scan"  output="screen"/> -->
+  <node pkg="depth_car" type="plot_scan.py" name="plot_scan"  output="screen"/>
   <node pkg="depth_car" type="wps_manager.py" name="wps_manager"  output="screen"/>
   <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' 
   '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' 
-  '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock' '/sim(.*)' '/plan(.*)'
+  '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock' '/sim(.*)' '/plan(.*)' 
   /" />
 
  <!-- '/RScamera/depth/image_raw' '/RScamera/depth/camera_info' -->
 
-  <param name="date_time_folder" value="/home/yuqiang/GA_MAP" />
+
 
   <param name="XZ_MODE" value="1" />
   <param name="Enable_Fixed_Point_Strat" value="0" />

@@ -51,19 +51,23 @@ use_landmark=-1
 ARRAY_LAY1=20
 ARRAY_LAY2=40
 x0,y0=0,0
+
+tt_last=time.time()
 def cb_array(data):
-    global use_landmark
+    global use_landmark,tt_last
+    # print(time.time()-tt_last)
+    tt_last=time.time()
     d=list(data.data)
     n=int(len(d)/ARRAY_LAY1)
     d_out=[0 for i in range(n*ARRAY_LAY2)]
-        
+    tt0=time.time()
 
     dis=0
     n_in=0
     #     for i in range(min(n,1)):
     for i in range(n):
 
-        # tt1=time.time()
+        tt1=time.time()
         if int(rospy.get_param('XZ_MODE'))==1:
             if n>=2 and (d[i*ARRAY_LAY1+11]>-1) and 0:
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz_know_cor(EKF_localization.list_2_landmark_xz_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
@@ -88,7 +92,7 @@ def cb_array(data):
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark(EKF_localization.list_2_landmark_Z_together(data.data,i))
 
         # if j>0 and (j in[13,15,16,17,18,19,21,23]):
-        # tt2=time.time()
+        tt2=time.time()
         if j>0:
             use_landmark=j
 
@@ -132,6 +136,7 @@ def cb_array(data):
     ekf_out_landmark_error.publish(m)
     m=Float64MultiArray(data=d_out)
     ekf_out_landmark_z.publish(m) 
+    # print(time.time()-tt0)
 t0=time.time()
 
 
@@ -211,7 +216,7 @@ def cb_x0y0(data):
     y0=data.linear.y
 
 
-USING_GAZEBO=int(rospy.get_param("Using_Gazebo"))
+USING_GAZEBO=int(rospy.get_param("Using_Gazebo",default=0))
 
 if __name__=="__main__":
     rospy.Subscriber("/tree/data/together", Float64MultiArray,cb_array, buff_size=2**20,queue_size=1)
@@ -238,8 +243,8 @@ if __name__=="__main__":
     ekf_out_sigma=rospy.Publisher("/lm_ekf/sigma",Twist,queue_size=1)
     ekf_out_landmark_z=rospy.Publisher("/lm_ekf/z",Float64MultiArray,queue_size=1)
     ekf_out_landmark_error=rospy.Publisher("/lm_ekf/error",Float64MultiArray,queue_size=1)
-    rate=rospy.Rate(10)
-    EKF_localization.DELTA_T=0.1
+    rate=rospy.Rate(5)
+    EKF_localization.DELTA_T=0.2
 
     
     while not rospy.is_shutdown():
