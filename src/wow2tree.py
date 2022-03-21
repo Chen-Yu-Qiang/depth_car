@@ -124,16 +124,6 @@ def cbTrunkset(data):
         th_list.append(theta)
         cor_list.append(cor)
 
-    #     cv2.line(image,(org_in_img_x,org_in_img_y) , (int(org_in_img_x-np.sin(theta)*distance/100), int(org_in_img_y-np.cos(theta)*distance/100)),30000, 5)
-    #     cv2.circle(image, (int(org_in_img_x-np.sin(theta)*distance/100), int(org_in_img_y-np.cos(theta)*distance/100)), int(radius*0.01),60000, -1)
-    #     if not cor==-100:
-    #         cv2.putText(image,str(int(cor+1)),((int(org_in_img_x-np.sin(theta)*(distance+100)/100), int(org_in_img_y-np.cos(theta)*(distance+100)/100))), cv2.FONT_HERSHEY_SIMPLEX,1, 60000, 1, cv2.LINE_AA)
-    # print(cor_list)
-    # t=time.time()
-
-    # for i in range(len(d_list)):
-    #     cv2.putText(image,str(int(d_list[i]))+","+str(int((th_list[i])*57.3))+","+str(int(r_list[i]))+","+str(int(cor_list[i]+1)),(0,400+i*30), cv2.FONT_HERSHEY_SIMPLEX,1, 60000, 1, cv2.LINE_AA)
-
     if len(d_list)>0:
         list2ROSmsg_dthr_with_cor(d_list,th_list,r_list,car_x,car_y,car_theta,AA,tree_data2_together_pub,cor_list)
         # list2ROSmsg_dthr_each_with_cor(d_list,th_list,r_list,car_x,car_y,car_theta,AA,tree_data2_each_pub,cor_list)
