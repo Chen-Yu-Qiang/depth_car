@@ -39,7 +39,7 @@
   <node pkg="depth_car" type="wps_manager.py" name="wps_manager"  output="screen"/>
   <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' 
   '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' 
-  '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock' '/sim(.*)' '/plan(.*)' 
+  '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock' '/sim(.*)' '/plan(.*)' '/odom'
   /" />
 
  <!-- '/RScamera/depth/image_raw' '/RScamera/depth/camera_info' -->

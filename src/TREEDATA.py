@@ -58,9 +58,9 @@ if __name__=="__main__":
     import numpy as np
     tree_data_wow=np.load("center_list_all(1228).npy")
     TREE_DATA_2_npy=[]
-    TREE_DATA_2_npy.append([5,0,0.25])
-    TREE_DATA_2_npy.append([0,5,0.25])
-    TREE_DATA_2_npy.append([5,5,0.25])
+    TREE_DATA_2_npy.append([0,4,0.25])
+    # TREE_DATA_2_npy.append([0,5,0.25])
+    # TREE_DATA_2_npy.append([5,5,0.25])
     print(TREE_DATA_2_npy)
     np.save("output.npy",TREE_DATA_2_npy)
 
