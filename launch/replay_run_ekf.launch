@@ -1,22 +1,24 @@
 <launch>
 
 
-<node pkg="rosbag" type="play" name="myrosbag" args="/media/yuqiang/2CFC30D1FC309754/BAG/220127_DaHu/bag/2022-01-27-14-24-06_in.bag">
+<node pkg="rosbag" type="play" name="myrosbag_pub" args="/home/ursrobot/Downloads/2022-01-27-14-24-06_in.bag">
     <remap from="/outdoor_waypoint_nav/odometry/filtered_map" to="/aaaa/outdoor_waypoint_nav/odometry/filtered_map"/>
     <remap from="/outdoor_waypoint_nav/gps/filtered" to="/aaaa/outdoor_waypoint_nav/gps/filtered"/>
     <remap from="/cmd_vel" to="/aaaa/cmd_vel"/>
+    <remap from="/scan" to="/aaaa/scan"/>
 </node>
 <!-- <node pkg="rosbag" type="record" name="myrosbag2" args="-a" /> -->
 
-<param name="XZ_MODE" value="1" />
-<param name="Enable_Fixed_Point_Strat" value="0" />
-<param name="Use_GPS_time" value="10000" />
-<param name="date_time_folder" value="/media/yuqiang/2CFC30D1FC309754/BAG/220127_DaHu/220127_BDzone-20220127T120103Z-001/220127_BDzone/Dzone_test2/20220127_12-11-38" />
-<param name="Use_WOW_controller" value="1" />
-<param name="Good_Computer" value="1" />
+<node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
+    <rosparam command="load" file="$(find depth_car)/config/lidar_config.yaml"/>
+    <remap from="scan" to="/aaaa/scan"/>
+    <remap from="scan_filtered" to="/aaaa/scan_filtered"/>
+</node>
 <remap from="/outdoor_waypoint_nav/odometry/filtered_map" to="/aaaa/outdoor_waypoint_nav/odometry/filtered_map"/>
-    <remap from="/outdoor_waypoint_nav/gps/filtered" to="/aaaa/outdoor_waypoint_nav/gps/filtered"/>
-    <remap from="/cmd_vel" to="/aaaa/cmd_vel"/>
+<remap from="/outdoor_waypoint_nav/gps/filtered" to="/aaaa/outdoor_waypoint_nav/gps/filtered"/>
+<remap from="/cmd_vel" to="/aaaa/cmd_vel"/>
+<remap from="scan_filtered" to="/aaaa/scan_filtered"/>
+
 
 <include file="$(find depth_car)/launch/wow_no_gen_scan.launch"></include>
 <include file="$(find depth_car)/launch/my_bag.launch"></include>

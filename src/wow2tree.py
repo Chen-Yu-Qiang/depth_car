@@ -95,7 +95,7 @@ def move30cm(d,th):
 
 def cbTrunkset(data):
     global car_x,car_y,car_theta,AA,image_org
-
+    t0=time.time()
     d_list=[]
     r_list=[]
     th_list=[]
@@ -136,7 +136,8 @@ def cbTrunkset(data):
 
     if len(d_list)>0:
         list2ROSmsg_dthr_with_cor(d_list,th_list,r_list,car_x,car_y,car_theta,AA,tree_data2_together_pub,cor_list)
-        list2ROSmsg_dthr_each_with_cor(d_list,th_list,r_list,car_x,car_y,car_theta,AA,tree_data2_each_pub,cor_list)
+        # list2ROSmsg_dthr_each_with_cor(d_list,th_list,r_list,car_x,car_y,car_theta,AA,tree_data2_each_pub,cor_list)
+        # print(t0-time.time())
     # map=depth2map.circle_to_world(map,centre_x_list,centre_z_list,radius_r_list,car_x*1000,car_y*1000,car_theta)
 
     # cv2.putText(image,str(int(car_x*1000)),(0,30), cv2.FONT_HERSHEY_SIMPLEX,1, 60000, 1, cv2.LINE_AA)
@@ -150,10 +151,6 @@ def cbTrunkset(data):
     AA+=1
 
 
-def cbDepth(data):
-    global image_org
-    bridge = CvBridge()
-    image_org = bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
 
 def cbOdom(msg):
     global car_x,car_y,car_theta
@@ -167,14 +164,14 @@ def cbOdom(msg):
 if __name__=="__main__":
     print("Python version: ",sys.version)
     rospy.init_node("depth_to_tree", anonymous=True)
-    rospy.Subscriber("/tree/trunk_info", Trunkset, cbTrunkset,queue_size=1, buff_size=2**24)
+    rospy.Subscriber("/tree/trunk_info", Trunkset, cbTrunkset,queue_size=1)
     # rospy.Subscriber("/camera/depth/image_rect_raw", Image, cbDepth,queue_size=1, buff_size=2**24)
         
     tree_data2_each_pub=rospy.Publisher("/tree/data2/each", Float64MultiArray,queue_size=1)
     tree_data2_together_pub=rospy.Publisher("/tree/data2/together", Float64MultiArray,queue_size=1)
 
 
-    subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom,queue_size=1, buff_size=2**24)
+    # subOdom = rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cbOdom,queue_size=1, buff_size=2**24)
     rospy.spin()
 
 

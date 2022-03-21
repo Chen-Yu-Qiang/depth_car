@@ -9,7 +9,7 @@
 
 <node pkg="mapping_explorer" type="trunk_info_node.py" name="trunk_info_node" output="screen"/>
 <node pkg="mapping_explorer" type="trunk_info_2_icp.py" name="trunk_info_2_icp" output="screen"/>
-<node pkg="depth_car" type="wow2tree.py" name="wow2tree"/>
+<node pkg="depth_car" type="wow2tree.py" name="wow2tree" output="screen"/>
 <node pkg="depth_car" type="tree2map.py" name="tree2map"/>
 <param name="Good_Computer" value="0" />
 
