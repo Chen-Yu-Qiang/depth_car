@@ -12,7 +12,7 @@ if a=="0":
     a=input("Please enter the date-time folder of the waypoint: ~/202201")
     a=os.path.expanduser('~')+"/202201"+a
     rospy.set_param("date_time_folder",a)
-b=input("The date time folder is: {} \nPlease press Enter to agree or any key to reset".format(a))
+b=raw_input("The date time folder is: {} \nPlease press Enter to agree or any key to reset".format(a))
 if not b=='':
     a=input("Please enter the date-time folder of the waypoint: ~/202201")
     a=os.path.expanduser('~')+"/202201"+a
