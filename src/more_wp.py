@@ -33,7 +33,7 @@ def div(file_name,file_new_name):
                 y_waypoints_list.append(float(s[1]))
         x_waypoints = x_waypoints_list
         y_waypoints = y_waypoints_list
-    fig, ax = plt.subplots(figsize=(10,10))
+    # fig, ax = plt.subplots(figsize=(10,10))
 
 
     n_x=list()

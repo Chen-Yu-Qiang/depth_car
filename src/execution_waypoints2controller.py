@@ -5,7 +5,7 @@ from datetime import datetime
 import rospy
 from sensor_msgs.msg import NavSatFix
 
-a=os.path.expanduser('~')+"/2021206_16-17-41"
+a=os.path.expanduser('~')+"/20211206_16-17-41"
 rospy.set_param("date_time_folder",a)
 a=rospy.get_param("date_time_folder",default="0")
 if a=="0":
