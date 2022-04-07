@@ -53,7 +53,7 @@ ekf=EKF_localization.EKF_localization(u_init)
 TREE_DATA=TREEDATA.TREE_DATA
 ekf.tree_data=TREE_DATA
 use_landmark=-1
-
+XZ_MODE=int(rospy.get_param('XZ_MODE'))
 
 ARRAY_LAY1=20
 ARRAY_LAY2=40
@@ -75,14 +75,14 @@ def cb_array(data):
     for i in range(n):
 
         tt1=time.time()
-        if int(rospy.get_param('XZ_MODE'))==1:
+        if XZ_MODE==1:
             if n>=2 and (d[i*ARRAY_LAY1+11]>-1) and 0:
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz_know_cor(EKF_localization.list_2_landmark_xz_Z_together(data.data,i),d[i*ARRAY_LAY1+11]+1)
             else:
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark_xz(EKF_localization.list_2_landmark_xz_Z_together(data.data,i))
 
 
-        elif int(rospy.get_param('XZ_MODE'))==2:
+        elif XZ_MODE==2:
             if d[i*ARRAY_LAY1+3]>6:
                 j,max_j,Z,z_hat,delta_z=ekf.update_landmark(EKF_localization.list_2_landmark_Z_together(data.data,i))
             else:
@@ -108,21 +108,21 @@ def cb_array(data):
             new_car_th=ekf.u[2][0]
 
 
-            if int(rospy.get_param('XZ_MODE')):
+            if XZ_MODE:
                 new_Z=depth2map.fromCar2World([Z[0][0]*1000],[Z[1][0]*1000],new_car_x*1000,new_car_y*1000,new_car_th) # in UTM in mm
-                dd=EKF_localization.get_dis(new_Z[0,0]*0.001,new_Z[1,0]*(-0.001),TREE_DATA[int(j-1)][0],TREE_DATA[int(j-1)][1])
+                # dd=EKF_localization.get_dis(new_Z[0,0]*0.001,new_Z[1,0]*(-0.001),TREE_DATA[int(j-1)][0],TREE_DATA[int(j-1)][1])
             else:
                 d_list=[Z[0][0]*1000]
                 th_list=[Z[1][0]]
                 r_list=[Z[2][0]]
                 centre_x_list,centre_z_list,radius_r_list=depth2map.dthr2xyr(d_list,th_list,r_list)
                 new_Z=depth2map.fromCar2World(centre_x_list,centre_z_list,new_car_x*1000,new_car_y*1000,new_car_th) # in UTM in mm
-                dd=EKF_localization.get_dis(new_Z[0,0]*0.001,new_Z[1,0]*(-0.001),TREE_DATA[int(j-1)][0],TREE_DATA[int(j-1)][1]) 
+                # dd=EKF_localization.get_dis(new_Z[0,0]*0.001,new_Z[1,0]*(-0.001),TREE_DATA[int(j-1)][0],TREE_DATA[int(j-1)][1]) 
 
 
             
-            dis=dis+dd*dd
-            n_in=n_in+1
+            # dis=dis+dd*dd
+            # n_in=n_in+1
             l=[j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0],delta_z[0][0],delta_z[1][0],delta_z[2][0],new_Z[0,0]*0.001,new_Z[1,0]*0.001,new_car_x,new_car_y,new_car_th]
             # print("is tree!",j,max_j,Z[0][0],Z[1][0],Z[2][0],z_hat[0][0],z_hat[1][0],z_hat[2][0])
     
@@ -135,15 +135,15 @@ def cb_array(data):
     
 
     # print("d_out---------------------")
-    if n_in==0:
-        mean_error=0
-    else:
-        mean_error=dis/n_in
-    m=Float64MultiArray(data=[dis,np.sqrt(mean_error),n,n_in])
-    ekf_out_landmark_error.publish(m)
+    # if n_in==0:
+    #     mean_error=0
+    # else:
+    #     mean_error=dis/n_in
+    # m=Float64MultiArray(data=[dis,np.sqrt(mean_error),n,n_in])
+    # ekf_out_landmark_error.publish(m)
     m=Float64MultiArray(data=d_out)
     ekf_out_landmark_z.publish(m) 
-    # print(time.time()-tt0)
+    print(time.time()-tt0)
 t0=time.time()
 
 
@@ -156,6 +156,10 @@ x0_loc,y0_loc=0,0
 x0y0_finish=0
 def cb_pos(data):
     global x0,y0,t0
+
+    if abs(data.twist.twist.angular.z)>3:
+        rospy.logerr("Filtered_map twist.twist.angular.z >3 !!!")
+    
     if x0==0 and y0==0 and (not USING_GAZEBO==1):
     #     x0_loc= data.pose.pose.position.x
     #     y0_loc= data.pose.pose.position.y
