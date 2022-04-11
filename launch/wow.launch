@@ -2,7 +2,7 @@
     <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
         <remap from="image" to="/RScamera/depth/image_raw"/>
         <remap from="scan" to="/scan" />
-        <param name="scan_height" value="20"/>
+        <param name="scan_height" value="10"/>
         <param name="scan_height_min" value="700"/>
         <param name="scan_height_max" value="900"/>
         <param name="scan_time" value="0.03"/>

@@ -29,7 +29,7 @@ def move30cm(d,th):
         return d2,-th2
 
 def cbTrunkset(data):
-
+    global AA
     n=len(data.aframe)
     if n==0:
         return
@@ -47,7 +47,7 @@ def cbTrunkset(data):
                 cor = int(data.match[i])
             else:
                 cor=-100
-
+        distance,theta=move30cm(distance,theta)
         x=np.sin(theta)*distance
         z=np.cos(theta)*distance
         a[i*ARRAY_LAY1]=x
@@ -55,6 +55,7 @@ def cbTrunkset(data):
         a[i*ARRAY_LAY1+2]=radius
         a[i*ARRAY_LAY1+3]=distance
         a[i*ARRAY_LAY1+4]=theta       
+        a[i*ARRAY_LAY1+8]=AA
         a[i*ARRAY_LAY1+11]=cor
 
 
@@ -67,15 +68,26 @@ def cbTrunkset(data):
     b.layout.dim[0].label="A_Tree_each"
     tree_data2_together_pub.publish(b)
 
-
+    AA=AA+1
 
 if __name__=="__main__":
     print("Python version: ",sys.version)
     rospy.init_node("depth_to_tree", anonymous=True)
     rospy.Subscriber("/tree/trunk_info", Trunkset, cbTrunkset,queue_size=1, buff_size=2**24)
     tree_data2_together_pub=rospy.Publisher("/tree/data/together", Float64MultiArray,queue_size=1)
-    rospy.spin()
+    tree_data_list_pub=rospy.Publisher("/tree/data/list", Float64MultiArray,queue_size=1)
 
+
+    rate=rospy.Rate(1)
+    TREEDATA_list=[]
+    for i in TREEDATA.TREE_DATA:
+        TREEDATA_list.append(i[0])
+        TREEDATA_list.append(i[1])
+        TREEDATA_list.append(i[2])
+    list_msg=Float64MultiArray(data=TREEDATA_list)
+    while not rospy.is_shutdown():
+        tree_data_list_pub.publish(list_msg)
+        rate.sleep()
 
 
     
