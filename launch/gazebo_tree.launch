@@ -39,8 +39,9 @@
   <node pkg="depth_car" type="wps_manager.py" name="wps_manager"  output="screen"/>
   <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' 
   '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' 
-  '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock' '/sim(.*)' '/plan(.*)' '/odom'
-  /" />
+  '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock' '/sim(.*)' '/plan(.*)' '/odom' 
+  '/cmd_vel' '/explore/traj' '/explore/potential/af' '/explore/potential/rf' '/explore/trajRTheta' '/tree/trunk_info' '/explore/state'
+  " />
 
  <!-- '/RScamera/depth/image_raw' '/RScamera/depth/camera_info' -->
 
@@ -54,4 +55,7 @@
   <param name="Using_Gazebo" value="1" />
   <include file="$(find depth_car)/launch/wow.launch">
     </include>
+
+  
+
 </launch>

@@ -47,7 +47,7 @@ def cbTrunkset(data):
                 cor = int(data.match[i])
             else:
                 cor=-100
-
+        distance,theta=move30cm(distance,theta)
         x=np.sin(theta)*distance
         z=np.cos(theta)*distance
         a[i*ARRAY_LAY1]=x

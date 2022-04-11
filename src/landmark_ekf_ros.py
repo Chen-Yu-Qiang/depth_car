@@ -47,7 +47,7 @@ else:
 print("[landmark_ekf_ros.py] Get GPS offset init x = {} ,y = {}".format(resp.offset_y,resp.offset_x*(-1.0)))
 
 
-u_init=EKF_localization.set_u_init(gps_init.linear.x,gps_init.linear.y,1.5,resp.offset_y,resp.offset_x*(-1.0))
+u_init=EKF_localization.set_u_init((gps_init.linear.x-resp.offset_y),(gps_init.linear.y-resp.offset_x*(-1.0)),1.5,resp.offset_y,resp.offset_x*(-1.0))
 
 ekf=EKF_localization.EKF_localization(u_init)
 TREE_DATA=TREEDATA.TREE_DATA
@@ -143,7 +143,7 @@ def cb_array(data):
     # ekf_out_landmark_error.publish(m)
     m=Float64MultiArray(data=d_out)
     ekf_out_landmark_z.publish(m) 
-    print(time.time()-tt0)
+    # print(time.time()-tt0)
 t0=time.time()
 
 
