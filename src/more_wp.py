@@ -1,5 +1,6 @@
 #!/usr/bin/wowpython
 '''ros utils'''
+
 import time
 import rospy
 from sensor_msgs.msg import NavSatFix
@@ -38,9 +39,10 @@ def div(file_name,file_new_name):
 
     n_x=list()
     n_y=list()
+    distance_per_wp=5.0
     for i in range(len(x_waypoints)-1):
         dis=np.sqrt((x_waypoints[i]-x_waypoints[i+1])**2+(y_waypoints[i]-y_waypoints[i+1])**2)
-        n=1.0*int(dis*0.0001)
+        n=1.0*int(dis/distance_per_wp)
 
         if n==0:
             n_x.append(x_waypoints[i])
