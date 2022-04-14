@@ -31,8 +31,8 @@
   </node>
 
 
-  <!-- <node pkg="depth_car" type="gazebo_controller.py" name="gazebo_controller"  output="screen"/>
-  <node pkg="depth_car" type="gazebo_waypoint2path.py" name="gazebo_waypoint2path"  output="screen"/> -->
+  <node pkg="depth_car" type="gazebo_controller.py" name="gazebo_controller"  output="screen"/>
+  <node pkg="depth_car" type="gazebo_waypoint2path.py" name="gazebo_waypoint2path"  output="screen"/>
   <node pkg="depth_car" type="gazebo_sim_gps.py" name="gazebo_sim_gps"  output="screen"/>
   <node pkg="depth_car" type="rrt_ROS.py" name="rrt_ROS"  output="screen"/>
   <node pkg="depth_car" type="plot_scan.py" name="plot_scan"  output="screen"/>

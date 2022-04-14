@@ -19,7 +19,7 @@ ARRAY_LAY1=20
 
 
 def move30cm(d,th):
-    move_dis=300
+    move_dis=0.3
     th_abs=abs(th)
     d2=np.sqrt(d*d+move_dis*move_dis-2.0*move_dis*d*np.cos(np.pi-th_abs))
     th2=np.arcsin(d/d2*np.sin(np.pi-th_abs))
