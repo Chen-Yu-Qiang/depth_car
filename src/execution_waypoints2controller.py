@@ -28,3 +28,4 @@ rospy.set_param("Init_tree_num",Init_tree_num)
 
 print("GOGO WayPoints !")
 os.system("roslaunch depth_car wow_waypoint.launch")
+# os.system("roslaunch depth_car wow_no_gen_scan.launch")

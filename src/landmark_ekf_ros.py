@@ -26,7 +26,7 @@ print("[landmark_ekf_ros.py] Get GPS init x = {} ,y = {}".format(gps_init.linear
 print("[landmark_ekf_ros.py] wait for service get_init_offset_in_map ")
 
 
-if sys.version[0]=='3':
+if sys.version[0]=='2':
 
     from mapping_explorer.srv import InitOffset, InitOffsetResponse
     rospy.wait_for_service('get_init_offset_in_map')
