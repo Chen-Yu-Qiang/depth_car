@@ -5,6 +5,23 @@ print("[TREEDATA.py] Start to get the trunk map data")
 X_MIN,X_MAX,Y_MIN,Y_MAX=0,1,0,1
 R_MAX=0
 R_MIN=10
+
+def get_maxmin(td):
+    X_MIN=td[0][0]
+    X_MAX=td[0][0]
+    Y_MIN=td[0][1]
+    Y_MAX=td[0][1]
+    R_MAX=td[0][2]
+    R_MIN=td[0][2]
+    for i in td:
+        X_MIN=min(X_MIN,i[0])
+        X_MAX=max(X_MAX,i[0])
+        Y_MIN=min(Y_MIN,i[1])
+        Y_MAX=max(Y_MAX,i[1])
+        R_MAX=max(R_MAX,i[2])
+        R_MIN=min(R_MIN,i[2])    
+    return X_MAX,X_MIN,Y_MAX,Y_MIN,R_MAX,R_MIN    
+
 try:
     file_path=rospy.get_param("date_time_folder",default="")+"/shapefiles/neg/center_all.npy"
     if rospy.get_param("date_time_folder",default="")=="":

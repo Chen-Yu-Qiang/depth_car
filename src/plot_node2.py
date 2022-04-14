@@ -35,13 +35,8 @@ TREE_DATA=[]
 # elif sys.version[0]=='3':
 #     tree_data_np = np.load('/home/ncslaber/center_list_all.npy')
 
-TREE_DATA=TREEDATA.TREE_DATA
-tree_data_np=np.array(TREE_DATA)
-a=tree_data_np[:,1].copy()
-tree_data_np[:,1]=tree_data_np[:,0]
-tree_data_np[:,0]=-a
-TREE_DATA=tree_data_np
-# print(tree_data_np)
+
+
 
 class data_set:
     def __init__(self):
@@ -470,6 +465,34 @@ if __name__ == '__main__':
         rate=rospy.Rate(20)
     else:
         rate=rospy.Rate(5)
+
+    # from npy file
+    # TREE_DATA=TREEDATA.TREE_DATA
+    # tree_data_np=np.array(TREE_DATA)
+    # a=tree_data_np[:,1].copy()
+    # tree_data_np[:,1]=tree_data_np[:,0]
+    # tree_data_np[:,0]=-a
+    # TREE_DATA=tree_data_np
+    # X_MIM,X_MAX=TREEDATA.X_MIN,TREEDATA.X_MAX
+    # Y_MIN,Y_MAX=TREEDATA.Y_MAX*(-1.0),TREEDATA.Y_MIN*(-1.0)
+
+    # print(tree_data_np)
+
+    # from ROS topic
+    print("[plot_node2.py] wait for Tree List msg")
+    temp=rospy.wait_for_message("/tree/data/list", Float64MultiArray)
+    # print(temp)
+    temp=list(temp.data)
+    TREE_DATA=[]
+    for i in range(0,len(temp),3):
+        TREE_DATA.append([temp[i+1]*(-1.0),temp[i],temp[i+2]])
+        print("[plot_node2.py] Get tree X="+str(temp[i])+", Y="+str(temp[i+1]))
+    TREE_DATA=np.array(TREE_DATA)
+    print(TREE_DATA)
+    X_MAX,X_MIN,Y_MIN,Y_MAX,_,_=TREEDATA.get_maxmin(TREE_DATA)
+    Y_MIN=Y_MIN*(-1.0)
+    Y_MAX=Y_MAX*(-1.0)
+
     a=a_plot()
 
     while not rospy.is_shutdown():
