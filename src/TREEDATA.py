@@ -36,7 +36,7 @@ try:
     TREE_DATA=[]
     for i in tree_data_wow:
         TREE_DATA.append([i[1],i[0]*(-1.0),i[2]])
-        print("[TREEDATA.py] get a tree "+str([i[1],i[0]*(-1.0),i[2]]))
+        # print("[TREEDATA.py] get a tree "+str([i[1],i[0]*(-1.0),i[2]]))
         X_MIN=min(X_MIN,i[1])
         X_MAX=max(X_MAX,i[1])
         Y_MIN=min(Y_MIN,i[0]*(-1.0))

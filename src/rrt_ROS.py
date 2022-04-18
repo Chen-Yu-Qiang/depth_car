@@ -53,49 +53,28 @@ if __name__=='__main__':
     rospy.init_node("rrt_planner", anonymous=True)
 
     path_pub=rospy.Publisher("/plan/wps",PoseArray,queue_size=1)
+    time.sleep(30)
 
-    while not rospy.is_shutdown():
-        print("Wait for goal msg")
-        g=rospy.wait_for_message("/plan/goal", Pose)
-        print("Get goal msg")
-        print("Wait for state msg")
-        p=rospy.wait_for_message("/sim/robot", Pose)
+    # while not rospy.is_shutdown():
+        # print("Wait for goal msg")
+        # g=rospy.wait_for_message("/plan/goal", Pose)
+        # print("Get goal msg")
+        # print("Wait for state msg")
+        # p=rospy.wait_for_message("/sim/robot", Pose)
         # poses=rrt_path([p.position.x,p.position.y],[g.position.x,g.position.y])
-
+    if 1:
+        x_list=[10,10,9,9,8,8,7,7,6,6,5,5]
+        y_list=[0,-3,-3,-4,-4,0,0,-6,-6,0,0,-6]
         poses=PoseArray()
-        a=Pose()
-        a.position.x=0
-        a.position.y=-1
-        poses.poses.append(a)
-        a=Pose()
-        a.position.x=10
-        a.position.y=-1
-        poses.poses.append(a)
-        a=Pose()
-        a.position.x=10
-        a.position.y=-2
-        poses.poses.append(a)
-        a=Pose()
-        a.position.x=0
-        a.position.y=-2
-        poses.poses.append(a)
-        a=Pose()
-        a.position.x=0
-        a.position.y=-3
-        poses.poses.append(a)
-        a=Pose()
-        a.position.x=3
-        a.position.y=-3
-        poses.poses.append(a)
-        a=Pose()
-        a.position.x=6
-        a.position.y=-3
-        poses.poses.append(a)
-        a=Pose()
-        a.position.x=6
-        a.position.y=-10
-        poses.poses.append(a)
+        for i in range(12):
+
+            a=Pose()
+            a.position.x=x_list[i]
+            a.position.y=y_list[i]
+            poses.poses.append(a)
+        
 
 
         path_pub.publish(poses)
+        print(poses)
 

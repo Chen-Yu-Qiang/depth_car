@@ -28,12 +28,13 @@ def cb_goalPoint(data):
     num=max(1,num)
     delta_x=(goal_x-now_x)/num
     delta_y=(goal_y-now_y)/num
+    print(goal_x,goal_y,now_x,now_y,delta_x,delta_y,num)
 
 if __name__ == '__main__':
     rospy.init_node('g_way2path_node')
     rospy.Subscriber("/ctrl/wp/g", PoseStamped,cb_goalPoint,queue_size=1, buff_size=2**20)
     path_pub=rospy.Publisher("/ctrl/path/g",PoseStamped,queue_size=1)
-    achieveGoal_pub=rospy.Publisher('/ctrl/achieve', UInt8,queue_size=1) 
+    achieveGoal_pub=rospy.Publisher('/ctrl/achieve0', UInt8,queue_size=1) 
     rate=rospy.Rate(CMD_SPEED)
     time.sleep(15)
     print("[gazebo_waypoint2path.py] Start control")
