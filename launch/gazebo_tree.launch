@@ -11,6 +11,7 @@
     <arg name="paused" value="$(arg paused)"/>
     <arg name="use_sim_time" value="$(arg use_sim_time)"/>
     <arg name="headless" value="$(arg headless)"/>
+    <arg name="world_name" value="$(find depth_car)/worlds/CaoDi.world"/>
   </include>
   <arg name="model" default="waffle_pi"/>
   <arg name="x_pos" default="0.0"/>
