@@ -101,7 +101,7 @@ def get_Rt_by_ICP(P,U): #, robot_xy, theta
         # plot_transformed(P,U, robot_xy, theta, count)
 
         if count>4:
-            print("iterate over 5 times!!")
+            # print("iterate over 5 times!!")
             break
 
     return cols, U_new, resid_scalar 
