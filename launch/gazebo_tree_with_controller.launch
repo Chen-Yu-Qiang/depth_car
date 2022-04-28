@@ -13,8 +13,8 @@
     <arg name="headless" value="$(arg headless)"/>
   </include>
   <arg name="model" default="waffle_pi"/>
-  <arg name="x_pos" default="0.0"/>
-  <arg name="y_pos" default="0.0"/>
+  <arg name="x_pos" default="2.0"/>
+  <arg name="y_pos" default="-4.0"/>
   <arg name="z_pos" default="0.0"/>
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
   <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" launch-prefix="gnome-terminal -x" />
@@ -35,6 +35,7 @@
   <node pkg="depth_car" type="gazebo_waypoint2path.py" name="gazebo_waypoint2path"  output="screen"/>
   <node pkg="depth_car" type="gazebo_sim_gps.py" name="gazebo_sim_gps"  output="screen"/>
   <node pkg="depth_car" type="rrt_ROS.py" name="rrt_ROS"  output="screen"/>
+  <node pkg="depth_car" type="plot_node2.py" name="plot_node2" output="screen"/>
   <!-- <node pkg="mapping_explorer" type="plot_scan.py" name="plot_scan"  output="screen"/> -->
   <node pkg="depth_car" type="wps_manager.py" name="wps_manager"  output="screen"/>
   <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' 
@@ -48,6 +49,7 @@
 
 
   <param name="XZ_MODE" value="1" />
+  <param name="Init_tree_num" value="2" />
   <param name="Enable_Fixed_Point_Strat" value="0" />
   <param name="Use_GPS_time" value="10000" />
   <param name="Use_WOW_controller" value="1" />

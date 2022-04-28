@@ -72,6 +72,8 @@ for i in TREEDATA.TREE_DATA:
     pose.position.x=i[0]
     pose.position.y=i[1]
     pose.orientation.w = 1.0
+    # if j==4:
+    #     pose.position.y=i[1]-1
 
     model_name = "tree_" + str(j)
 

@@ -47,8 +47,8 @@ else:
 print("[landmark_ekf_ros.py] Get GPS offset init x = {} ,y = {}".format(resp.offset_y,resp.offset_x*(-1.0)))
 
 
-u_init=EKF_localization.set_u_init((gps_init.linear.x-resp.offset_y),(gps_init.linear.y-resp.offset_x*(-1.0)),1.5,resp.offset_y,resp.offset_x*(-1.0))
-
+u_init=EKF_localization.set_u_init((gps_init.linear.x-resp.offset_y),(gps_init.linear.y-resp.offset_x*(-1.0)),0,resp.offset_y,resp.offset_x*(-1.0))
+print("[landmark_ekf_ros.py] Init ",u_init)
 ekf=EKF_localization.EKF_localization(u_init)
 TREE_DATA=TREEDATA.TREE_DATA
 ekf.tree_data=TREE_DATA
@@ -296,6 +296,8 @@ if __name__=="__main__":
         ekf_out_sigma_msg.linear.x=ekf.sigma[0][0]
         ekf_out_sigma_msg.linear.y=ekf.sigma[1][1]
         ekf_out_sigma_msg.angular.z=ekf.sigma[2][2]
+        ekf_out_sigma_msg.angular.x=ekf.sigma[3][3]
+        ekf_out_sigma_msg.angular.y=ekf.sigma[4][4]
         ekf_out_sigma.publish(ekf_out_sigma_msg)
 
         use_landmark=-1

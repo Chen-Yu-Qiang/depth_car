@@ -36,12 +36,13 @@ def get_Vt(v,omg,theta):
 
 def get_Mt(v,omg):
     Mt=np.zeros((2,2))
+    # Mt=np.ones((2,2))*0.5
     alpha1=0.5
     alpha2=0.1
-    alpha3=0.05
-    alpha4=0.1
-    Mt[0][0]=alpha1*v*v+alpha2*omg*omg+0.01
-    Mt[1][1]=alpha3*v*v+alpha4*omg*omg+0.005
+    alpha3=0.01
+    alpha4=0.5
+    Mt[0][0]=Mt[0][0]+alpha1*v*v+alpha2*omg*omg
+    Mt[1][1]=Mt[1][1]+alpha3*v*v+alpha4*omg*omg
     return Mt
 
 def get_ut(ut_1,v,omg):
@@ -62,7 +63,7 @@ def get_sigma(sigmat_1,gt,vt,mt):
     a=np.zeros((STATE_NUM,STATE_NUM))
     a[3][3]=10**(-5)
     a[4][4]=10**(-5)
-
+    # print( np.dot(np.dot(gt,sigmat_1),gt.T)+np.dot(np.dot(vt,mt),vt.T))
     return np.dot(np.dot(gt,sigmat_1),gt.T)+np.dot(np.dot(vt,mt),vt.T)+a
 
 
@@ -181,8 +182,8 @@ def set_u_init(x,y,theta,x_offset,y_offset):
 class EKF_localization:
     def __init__(self,u_init):
         self.sigma=np.eye(STATE_NUM)*1.0
-        self.sigma[3][3]=10**(-2)
-        self.sigma[4][4]=10**(-2)
+        self.sigma[3][3]=10**(-1)
+        self.sigma[4][4]=10**(-1)
         self.Qt=np.zeros((3,3))
         self.Qt[0][0]=10**(2)
         self.Qt[1][1]=10**(2)

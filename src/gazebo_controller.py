@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
 
 
-        print(s,dis,ang,goal_y,now_y)
+        # print(s,dis,ang,goal_y,now_y)
         error_msg=Twist()
         error_msg.linear.x=goal_x-now_x
         error_msg.linear.y=goal_y-now_y
