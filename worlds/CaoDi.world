@@ -119,6 +119,9 @@
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
+      <grid>
+        <cell_count>100</cell_count>
+      </grid>
     </gui>
   </world>
 </sdf>
