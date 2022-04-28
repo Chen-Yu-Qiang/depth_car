@@ -75,8 +75,14 @@ if __name__=="__main__":
     import numpy as np
     tree_data_wow=np.load("center_list_all(1228).npy")
     TREE_DATA_2_npy=[]
-    TREE_DATA_2_npy.append([0,4,0.25])
-    # TREE_DATA_2_npy.append([0,5,0.25])
+    a = np.array(range(0,21,3))
+    b = np.array(range(0,21,3))
+    X,Y = np.meshgrid(-a,b)
+    for i in range(7):
+        for j in range(7):
+            TREE_DATA_2_npy.append([X[i][j],Y[i][j],0.25])
+    # TREE_DATA_2_npy.append([-1.2,2.25,0.25])
+    # TREE_DATA_2_npy.append([-2.0,5.0,0.4])
     # TREE_DATA_2_npy.append([5,5,0.25])
     print(TREE_DATA_2_npy)
     np.save("output.npy",TREE_DATA_2_npy)

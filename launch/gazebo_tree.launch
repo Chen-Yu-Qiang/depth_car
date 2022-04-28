@@ -14,8 +14,8 @@
     <arg name="world_name" value="$(find depth_car)/worlds/CaoDi.world"/>
   </include>
   <arg name="model" default="waffle_pi"/>
-  <arg name="x_pos" default="0.0"/>
-  <arg name="y_pos" default="0.0"/>
+  <arg name="x_pos" default="-1.0"/>
+  <arg name="y_pos" default="-1.0"/>
   <arg name="z_pos" default="0.0"/>
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
   <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" launch-prefix="gnome-terminal -x" />
@@ -38,11 +38,11 @@
   <node pkg="depth_car" type="rrt_ROS.py" name="rrt_ROS"  output="screen"/>
   <!-- <node pkg="mapping_explorer" type="plot_scan.py" name="plot_scan"  output="screen"/> -->
   <node pkg="depth_car" type="wps_manager.py" name="wps_manager"  output="screen"/>
-  <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' 
+  <!-- <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' 
   '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' 
   '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock' '/sim(.*)' '/plan(.*)' '/odom' 
   '/cmd_vel' '/explore/traj' '/explore/potential/af' '/explore/potential/rf' '/explore/trajRTheta' '/tree/trunk_info' '/explore/state'
-  " />
+  " /> -->
 
  <!-- '/RScamera/depth/image_raw' '/RScamera/depth/camera_info' -->
 
