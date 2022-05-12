@@ -1,5 +1,6 @@
 #!/usr/bin/wowpython
 
+from cmath import isnan
 from re import L, TEMPLATE
 import numpy as np
 import time
@@ -25,6 +26,8 @@ from collections import deque
 
 laser_msg=LaserScan()
 trunk_msg=Trunkset()
+EKFz_msg=list()
+
 def cbLaser(msg):
     global laser_msg
     laser_msg=msg
@@ -33,13 +36,16 @@ def cbLaser(msg):
 def cbTrunkset(msg):
     global trunk_msg
     trunk_msg=msg
-
+def cbEKFz(data):
+    global EKFz_msg
+    EKFz_msg=list(data.data)
 
 if __name__=='__main__':
         
     rospy.init_node("laser_ploter", anonymous=True)
     rospy.Subscriber("/scan_filtered", LaserScan, cbLaser, buff_size=2**20, queue_size=1)
     rospy.Subscriber("/tree/trunk_info", Trunkset, cbTrunkset, buff_size=2**20, queue_size=1)
+    rospy.Subscriber("/lm_ekf/z",Float64MultiArray, cbEKFz, buff_size=2**20, queue_size=1)
     rate=rospy.Rate(15)
 
 
@@ -49,9 +55,11 @@ if __name__=='__main__':
 
     ax.set_xlim(-10,10)
     ax.set_ylim(-1,10)
-    tree_plot_list=[ax.plot([2],[2], 'o', color='k', markersize=3)[0] for i in range(10)]
+    tree_plot_list=[ax.plot([2],[2], 'o', color='k', markersize=3, label='Tree(Scan)')[0] for i in range(10)]
+    tree_plot2_list=[ax.plot([2],[2], 'o', color='g', markersize=3, label='Tree(Map)')[0] for i in range(10)]
     tree_text_list=[ax.text(0,0,'',fontsize=14, color='k') for i in range(10)]
     ls_plot_obj=ax.plot([2],[1], 'o', color='r', markersize=2.5, label='Laser')[0]
+    ls_plot_obj2=ax.plot([2],[1], 'o', color='b', markersize=2.5, label='Laser(free)')[0]
 
     xminorLocator = MultipleLocator(1)
     yminorLocator = MultipleLocator(1)
@@ -67,24 +75,33 @@ if __name__=='__main__':
     ax.xaxis.grid(True, which='major',color="k")
     ax.yaxis.grid(True, which='minor',color="silver")
     ax.yaxis.grid(True, which='major',color="k")
-
+    ax.legend()
 
     while not rospy.is_shutdown():
         point_x_list=[]
         point_z_list=[]
+        point_x2_list=[]
+        point_z2_list=[]
 
 
         for i in range(len(laser_msg.ranges)):
-            ls_range = laser_msg.ranges[i]    
+            ls_range = laser_msg.ranges[i]
+            if isnan(ls_range):
+                ls_range=7
             theta = laser_msg.angle_max - laser_msg.angle_increment * i
             x_camera = ls_range * np.sin(theta)
             z_camera = ls_range * np.cos(theta)
+            if ls_range<7.0:
+                point_x_list.append(x_camera)
+                point_z_list.append(z_camera)
+            else:
+                point_x2_list.append(x_camera)
+                point_z2_list.append(z_camera)
 
-            point_x_list.append(x_camera)
-            point_z_list.append(z_camera)
 
         # print(point_x_list,point_z_list)
         ls_plot_obj.set_data(point_x_list,point_z_list)
+        ls_plot_obj2.set_data(point_x2_list,point_z2_list)
 
 
 
@@ -125,7 +142,24 @@ if __name__=='__main__':
             tree_plot_list[i].set_visible(False)
             tree_text_list[i].set_visible(False)
 
-        
+        if len(r_list)<1:
+            EKFz_msg=[]
+        for i in range(int(len(EKFz_msg)/40)):
+            EKF_x=EKFz_msg[40*i+6]-0.3
+            EKF_y=EKFz_msg[40*i+5]*(-1.0)
+            EKF_r=EKFz_msg[40*i+7]
+
+            trunk_point=[]
+
+            for j in range(number_of_point):
+                trunk_point.append((EKF_x+EKF_r*np.cos(piece_rad*j), EKF_y+EKF_r*np.sin(piece_rad*j)))
+            trunk_point=np.asarray(trunk_point)
+            tree_plot2_list[i].set_visible(True)
+            tree_plot2_list[i].set_data(trunk_point[:,1], trunk_point[:,0])
+
+        for i in range(int(len(EKFz_msg)/40),10):
+            tree_plot2_list[i].set_visible(False)
+
         # print(2)
 
         plt.pause(0.01)
