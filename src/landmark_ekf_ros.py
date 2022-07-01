@@ -231,7 +231,7 @@ USING_GAZEBO=int(rospy.get_param("Using_Gazebo",default=0))
 
 if __name__=="__main__":
     rospy.Subscriber("/tree/data/together", Float64MultiArray,cb_array, buff_size=2**20,queue_size=1)
-    rospy.Subscriber("/cmd_vel", Twist,cb_cmd, buff_size=2**20,queue_size=1)
+    rospy.Subscriber("/husky_velocity_controller/cmd_vel", Twist,cb_cmd, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/outdoor_waypoint_nav/odometry/filtered_map", Odometry, cb_pos, buff_size=2**20,queue_size=1)
     # rospy.Subscriber("/lm_ekf/gps/utm", Twist, cb_gps, buff_size=2**20,queue_size=1)
     rospy.Subscriber("/lm_ekf/local_org/utm", Twist,cb_x0y0, buff_size=2**20,queue_size=1)

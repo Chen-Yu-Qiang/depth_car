@@ -9,9 +9,9 @@
 
 <node pkg="mapping_explorer" type="trunk_info_node.py" name="trunk_info_node" output="screen"/>
 <node pkg="mapping_explorer" type="trunk_info_2_icp.py" name="trunk_info_2_icp" output="screen"/>
-<!-- <node pkg="depth_car" type="wow2tree.py" name="wow2tree"/>
-<node pkg="depth_car" type="tree2map.py" name="tree2map"/> -->
-<node pkg="depth_car" type="wow2tree_new.py" name="wow2tree_new"/>
+<node pkg="depth_car" type="wow2tree.py" name="wow2tree"/>
+<node pkg="depth_car" type="tree2map.py" name="tree2map"/>
+<!-- <node pkg="depth_car" type="wow2tree_new.py" name="wow2tree_new"/> -->
 
 <param name="Good_Computer" value="0" />
 
@@ -36,6 +36,7 @@
 
 <!-- <node pkg="mapping_explorer" type="tf_transformer_maptomap2.py" name="tf_transformer_maptomap2" output="screen"/> -->
 <node pkg="depth_car" type="map2_tf_pub.py" name="map2_tf_pub" output="screen"/>
+<!-- <node pkg="tf" type="static_transform_publisher" name="map2_pub" arg="0 0 0 0 0 0 map2 map 50"/>  -->
 <!-- <node pkg="rosbag" type="record" name="myrosbag"  output="screen" args="-e '/lm_ekf/(.*)' '/ctrl/(.*)' '/tree/(.*)' '/scan(.*)' '/outdoor_waypoint_nav(.*)' '/move_base_simple/goal' '/imu(.*)' '/gps(.*)' '/husky(.*)' '/cmd(.*)' '/navsat(.*)' '/tf(.*)' '/clock'" /> -->
 <node pkg="mapping_explorer" type="check_utm_init_service.py" name="check_utm_init_service" output="screen"/>
 </launch>

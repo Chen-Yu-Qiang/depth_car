@@ -40,7 +40,7 @@ def div(file_name,file_new_name):
     n_y=list()
     for i in range(len(x_waypoints)-1):
         dis=np.sqrt((x_waypoints[i]-x_waypoints[i+1])**2+(y_waypoints[i]-y_waypoints[i+1])**2)
-        n=1.0*int(dis)
+        n=1.0*int(dis*0.2)
 
         if n==0:
             n_x.append(x_waypoints[i])

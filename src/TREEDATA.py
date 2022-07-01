@@ -7,6 +7,7 @@ R_MAX=0
 R_MIN=10
 try:
     file_path=rospy.get_param("date_time_folder",default="")+"/shapefiles/neg/center_all.npy"
+    file_path=file_path.replace("ncslaber","ursrobot")
     if rospy.get_param("date_time_folder",default="")=="":
         rospy.logerr("You forgot to set rosparam date_time_folder ")
     
